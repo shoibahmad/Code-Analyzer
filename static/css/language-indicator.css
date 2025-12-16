@@ -1,0 +1,39 @@
+/* Language indicator styles */
+#languageLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg-elevated);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+#detectedLanguage {
+    font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+#languageLabel i.fa-magic {
+    color: var(--accent-primary);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+#languageLabel i.fa-check-circle {
+    color: var(--accent-success);
+}
+
+#languageLabel i.fa-circle-notch {
+    color: var(--accent-primary);
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
