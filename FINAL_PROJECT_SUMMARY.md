@@ -107,7 +107,6 @@ code-review-assistant/
 pip install -r requirements.txt
 
 # 2. Configure API key (already done)
-# .env file contains: GEMINI_API_KEY=AIzaSyD0Y_VR9KrvvO9-BsDffLoHlcoLSg3tm-Q
 
 # 3. Run application
 python app.py
