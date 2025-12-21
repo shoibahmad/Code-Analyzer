@@ -43,12 +43,6 @@ if (logoutBtn) {
 // Global state
 let currentRepo = null;
 
-// Expose functions to global scope
-window.analyzeCode = analyzeCode;
-window.clearCode = clearCode;
-window.analyzeGithubRepo = analyzeGithubRepo;
-window.analyzePullRequest = analyzePullRequest;
-
 // --- Code Analysis Logic ---
 
 async function analyzeCode() {
@@ -459,92 +453,157 @@ async function analyzeGithubRepo() {
         return;
     }
 
-    // Extract owner/repo
-    let url = urlInput.trim();
-    if (url.endsWith('.git')) url = url.slice(0, -4);
-    if (url.endsWith('/')) url = url.slice(0, -1);
-
-    let owner, repo;
-    try {
-        const urlObj = new URL(url);
-        const parts = urlObj.pathname.split('/').filter(p => p);
-        if (parts.length < 2) throw new Error("Invalid Repository URL");
-        owner = parts[0];
-        repo = parts[1];
-    } catch (e) {
-        // Fallback for non-URL inputs (e.g. "owner/repo")
-        const parts = url.split('/');
-        if (parts.length === 2) {
-            owner = parts[0];
-            repo = parts[1];
-        } else {
-            window.toast.error('Invalid GitHub URL or format. Use: https://github.com/owner/repo');
-            return;
-        }
-    }
-
-    resultsDiv.innerHTML = '<div class="loading-spinner"></div> Fetching repository info...';
-
-    const headers = {};
-    if (token) headers['Authorization'] = `token ${token}`;
+    resultsDiv.innerHTML = `
+        <div class="glass-card text-center p-4">
+            <div class="loading-spinner mx-auto mb-3"></div>
+            <h3>Analyzing Repository...</h3>
+            <p class="text-muted">Fetching and analyzing all code files. This may take a minute.</p>
+        </div>
+    `;
 
     try {
-        const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
-        if (!repoRes.ok) {
-            const errBody = await repoRes.json().catch(() => ({}));
-            throw new Error(errBody.message || `Repository not found or private (Status: ${repoRes.status})`);
+        window.toast.info('Starting repository analysis...', 'GitHub Analyzer');
+
+        // Call our backend endpoint
+        const response = await fetch('/api/analyze-github', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                repo_url: urlInput,
+                github_token: token
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || data.error || 'Analysis failed');
         }
-        const repoData = await repoRes.json();
 
-        // Show success toast
-        window.toast.success(`Successfully loaded ${repoData.full_name}`, 'Repository Loaded');
+        window.toast.success(`Analyzed ${data.analyzed_files} files!`, 'Analysis Complete');
 
-        // Display Repo Info
+        // Display results
         resultsDiv.innerHTML = `
+            <!-- Repository Overview -->
             <div class="glass-card mb-3">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2><i class="fab fa-github"></i> ${repoData.full_name}</h2>
-                        <p>${repoData.description || 'No description'}</p>
+                <h2><i class="fab fa-github"></i> ${data.repository}</h2>
+                <div class="grid-2-col gap-2 mt-3">
+                    <div class="stat-card">
+                        <i class="fas fa-file-code"></i>
+                        <div class="stat-value">${data.total_files}</div>
+                        <div class="stat-label">Total Code Files</div>
                     </div>
-                    <div class="flex gap-2 text-center">
-                        <div class="p-2">
-                            <div class="stat-value" style="font-size: 1.5rem;">${repoData.stargazers_count}</div>
-                            <div class="stat-label">Stars</div>
-                        </div>
-                        <div class="p-2">
-                            <div class="stat-value" style="font-size: 1.5rem;">${repoData.forks_count}</div>
-                            <div class="stat-label">Forks</div>
-                        </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="stat-value">${data.analyzed_files}</div>
+                        <div class="stat-label">Files Analyzed</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-bug text-danger"></i>
+                        <div class="stat-value">${data.total_bugs}</div>
+                        <div class="stat-label">Total Bugs Found</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-shield-alt text-warning"></i>
+                        <div class="stat-value">${data.total_security_issues}</div>
+                        <div class="stat-label">Security Issues</div>
                     </div>
                 </div>
-                <div class="mt-3">
-                    <span class="badge badge-primary">${repoData.language || 'Unknown'}</span>
-                    <span class="badge badge-secondary">${repoData.open_issues_count} Issues</span>
-                </div>
+                ${data.note ? `<div class="alert alert-info mt-3"><i class="fas fa-info-circle"></i> ${data.note}</div>` : ''}
             </div>
-            
+
+            <!-- File Analysis Results -->
             <div class="glass-card">
-                <h3>Files (Root)</h3>
-                <div id="fileList" class="mt-3">Loading files...</div>
+                <h3><i class="fas fa-list"></i> File Analysis Details</h3>
+                <div class="mt-3">
+                    ${data.files.map((file, index) => `
+                        <div class="analysis-section mb-4">
+                            <h4 style="color: var(--primary); border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">
+                                <i class="fas fa-file-code"></i> ${file.path}
+                                <span class="badge badge-primary ml-2">${file.language}</span>
+                                <span class="text-muted text-sm ml-2">${(file.size / 1024).toFixed(1)} KB</span>
+                            </h4>
+
+                            <!-- ML Analysis -->
+                            <div class="mt-3">
+                                <h5 style="color: var(--success);"><i class="fas fa-robot"></i> ML Analysis</h5>
+                                <div class="grid-2-col gap-2 mt-2">
+                                    <div class="metric-card">
+                                        <div class="metric-label">Quality Score</div>
+                                        <div class="metric-value">${file.ml_analysis.quality}</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-label">Issues Found</div>
+                                        <div class="metric-value">${file.ml_analysis.bugs_count + file.ml_analysis.security_count}</div>
+                                    </div>
+                                </div>
+
+                                ${file.ml_analysis.bugs.length > 0 ? `
+                                    <div class="mt-2">
+                                        <strong class="text-danger"><i class="fas fa-bug"></i> Bugs:</strong>
+                                        <ul class="mt-1">
+                                            ${file.ml_analysis.bugs.map(bug => `
+                                                <li class="text-secondary">${bug.description || bug.issue || bug}</li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+
+                                ${file.ml_analysis.security.length > 0 ? `
+                                    <div class="mt-2">
+                                        <strong class="text-warning"><i class="fas fa-shield-alt"></i> Security:</strong>
+                                        <ul class="mt-1">
+                                            ${file.ml_analysis.security.map(sec => `
+                                                <li class="text-secondary">${sec.description || sec.issue || sec}</li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <!-- AI Analysis -->
+                            <div class="mt-3">
+                                <h5 style="color: var(--secondary);"><i class="fas fa-brain"></i> AI Analysis</h5>
+                                <div class="grid-2-col gap-2 mt-2">
+                                    <div class="metric-card">
+                                        <div class="metric-label">Quality Score</div>
+                                        <div class="metric-value">${file.ai_analysis.quality}</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-label">Issues Found</div>
+                                        <div class="metric-value">${file.ai_analysis.bugs_count + file.ai_analysis.security_count}</div>
+                                    </div>
+                                </div>
+
+                                ${file.ai_analysis.bugs.length > 0 ? `
+                                    <div class="mt-2">
+                                        <strong class="text-danger"><i class="fas fa-bug"></i> Bugs:</strong>
+                                        <ul class="mt-1">
+                                            ${file.ai_analysis.bugs.map(bug => `
+                                                <li class="text-secondary">${bug.description || bug.issue || bug}</li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+
+                                ${file.ai_analysis.security.length > 0 ? `
+                                    <div class="mt-2">
+                                        <strong class="text-warning"><i class="fas fa-shield-alt"></i> Security:</strong>
+                                        <ul class="mt-1">
+                                            ${file.ai_analysis.security.map(sec => `
+                                                <li class="text-secondary">${sec.description || sec.issue || sec}</li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `;
-
-        // Fetch Contents
-        const contentsRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers });
-        const contents = await contentsRes.json();
-
-        const fileListDiv = document.getElementById('fileList');
-        if (Array.isArray(contents)) {
-            fileListDiv.innerHTML = contents.map(item => `
-                <div class="flex items-center gap-2 p-2 hover:bg-white/5 rounded cursor-pointer" 
-                     onclick="fetchAndAnalyzeFile('${item.download_url}', '${item.name}')">
-                    <i class="fas fa-${item.type === 'dir' ? 'folder' : 'file-code'} text-${item.type === 'dir' ? 'warning' : 'primary'}"></i>
-                    <span>${item.name}</span>
-                    ${item.type === 'file' ? `<span class="text-muted text-sm ml-auto">${(item.size / 1024).toFixed(1)} KB</span>` : ''}
-                </div>
-            `).join('');
-        }
 
     } catch (error) {
         console.error('GitHub Analysis Error:', error);
@@ -553,14 +612,10 @@ async function analyzeGithubRepo() {
                 <i class="fas fa-exclamation-triangle"></i>
                 <div>
                     <strong>Error:</strong> ${error.message}
-                    <p class="text-sm mt-2">
-                        ${error.message.includes('not found') || error.message.includes('404') ?
-                'Make sure the repository URL is correct and the repository is public, or provide a valid GitHub token for private repositories.' :
-                'Please check your internet connection and try again.'}
-                    </p>
                 </div>
             </div>
         `;
+        window.toast.error(error.message, 'Analysis Failed');
     }
 }
 
@@ -591,4 +646,12 @@ window.fetchAndAnalyzeFile = async (url, filename) => {
     }
 };
 
-console.log('displayResults function completed successfully');
+// Expose all functions to global scope (must be at the end after all definitions)
+window.analyzeCode = analyzeCode;
+window.clearCode = clearCode;
+window.analyzeGithubRepo = analyzeGithubRepo;
+window.analyzePullRequest = analyzePullRequest;
+window.fetchAndAnalyzeFile = fetchAndAnalyzeFile;
+
+console.log('main-functions.js loaded successfully');
+console.log('analyzeGithubRepo:', typeof window.analyzeGithubRepo);

@@ -342,7 +342,7 @@
 
         /* Left: User Email */
         .user-email-display {
-            display: flex;
+            display: flex !important;
             flex-direction: column;
             gap: 0.25rem;
             font-size: 0.75rem;
@@ -898,6 +898,37 @@
                             </select>
                         </div>
 
+
+                        <div class="input-group">
+                            <label>
+                                <i class="fas fa-flask"></i>
+                                Try Sample Code
+                            </label>
+                            <select class="input-field" id="sampleSelect">
+                                <option value="">-- Select a sample --</option>
+                                <optgroup label="Python Examples">
+                                    <option value="python-good">✅ Python - Good Code (Fibonacci)</option>
+                                    <option value="python-bad">❌ Python - Bad Code (Fibonacci)</option>
+                                    <option value="python-api">✅ Python - API Handler</option>
+                                    <option value="python-security">⚠️ Python - Security Issues</option>
+                                </optgroup>
+                                <optgroup label="JavaScript Examples">
+                                    <option value="javascript-good">✅ JavaScript - Good Code (Async)</option>
+                                    <option value="javascript-bad">❌ JavaScript - Bad Code (Async)</option>
+                                    <option value="javascript-react">✅ JavaScript - React Component</option>
+                                    <option value="javascript-bugs">🐛 JavaScript - Common Bugs</option>
+                                </optgroup>
+                                <optgroup label="Java Examples">
+                                    <option value="java-good">✅ Java - Good Code (OOP)</option>
+                                    <option value="java-bad">❌ Java - Bad Code (OOP)</option>
+                                </optgroup>
+                                <optgroup label="C++ Examples">
+                                    <option value="cpp-good">✅ C++ - Good Code (Memory)</option>
+                                    <option value="cpp-bad">❌ C++ - Memory Leaks</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
                         <div class="input-group">
                             <label>
                                 <i class="fas fa-code"></i>
@@ -1133,6 +1164,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/firestore-integration.js') }}"></script>
     <script src="{{ url_for('static', filename='js/pdf-generator.js') }}"></script>
     <script src="{{ url_for('static', filename='js/features.js') }}"></script>

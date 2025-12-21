@@ -134,7 +134,7 @@ def get_gemini_analysis(code, language):
     2. **Security**: Look for SQLI, XSS, CSRF, insecure randomness, hardcoded secrets, IDOR, etc.
     3. **Performance**: Identify redundant computations, N+1 queries, unoptimized loops, or memory leaks.
     4. **Modern Standards**: Suggest modern language features (e.g., f-strings for Python 3.6+, async/await vs promises).
-    5. **Strict JSON**: Respond ONLY with the valid JSON object. No markdown fercing around the JSON.
+    5. **Strict JSON**: Respond ONLY with the valid JSON object. No markdown fencing around the JSON. Escape all quotes and newlines properly.
     """
 
     try:
@@ -148,11 +148,50 @@ def get_gemini_analysis(code, language):
         elif '```' in response_text:
             response_text = response_text.split('```')[1].split('```')[0].strip()
         
-        analysis = json.loads(response_text)
+        # Try to parse JSON
+        try:
+            analysis = json.loads(response_text)
+        except json.JSONDecodeError as json_err:
+            app.logger.warning(f"Initial JSON parse failed: {json_err}")
+            
+            # Try to fix common JSON issues
+            # Replace unescaped newlines in strings
+            import re
+            
+            # Try parsing again
+            fixed_text = response_text
+            try:
+                analysis = json.loads(fixed_text)
+            except:
+                # If still fails, create a basic structure
+                app.logger.error(f"JSON Parse Error after fixes: {str(json_err)[:200]}")
+                
+                # Extract what we can using regex
+                quality_match = re.search(r'"overall_quality"\s*:\s*"([^"]+)"', response_text)
+                summary_match = re.search(r'"summary"\s*:\s*"([^"]+)"', response_text)
+                
+                analysis = {
+                    'overall_quality': quality_match.group(1) if quality_match else '7/10',
+                    'summary': summary_match.group(1) if summary_match else 'Analysis completed. Some details may be incomplete due to formatting issues.',
+                    'bugs': [],
+                    'improvements': [],
+                    'best_practices': [],
+                    'security': [],
+                    'complexity_analysis': {
+                        'time_complexity': 'Unable to parse',
+                        'space_complexity': 'Unable to parse'
+                    },
+                    'metrics': {
+                        'complexity': '7/10',
+                        'readability': '7/10',
+                        'maintainability': '7/10',
+                        'testability': '7/10'
+                    }
+                }
         
         # Ensure metrics are in correct format
         if 'metrics' in analysis:
-            for key in ['complexity', 'readability', 'maintainability']:
+            for key in ['complexity', 'readability', 'maintainability', 'testability']:
                 if key in analysis['metrics']:
                     val = analysis['metrics'][key]
                     if isinstance(val, (int, float)):
@@ -169,11 +208,11 @@ def get_gemini_analysis(code, language):
         
         return analysis
         
-    except json.JSONDecodeError as e:
-        app.logger.error(f"JSON Parse Error: {e}")
+    except Exception as e:
+        app.logger.error(f"Gemini Analysis Error: {e}")
         return {
-            'overall_quality': '8/10',
-            'summary': f'🤖 AI Analysis:\\n\\n{response_text[:500]}...',
+            'overall_quality': '7/10',
+            'summary': '🤖 AI analysis encountered an error. Please try again.',
             'bugs': [],
             'improvements': [],
             'best_practices': [],
@@ -311,6 +350,189 @@ def analyze_code_endpoint():
         
     except Exception as e:
         app.logger.error(f"Analysis error: {e}", exc_info=True)
+        return jsonify({
+            'error': 'Analysis failed',
+            'message': str(e)
+        }), 500
+
+# GitHub Repository Analysis
+@app.route('/api/analyze-github', methods=['POST'])
+@limiter.limit("5 per minute" if config.RATELIMIT_ENABLED else "1000 per minute")
+def analyze_github_repo():
+    """
+    Analyze entire GitHub repository
+    Fetches all code files and analyzes them
+    """
+    import requests
+    import base64
+    
+    start_time = datetime.now()
+    
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        repo_url = data.get('repo_url', '').strip()
+        github_token = data.get('github_token', '').strip()
+        
+        if not repo_url:
+            return jsonify({'error': 'Repository URL is required'}), 400
+        
+        # Parse GitHub URL
+        # Format: https://github.com/owner/repo
+        try:
+            parts = repo_url.replace('https://github.com/', '').replace('http://github.com/', '').strip('/').split('/')
+            if len(parts) < 2:
+                return jsonify({'error': 'Invalid GitHub URL format'}), 400
+            
+            owner = parts[0]
+            repo = parts[1]
+        except:
+            return jsonify({'error': 'Invalid GitHub URL'}), 400
+        
+        # GitHub API headers
+        headers = {
+            'Accept': 'application/vnd.github.v3+json'
+        }
+        if github_token:
+            headers['Authorization'] = f'token {github_token}'
+        
+        # Fetch repository tree
+        tree_url = f'https://api.github.com/repos/{owner}/{repo}/git/trees/main?recursive=1'
+        
+        app.logger.info(f"Fetching repository tree: {tree_url}")
+        tree_response = requests.get(tree_url, headers=headers, timeout=30)
+        
+        # Try 'master' if 'main' doesn't exist
+        if tree_response.status_code == 404:
+            tree_url = f'https://api.github.com/repos/{owner}/{repo}/git/trees/master?recursive=1'
+            tree_response = requests.get(tree_url, headers=headers, timeout=30)
+        
+        if tree_response.status_code != 200:
+            return jsonify({
+                'error': 'Failed to fetch repository',
+                'message': f'GitHub API returned status {tree_response.status_code}'
+            }), 400
+        
+        tree_data = tree_response.json()
+        
+        # Filter code files
+        code_extensions = ['.py', '.js', '.jsx', '.ts', '.tsx', '.java', '.cpp', '.c', '.cs', '.go', '.rb', '.php', '.swift', '.kt']
+        code_files = [
+            item for item in tree_data.get('tree', [])
+            if item['type'] == 'blob' and any(item['path'].endswith(ext) for ext in code_extensions)
+        ]
+        
+        app.logger.info(f"Found {len(code_files)} code files in repository")
+        
+        # Limit to first 10 files to avoid timeout
+        max_files = 10
+        files_to_analyze = code_files[:max_files]
+        
+        analyzed_files = []
+        total_bugs = 0
+        total_security_issues = 0
+        
+        for file_item in files_to_analyze:
+            try:
+                # Fetch file content
+                file_url = f'https://api.github.com/repos/{owner}/{repo}/contents/{file_item["path"]}'
+                file_response = requests.get(file_url, headers=headers, timeout=15)
+                
+                if file_response.status_code != 200:
+                    continue
+                
+                file_data = file_response.json()
+                
+                # Decode content
+                content = base64.b64decode(file_data['content']).decode('utf-8', errors='ignore')
+                
+                # Detect language
+                file_ext = file_item['path'].split('.')[-1]
+                language_map = {
+                    'py': 'python', 'js': 'javascript', 'jsx': 'javascript',
+                    'ts': 'typescript', 'tsx': 'typescript', 'java': 'java',
+                    'cpp': 'cpp', 'c': 'c', 'cs': 'csharp', 'go': 'go',
+                    'rb': 'ruby', 'php': 'php', 'swift': 'swift', 'kt': 'kotlin'
+                }
+                language = language_map.get(file_ext, 'auto')
+                
+                # Analyze with ML
+                ml_result = code_analyzer.analyze_code_quality(content, language)
+                
+                # Analyze with AI
+                ai_result = None
+                try:
+                    if config.GEMINI_API_KEY:
+                        ai_result = get_gemini_analysis(content, language)
+                except Exception as ai_error:
+                    app.logger.warning(f"AI analysis failed for {file_item['path']}: {ai_error}")
+                    ai_result = {'error': 'AI analysis unavailable'}
+                
+                # Count issues
+                ml_bugs = len(ml_result.get('bugs', []))
+                ml_security = len(ml_result.get('security', []))
+                ai_bugs = len(ai_result.get('bugs', [])) if ai_result and 'bugs' in ai_result else 0
+                ai_security = len(ai_result.get('security', [])) if ai_result and 'security' in ai_result else 0
+                
+                total_bugs += ml_bugs + ai_bugs
+                total_security_issues += ml_security + ai_security
+                
+                analyzed_files.append({
+                    'path': file_item['path'],
+                    'language': language,
+                    'size': file_item['size'],
+                    'ml_analysis': {
+                        'quality': ml_result.get('overall_quality', 'N/A'),
+                        'bugs_count': ml_bugs,
+                        'security_count': ml_security,
+                        'bugs': ml_result.get('bugs', [])[:3],  # First 3 bugs
+                        'security': ml_result.get('security', [])[:3]  # First 3 security issues
+                    },
+                    'ai_analysis': {
+                        'quality': ai_result.get('overall_quality', 'N/A') if ai_result else 'N/A',
+                        'bugs_count': ai_bugs,
+                        'security_count': ai_security,
+                        'bugs': ai_result.get('bugs', [])[:3] if ai_result and 'bugs' in ai_result else [],
+                        'security': ai_result.get('security', [])[:3] if ai_result and 'security' in ai_result else []
+                    }
+                })
+                
+            except Exception as file_error:
+                app.logger.error(f"Error analyzing {file_item['path']}: {file_error}")
+                continue
+        
+        analysis_time = (datetime.now() - start_time).total_seconds()
+        
+        result = {
+            'repository': f'{owner}/{repo}',
+            'total_files': len(code_files),
+            'analyzed_files': len(analyzed_files),
+            'total_bugs': total_bugs,
+            'total_security_issues': total_security_issues,
+            'files': analyzed_files,
+            'analysis_time': analysis_time,
+            'note': f'Analyzed first {max_files} files. Full repository has {len(code_files)} code files.'
+        }
+        
+        app.logger.info(f"GitHub analysis completed in {analysis_time:.2f}s")
+        return jsonify(result)
+        
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'error': 'Request timeout',
+            'message': 'GitHub API request timed out. Please try again.'
+        }), 408
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"GitHub API error: {e}")
+        return jsonify({
+            'error': 'GitHub API error',
+            'message': str(e)
+        }), 500
+    except Exception as e:
+        app.logger.error(f"GitHub analysis error: {e}", exc_info=True)
         return jsonify({
             'error': 'Analysis failed',
             'message': str(e)

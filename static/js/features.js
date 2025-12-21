@@ -42,6 +42,89 @@ print(f"Fibonacci sequence: {result}")`,
 
 print(calc(10))`,
 
+    'python-api': `from flask import Flask, jsonify, request
+from functools import wraps
+import jwt
+import logging
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your-secret-key'
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def token_required(f):
+    """Decorator to protect routes with JWT authentication"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'error': 'Token is missing'}), 401
+        
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = data['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Invalid token'}), 401
+        
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
+
+@app.route('/api/users/<int:user_id>', methods=['GET'])
+@token_required
+def get_user(current_user, user_id):
+    """Get user information"""
+    try:
+        # Validate permissions
+        if current_user != user_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        # Fetch user data (example)
+        user_data = {
+            'id': user_id,
+            'name': 'John Doe',
+            'email': 'john@example.com'
+        }
+        
+        logger.info(f"User {user_id} data retrieved successfully")
+        return jsonify(user_data), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching user {user_id}: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500`,
+
+    'python-security': `import os
+import sqlite3
+
+# SECURITY ISSUE: Hardcoded credentials
+API_KEY = "sk-1234567890abcdef"
+DATABASE_PASSWORD = "admin123"
+
+def get_user_data(username):
+    # SECURITY ISSUE: SQL Injection vulnerability
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    cursor.execute(query)
+    return cursor.fetchall()
+
+def execute_command(cmd):
+    # SECURITY ISSUE: Command injection vulnerability
+    os.system(cmd)
+
+# SECURITY ISSUE: Insecure random number generation
+import random
+session_token = random.randint(1000, 9999)
+
+# SECURITY ISSUE: Eval usage
+user_input = input("Enter calculation: ")
+result = eval(user_input)`,
+
     'javascript-good': `/**
  * Fetch user data from API
  * @param {number} userId - The user ID to fetch
@@ -79,7 +162,291 @@ fetchUserData(123)
         });
 }
 
-getUser(123);`
+getUser(123);`,
+
+    'javascript-react': `import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
+
+/**
+ * UserProfile Component
+ * Displays user information with loading and error states
+ */
+const UserProfile = ({ userId }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchUser = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const response = await fetch(\`/api/users/\${userId}\`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch user');
+            }
+            
+            const data = await response.json();
+            setUser(data);
+        } catch (err) {
+            setError(err.message);
+            console.error('Error fetching user:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        fetchUser();
+    }, [fetchUser]);
+
+    if (loading) {
+        return <div className="loading">Loading...</div>;
+    }
+
+    if (error) {
+        return (
+            <div className="error">
+                <p>Error: {error}</p>
+                <button onClick={fetchUser}>Retry</button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="user-profile">
+            <h2>{user.name}</h2>
+            <p>Email: {user.email}</p>
+            <p>Joined: {new Date(user.createdAt).toLocaleDateString()}</p>
+        </div>
+    );
+};
+
+UserProfile.propTypes = {
+    userId: PropTypes.number.isRequired
+};
+
+export default UserProfile;`,
+
+    'javascript-bugs': `// BUG 1: Infinite loop
+function processItems(items) {
+    let i = 0;
+    while (i < items.length) {
+        console.log(items[i]);
+        // Missing i++ - infinite loop!
+    }
+}
+
+// BUG 2: Memory leak
+let cache = {};
+function addToCache(key, value) {
+    cache[key] = value;
+    // Cache never cleared - memory leak!
+}
+
+// BUG 3: Race condition
+let counter = 0;
+async function incrementCounter() {
+    const current = counter;
+    await new Promise(resolve => setTimeout(resolve, 100));
+    counter = current + 1;
+}
+
+// BUG 4: Incorrect comparison
+function checkValue(val) {
+    if (val = 10) {  // Should be == or ===
+        console.log("Value is 10");
+    }
+}
+
+// BUG 5: Callback hell
+getData(function(a) {
+    getMoreData(a, function(b) {
+        getMoreData(b, function(c) {
+            getMoreData(c, function(d) {
+                console.log(d);
+            });
+        });
+    });
+});`,
+
+    'java-good': `import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * User management class with proper encapsulation and error handling
+ */
+public class UserManager {
+    private final List<User> users;
+    private static final int MAX_USERS = 1000;
+    
+    public UserManager() {
+        this.users = new ArrayList<>();
+    }
+    
+    /**
+     * Add a new user with validation
+     * @param user The user to add
+     * @return true if user was added successfully
+     * @throws IllegalArgumentException if user is null or invalid
+     * @throws IllegalStateException if max users reached
+     */
+    public boolean addUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        
+        if (users.size() >= MAX_USERS) {
+            throw new IllegalStateException("Maximum user limit reached");
+        }
+        
+        if (!isValidUser(user)) {
+            throw new IllegalArgumentException("Invalid user data");
+        }
+        
+        return users.add(user);
+    }
+    
+    /**
+     * Find user by ID
+     * @param id The user ID to search for
+     * @return Optional containing the user if found
+     */
+    public Optional<User> findUserById(int id) {
+        return users.stream()
+                   .filter(u -> u.getId() == id)
+                   .findFirst();
+    }
+    
+    private boolean isValidUser(User user) {
+        return user.getName() != null && 
+               !user.getName().trim().isEmpty() &&
+               user.getEmail() != null &&
+               user.getEmail().contains("@");
+    }
+}
+
+class User {
+    private final int id;
+    private final String name;
+    private final String email;
+    
+    public User(int id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+    
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+}`,
+
+    'java-bad': `import java.util.*;
+
+public class UserMgr {
+    public static List users = new ArrayList();
+    
+    public void add(Object u) {
+        users.add(u);
+    }
+    
+    public Object get(int i) {
+        return users.get(i);
+    }
+    
+    public void process() {
+        for(int i=0;i<users.size();i++) {
+            System.out.println(users.get(i));
+        }
+    }
+}`,
+
+    'cpp-good': `#include <iostream>
+#include <memory>
+#include <vector>
+#include <string>
+
+/**
+ * Smart pointer-based resource management
+ * Demonstrates RAII and modern C++ best practices
+ */
+class ResourceManager {
+private:
+    std::vector<std::unique_ptr<std::string>> resources;
+    
+public:
+    ResourceManager() = default;
+    
+    // Delete copy constructor and assignment
+    ResourceManager(const ResourceManager&) = delete;
+    ResourceManager& operator=(const ResourceManager&) = delete;
+    
+    // Allow move operations
+    ResourceManager(ResourceManager&&) = default;
+    ResourceManager& operator=(ResourceManager&&) = default;
+    
+    ~ResourceManager() {
+        std::cout << "Cleaning up resources..." << std::endl;
+    }
+    
+    void addResource(const std::string& data) {
+        resources.push_back(std::make_unique<std::string>(data));
+    }
+    
+    const std::string* getResource(size_t index) const {
+        if (index >= resources.size()) {
+            return nullptr;
+        }
+        return resources[index].get();
+    }
+    
+    size_t count() const {
+        return resources.size();
+    }
+};
+
+int main() {
+    ResourceManager manager;
+    manager.addResource("Resource 1");
+    manager.addResource("Resource 2");
+    
+    std::cout << "Total resources: " << manager.count() << std::endl;
+    
+    // Resources automatically cleaned up when manager goes out of scope
+    return 0;
+}`,
+
+    'cpp-bad': `#include <iostream>
+using namespace std;
+
+class Manager {
+public:
+    int* data;
+    int size;
+    
+    Manager(int s) {
+        size = s;
+        data = new int[size];  // Memory allocated
+    }
+    
+    // Missing destructor - memory leak!
+    
+    void process() {
+        for(int i=0; i<=size; i++) {  // Buffer overflow!
+            data[i] = i;
+        }
+    }
+};
+
+int main() {
+    Manager* m = new Manager(10);
+    m->process();
+    // Memory never freed - leak!
+    return 0;
+}`
 };
 
 // Initialize features when DOM is ready

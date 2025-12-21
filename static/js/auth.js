@@ -135,30 +135,64 @@ window.updateUserName = function () {
             el.textContent = window.currentUser.displayName;
         });
 
-        // Update header email (for analyzer/dashboard pages)
-        const headerEmail = document.getElementById('headerUserEmail');
-        const headerEmailText = document.getElementById('headerEmailText');
+        // Function to update email display
+        const updateEmailDisplay = () => {
+            const headerEmail = document.getElementById('headerUserEmail');
+            const headerEmailText = document.getElementById('headerEmailText');
 
-        if (headerEmail && headerEmailText && window.currentUser.email) {
-            headerEmailText.textContent = window.currentUser.email;
-            headerEmail.style.display = 'flex';
-            console.log('✅ Header email updated:', window.currentUser.email);
-        }
+            if (headerEmail && headerEmailText && window.currentUser.email) {
+                headerEmailText.textContent = window.currentUser.email;
+                headerEmail.style.display = 'flex';
+                console.log('✅ Header email updated:', window.currentUser.email);
+                return true;
+            }
+            return false;
+        };
 
-        // Update profile page email
-        const profileEmail = document.getElementById('userEmail');
-        if (profileEmail && window.currentUser.email) {
-            profileEmail.textContent = window.currentUser.email;
-            console.log('✅ Profile email updated:', window.currentUser.email);
-        }
+        // Function to update profile email
+        const updateProfileEmail = () => {
+            const profileEmail = document.getElementById('userEmail');
+            if (profileEmail && window.currentUser.email) {
+                profileEmail.textContent = window.currentUser.email;
+                console.log('✅ Profile email updated:', window.currentUser.email);
+                return true;
+            }
+            return false;
+        };
 
-        // Update profile avatar initial
-        const profileAvatar = document.getElementById('profileAvatar');
-        if (profileAvatar && window.currentUser.displayName) {
-            const initial = window.currentUser.displayName.charAt(0).toUpperCase();
-            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: 700;">${initial}</span>`;
-            console.log('✅ Profile avatar updated');
-        }
+        // Function to update profile avatar
+        const updateProfileAvatar = () => {
+            const profileAvatar = document.getElementById('profileAvatar');
+            if (profileAvatar && window.currentUser.displayName) {
+                const initial = window.currentUser.displayName.charAt(0).toUpperCase();
+                profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: 700;">${initial}</span>`;
+                console.log('✅ Profile avatar updated');
+                return true;
+            }
+            return false;
+        };
+
+        // Try to update immediately
+        updateEmailDisplay();
+        updateProfileEmail();
+        updateProfileAvatar();
+
+        // Retry with delays if elements not found
+        let attempts = 0;
+        const maxAttempts = 10;
+        const retryInterval = setInterval(() => {
+            attempts++;
+            const emailUpdated = updateEmailDisplay();
+            const profileUpdated = updateProfileEmail();
+            const avatarUpdated = updateProfileAvatar();
+
+            if ((emailUpdated && profileUpdated && avatarUpdated) || attempts >= maxAttempts) {
+                clearInterval(retryInterval);
+                if (attempts >= maxAttempts) {
+                    console.warn('⚠️ Some elements could not be updated after', maxAttempts, 'attempts');
+                }
+            }
+        }, 200);
     }
 };
 

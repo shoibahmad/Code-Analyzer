@@ -2,9 +2,9 @@
 let codeInput, analyzeBtn, clearBtn, resultsSection, loadingSpinner, errorMessage, detectedLanguageSpan;
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 Main.js: DOM Content Loaded');
-    
+
     codeInput = document.getElementById('codeInput');
     analyzeBtn = document.getElementById('analyzeBtn');
     clearBtn = document.getElementById('clearBtn');
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error('❌ Analyze button not found!');
     }
-    
+
     if (clearBtn) {
         clearBtn.addEventListener('click', clearCode);
         console.log('✅ Clear button event listener attached');
@@ -76,24 +76,24 @@ function clearCode() {
 // Main analyze function
 async function analyzeCode() {
     console.log('🔍 Analyze button clicked!');
-    
+
     const code = codeInput.value.trim();
     console.log('📝 Code length:', code.length);
-    
+
     if (!code) {
         console.warn('⚠️ No code provided');
         showError('Please enter some code to analyze');
         return;
     }
-    
+
     console.log('✅ Starting analysis...');
-    
+
     // Show loading
     loadingSpinner.style.display = 'block';
     resultsSection.style.display = 'none';
     errorMessage.style.display = 'none';
     analyzeBtn.disabled = true;
-    
+
     try {
         const response = await fetch('/api/analyze', {
             method: 'POST',
@@ -102,33 +102,33 @@ async function analyzeCode() {
             },
             body: JSON.stringify({ code, language: 'auto' })
         });
-        
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Analysis failed');
         }
-        
+
         const data = await response.json();
-        
+
         // Update detected language
         if (data.detected_language) {
             detectedLanguageSpan.innerHTML = `<i class="fas fa-check-circle" style="color: var(--accent-success);"></i> ${data.detected_language}`;
         }
-        
+
         // Show fallback warning if AI analysis failed
         if (data.ai_fallback) {
             showFallbackWarning();
         }
-        
+
         displayResults(data);
-        
+
         // Save to history
         if (window.features) {
             window.features.saveToHistory(code, data.detected_language, data);
             window.features.createCharts(data.ml_analysis, data.ai_analysis);
             setTimeout(() => window.features.addCopyButtons(), 500);
         }
-        
+
     } catch (error) {
         showError(error.message);
     } finally {
@@ -140,17 +140,17 @@ async function analyzeCode() {
 // Display results
 function displayResults(data) {
     console.log('📊 Full API Response:', data);
-    
+
     // ML Model Analysis
     const mlData = data.ml_analysis || {};
     console.log('🤖 ML Data:', mlData);
     displayAnalysis('ml', mlData);
-    
+
     // AI Analysis
     const aiData = data.ai_analysis || {};
     console.log('🧠 AI Data:', aiData);
     displayAnalysis('ai', aiData);
-    
+
     // Show results
     resultsSection.style.display = 'block';
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -159,7 +159,7 @@ function displayResults(data) {
 // Display analysis for a specific column (ml or ai)
 function displayAnalysis(prefix, data) {
     console.log(`🔍 Displaying ${prefix} analysis:`, data);
-    
+
     // Check if this is fallback data for AI column
     if (prefix === 'ai' && data.is_fallback) {
         const aiHeader = document.querySelector('.ai-header');
@@ -167,7 +167,7 @@ function displayAnalysis(prefix, data) {
             aiHeader.classList.add('fallback-mode');
         }
     }
-    
+
     // Overall Quality
     const qualityScore = data.overall_quality || '⏳ Analyzing';
     const qualityScoreEl = document.getElementById(`${prefix}QualityScore`);
@@ -175,7 +175,7 @@ function displayAnalysis(prefix, data) {
         qualityScoreEl.textContent = qualityScore;
         console.log(`✅ Set ${prefix} quality score to:`, qualityScore);
     }
-    
+
     // Add visual indicator for quality score
     const scoreElement = document.getElementById(`${prefix}QualityScore`);
     if (qualityScore.includes('/10')) {
@@ -185,11 +185,11 @@ function displayAnalysis(prefix, data) {
         else if (score >= 4) scoreElement.style.color = 'var(--accent-warning)';
         else scoreElement.style.color = 'var(--accent-danger)';
     }
-    
+
     // Display summary with proper line breaks
     const summaryElement = document.getElementById(`${prefix}QualitySummary`);
     let summary = data.summary || 'Analysis in progress...';
-    
+
     // Check if summary looks like JSON and try to parse it
     if (typeof summary === 'string' && summary.trim().startsWith('{')) {
         try {
@@ -201,33 +201,33 @@ function displayAnalysis(prefix, data) {
             console.warn('Could not parse summary JSON:', e);
         }
     }
-    
+
     if (summaryElement) {
         summaryElement.textContent = summary;
         summaryElement.style.whiteSpace = 'pre-line'; // Preserve line breaks
     }
-    
+
     // Metrics
     const metrics = data.metrics || {};
     const complexityEl = document.getElementById(`${prefix}ComplexityScore`);
     const readabilityEl = document.getElementById(`${prefix}ReadabilityScore`);
     const maintainabilityEl = document.getElementById(`${prefix}MaintainabilityScore`);
-    
+
     if (complexityEl) complexityEl.textContent = metrics.complexity || '⏳ Analyzing';
     if (readabilityEl) readabilityEl.textContent = metrics.readability || '⏳ Analyzing';
     if (maintainabilityEl) maintainabilityEl.textContent = metrics.maintainability || '⏳ Analyzing';
-    
+
     console.log(`📊 ${prefix} Metrics:`, metrics);
-    
+
     // Bugs
     displayIssues(`${prefix}Bugs`, data.bugs || []);
-    
+
     // Security
     displayIssues(`${prefix}Security`, data.security || []);
-    
+
     // Improvements
     displayImprovements(`${prefix}Improvements`, data.improvements || []);
-    
+
     // Best Practices
     displayBestPractices(`${prefix}Practices`, data.best_practices || []);
 }
@@ -236,9 +236,9 @@ function displayAnalysis(prefix, data) {
 function displayIssues(prefix, issues) {
     const listElement = document.getElementById(`${prefix}List`);
     const countElement = document.getElementById(`${prefix}Count`);
-    
+
     countElement.textContent = issues.length;
-    
+
     if (issues.length === 0) {
         listElement.innerHTML = `
             <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
@@ -249,7 +249,7 @@ function displayIssues(prefix, issues) {
         `;
         return;
     }
-    
+
     listElement.innerHTML = issues.map(issue => {
         const severity = issue.severity || 'low';
         return `
@@ -269,9 +269,9 @@ function displayIssues(prefix, issues) {
 function displayImprovements(prefix, improvements) {
     const listElement = document.getElementById(`${prefix}List`);
     const countElement = document.getElementById(`${prefix}Count`);
-    
+
     countElement.textContent = improvements.length;
-    
+
     if (improvements.length === 0) {
         listElement.innerHTML = `
             <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
@@ -282,7 +282,7 @@ function displayImprovements(prefix, improvements) {
         `;
         return;
     }
-    
+
     listElement.innerHTML = improvements.map(item => `
         <div class="issue-item">
             <div class="issue-header">
@@ -298,9 +298,9 @@ function displayImprovements(prefix, improvements) {
 function displayBestPractices(prefix, practices) {
     const listElement = document.getElementById(`${prefix}List`);
     const countElement = document.getElementById(`${prefix}Count`);
-    
+
     countElement.textContent = practices.length;
-    
+
     if (practices.length === 0) {
         listElement.innerHTML = `
             <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
@@ -311,7 +311,7 @@ function displayBestPractices(prefix, practices) {
         `;
         return;
     }
-    
+
     listElement.innerHTML = practices.map(item => `
         <div class="issue-item">
             <div class="issue-header">
@@ -351,7 +351,7 @@ function showFallbackWarning() {
             </button>
         </div>
     `;
-    
+
     const resultsSection = document.getElementById('resultsSection');
     resultsSection.insertBefore(warningDiv, resultsSection.firstChild);
 }
@@ -363,4 +363,3 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Sample code examples (moved to features.js)
