@@ -411,12 +411,61 @@ def analyze_github_repo():
             tree_response = requests.get(tree_url, headers=headers, timeout=30)
         
         if tree_response.status_code != 200:
-            return jsonify({
-                'error': 'Failed to fetch repository',
-                'message': f'GitHub API returned status {tree_response.status_code}'
-            }), 400
-        
-        tree_data = tree_response.json()
+            error_message = f'GitHub API returned status {tree_response.status_code}'
+            
+            # Provide specific error messages for common status codes
+            if tree_response.status_code == 409:
+                # Try fallback: Use contents API for root directory
+                app.logger.warning("Tree API returned 409, trying contents API fallback...")
+                try:
+                    contents_url = f'https://api.github.com/repos/{owner}/{repo}/contents'
+                    contents_response = requests.get(contents_url, headers=headers, timeout=30)
+                    
+                    if contents_response.status_code == 200:
+                        contents_data = contents_response.json()
+                        # Get only files from root directory
+                        code_extensions = ['.py', '.js', '.jsx', '.ts', '.tsx', '.java', '.cpp', '.c', '.cs', '.go', '.rb', '.php', '.swift', '.kt']
+                        code_files = [
+                            {'path': item['name'], 'size': item.get('size', 0)}
+                            for item in contents_data
+                            if item['type'] == 'file' and any(item['name'].endswith(ext) for ext in code_extensions)
+                        ]
+                        
+                        if code_files:
+                            app.logger.info(f"Fallback successful: Found {len(code_files)} files in root directory")
+                            tree_data = {'tree': code_files}
+                        else:
+                            error_message = 'Repository is too large or has truncated tree. No code files found in root directory. Try a smaller repository.'
+                            raise Exception(error_message)
+                    else:
+                        error_message = 'Repository conflict - The repository may be empty, too large, or the tree is truncated. Try a smaller repository.'
+                        raise Exception(error_message)
+                except Exception as e:
+                    app.logger.error(f"Fallback failed: {str(e)}")
+                    error_message = 'Repository is too large or complex. Please try a smaller repository or one with fewer files.'
+                    
+                    return jsonify({
+                        'error': 'Failed to fetch repository',
+                        'message': error_message,
+                        'status_code': tree_response.status_code
+                    }), 400
+            elif tree_response.status_code == 403:
+                error_message = 'GitHub API rate limit exceeded. Please try again later or use a GitHub token.'
+            elif tree_response.status_code == 404:
+                error_message = 'Repository not found or branch does not exist. Please check the URL.'
+            elif tree_response.status_code == 401:
+                error_message = 'Authentication failed. Please check your GitHub token.'
+            
+            if tree_response.status_code != 409:  # Only return error if not 409 (fallback handled above)
+                app.logger.error(f"GitHub API error: {tree_response.status_code} - {error_message}")
+                
+                return jsonify({
+                    'error': 'Failed to fetch repository',
+                    'message': error_message,
+                    'status_code': tree_response.status_code
+                }), 400
+        else:
+            tree_data = tree_response.json()
         
         # Filter code files
         code_extensions = ['.py', '.js', '.jsx', '.ts', '.tsx', '.java', '.cpp', '.c', '.cs', '.go', '.rb', '.php', '.swift', '.kt']
