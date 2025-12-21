@@ -134,6 +134,7 @@
             font-size: 3rem;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
             display: inline-block;
@@ -291,6 +292,26 @@
 </head>
 
 <body>
+    <!-- Loading Spinner Overlay -->
+    <div id="authLoadingSpinner"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+            <div
+                style="width: 60px; height: 60px; margin: 0 auto 1.5rem; border: 4px solid rgba(59, 130, 246, 0.3); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;">
+            </div>
+            <p style="color: white; font-size: 1.1rem; font-weight: 600; margin: 0;">Processing...</p>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 0.5rem;">Please wait</p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
     <!-- Background Shapes -->
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>

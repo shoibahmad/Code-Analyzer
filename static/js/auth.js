@@ -222,12 +222,23 @@ const showError = (elementId, error) => {
     setTimeout(() => el.classList.remove('visible'), 5000);
 };
 
+// Loading Spinner Helper
+const showLoadingSpinner = (show = true) => {
+    const spinner = document.getElementById('authLoadingSpinner');
+    if (spinner) {
+        spinner.style.display = show ? 'flex' : 'none';
+    }
+};
+
 // Sign Up Handler
 window.handleSignUp = async (e) => {
     e.preventDefault();
     const name = document.getElementById('signup-name').value;
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
+
+    showLoadingSpinner(true);
+    window.toast.info('Creating your account...', 'Please wait');
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -246,9 +257,11 @@ window.handleSignUp = async (e) => {
         });
 
         console.log("Created account for:", email);
-        window.toast.success('Account created successfully!', 'Welcome');
+        window.toast.success('Account created successfully! Redirecting...', 'Welcome');
     } catch (error) {
+        showLoadingSpinner(false);
         showError('signup-error', error);
+        window.toast.error(getFriendlyErrorMessage(error), 'Sign Up Failed');
     }
 };
 
@@ -258,11 +271,16 @@ window.handleSignIn = async (e) => {
     const email = document.getElementById('signin-email').value;
     const password = document.getElementById('signin-password').value;
 
+    showLoadingSpinner(true);
+    window.toast.info('Signing you in...', 'Please wait');
+
     try {
         await signInWithEmailAndPassword(auth, email, password);
-        window.toast.success('Logged in successfully!', 'Welcome Back');
+        window.toast.success('Logged in successfully! Redirecting...', 'Welcome Back');
     } catch (error) {
+        showLoadingSpinner(false);
         showError('signin-error', error);
+        window.toast.error(getFriendlyErrorMessage(error), 'Login Failed');
         console.error(error);
     }
 };
@@ -286,6 +304,9 @@ window.handleForgotPass = async (e) => {
 // Google Sign In
 window.handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+    showLoadingSpinner(true);
+    window.toast.info('Opening Google Sign In...', 'Please wait');
+
     try {
         const result = await signInWithPopup(auth, provider);
 
@@ -297,15 +318,22 @@ window.handleGoogleSignIn = async () => {
             lastLogin: serverTimestamp()
         }, { merge: true });
 
-        window.toast.success('Logged in with Google!', 'Welcome');
+        window.toast.success('Logged in with Google! Redirecting...', 'Welcome');
     } catch (error) {
+        showLoadingSpinner(false);
         showError('signin-error', error);
+        if (error.code !== 'auth/popup-closed-by-user') {
+            window.toast.error(getFriendlyErrorMessage(error), 'Google Sign In Failed');
+        }
     }
 };
 
 // GitHub Sign In
 window.handleGithubSignIn = async () => {
     const provider = new GithubAuthProvider();
+    showLoadingSpinner(true);
+    window.toast.info('Opening GitHub Sign In...', 'Please wait');
+
     try {
         const result = await signInWithPopup(auth, provider);
 
@@ -317,9 +345,13 @@ window.handleGithubSignIn = async () => {
             lastLogin: serverTimestamp()
         }, { merge: true });
 
-        window.toast.success('Logged in with GitHub!', 'Welcome');
+        window.toast.success('Logged in with GitHub! Redirecting...', 'Welcome');
     } catch (error) {
+        showLoadingSpinner(false);
         showError('signin-error', error);
+        if (error.code !== 'auth/popup-closed-by-user') {
+            window.toast.error(getFriendlyErrorMessage(error), 'GitHub Sign In Failed');
+        }
     }
 };
 

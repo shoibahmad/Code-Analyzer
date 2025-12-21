@@ -224,242 +224,346 @@
     </style>
 </head>
 
-<!-- Main Content -->
-<div class="profile-container">
-    <!-- Back to Dashboard Link -->
-    <a href="/dashboard" class="back-to-dashboard">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back to Dashboard</span>
-    </a>
+<body>
+    <!-- Main Content -->
+    <div class="profile-container">
+        <!-- Back to Dashboard Link -->
+        <a href="/dashboard" class="back-to-dashboard">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Dashboard</span>
+        </a>
 
-    <!-- Profile Header -->
-    <div class="profile-header">
-        <div class="profile-avatar" id="profileAvatar">
-            <i class="fas fa-user"></i>
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <h1 class="user-display-name">User</h1>
+            <p id="userEmail">user@example.com</p>
         </div>
-        <h1 class="user-display-name">User</h1>
-        <p id="userEmail">user@example.com</p>
-    </div>
 
-    <!-- Profile Grid -->
-    <div class="profile-grid">
-        <!-- Profile Information -->
+        <!-- Profile Grid -->
+        <div class="profile-grid">
+            <!-- Profile Information -->
+            <div class="profile-card">
+                <h2><i class="fas fa-user-circle"></i> Profile Information</h2>
+                <div class="info-row">
+                    <span class="info-label">Display Name</span>
+                    <span class="info-value user-display-name">User</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" id="userEmailInfo">user@example.com</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">User ID</span>
+                    <span class="info-value" id="userId" style="font-size: 0.75rem; font-family: monospace;">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Type</span>
+                    <span class="info-value"><span class="badge badge-primary">Free</span></span>
+                </div>
+            </div>
+
+            <!-- Usage Statistics -->
+            <div class="profile-card">
+                <h2><i class="fas fa-chart-bar"></i> Usage Statistics</h2>
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalAnalysesProfile">0</div>
+                        <div class="stat-label">Analyses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="avgQualityProfile">-</div>
+                        <div class="stat-label">Avg Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalIssuesProfile">0</div>
+                        <div class="stat-label">Issues</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="lastAnalysisProfile">-</div>
+                        <div class="stat-label">Last</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
         <div class="profile-card">
-            <h2><i class="fas fa-user-circle"></i> Profile Information</h2>
-            <div class="info-row">
-                <span class="info-label">Display Name</span>
-                <span class="info-value user-display-name">User</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Email</span>
-                <span class="info-value" id="userEmailInfo">user@example.com</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">User ID</span>
-                <span class="info-value" id="userId" style="font-size: 0.75rem; font-family: monospace;">-</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Account Type</span>
-                <span class="info-value"><span class="badge badge-primary">Free</span></span>
-            </div>
-        </div>
-
-        <!-- Usage Statistics -->
-        <div class="profile-card">
-            <h2><i class="fas fa-chart-bar"></i> Usage Statistics</h2>
-            <div class="stat-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalAnalysesProfile">0</div>
-                    <div class="stat-label">Analyses</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="avgQualityProfile">-</div>
-                    <div class="stat-label">Avg Score</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="totalIssuesProfile">0</div>
-                    <div class="stat-label">Issues</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="lastAnalysisProfile">-</div>
-                    <div class="stat-label">Last</div>
-                </div>
+            <h2><i class="fas fa-cog"></i> Actions</h2>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-arrow-left"></i> Dashboard
+                </button>
+                <button class="btn btn-outline" onclick="clearLocalData()">
+                    <i class="fas fa-trash"></i> Clear Data
+                </button>
+                <button class="btn btn-danger" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Actions -->
-    <div class="profile-card">
-        <h2><i class="fas fa-cog"></i> Actions</h2>
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
-                <i class="fas fa-arrow-left"></i> Dashboard
-            </button>
-            <button class="btn btn-outline" onclick="clearLocalData()">
-                <i class="fas fa-trash"></i> Clear Data
-            </button>
-            <button class="btn btn-danger" onclick="handleLogout()">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--bg-glass); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); animation: modalSlideIn 0.3s ease;">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div
+                    style="width: 60px; height: 60px; margin: 0 auto 1rem; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-sign-out-alt" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: var(--text-primary);">Confirm Logout</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Are you sure you want to logout?</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <button onclick="closeLogoutModal()" class="btn btn-outline" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button onclick="confirmLogout()" class="btn btn-danger" style="flex: 1;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <!-- Footer -->
+    <footer
+        style="background: var(--bg-glass); border-top: 1px solid var(--border); margin-top: 4rem; padding: 2rem 0;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; text-align: center;">
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                &copy; 2026 CodeSentinel AI. Developed by Alisha Shad. All rights reserved.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem;">
+                <a href="/about"
+                    style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;">About</a>
+                <a href="/terms"
+                    style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;">Terms</a>
+                <a href="/privacy"
+                    style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;">Privacy</a>
+            </div>
+        </div>
+    </footer>
 
-<script>
-    // Wait for auth to load
-    setTimeout(() => {
-        if (window.currentUser) {
-            updateProfilePage();
-        } else {
-            // Retry after a delay
-            setTimeout(() => {
-                if (window.currentUser) {
-                    updateProfilePage();
-                }
-            }, 500);
-        }
-    }, 100);
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
 
-    function updateProfilePage() {
-        const user = window.currentUser;
-        if (!user) return;
-
-        console.log('Updating profile with user:', user);
-
-        // Update user info
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('userEmailInfo').textContent = user.email;
-        document.getElementById('userId').textContent = user.uid;
-
-        // Update avatar
-        const avatar = document.getElementById('profileAvatar');
-        if (user.photoURL) {
-            avatar.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-        } else {
-            const initial = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
-            avatar.innerHTML = initial;
-        }
-
-        // Load statistics from Firestore or localStorage
-        loadUserStatistics();
-    }
-
-    async function loadUserStatistics() {
-        console.log('Loading user statistics...');
-
-        try {
-            // Try to load from Firestore first
-            if (window.firebaseDb && window.currentUser) {
-                console.log('Fetching from Firestore for user:', window.currentUser.uid);
-
-                const { collection, query, where, orderBy, getDocs } = window.firestoreExports;
-                const analysesRef = collection(window.firebaseDb, 'analyses');
-                const q = query(
-                    analysesRef,
-                    where('userId', '==', window.currentUser.uid),
-                    orderBy('timestamp', 'desc')
-                );
-
-                const querySnapshot = await getDocs(q);
-                const history = [];
-
-                querySnapshot.forEach((doc) => {
-                    history.push({ id: doc.id, ...doc.data() });
-                });
-
-                console.log('Loaded', history.length, 'analyses from Firestore');
-
-                if (history.length > 0) {
-                    updateStatsFromFirestore(history);
-                    return;
-                } else {
-                    console.log('No analyses found in Firestore');
-                }
+    <style>
+        @keyframes modalSlideIn {
+            from {
+                transform: scale(0.9) translateY(-20px);
+                opacity: 0;
             }
-        } catch (error) {
-            console.error('Error loading from Firestore:', error);
-            window.toast && window.toast.error('Could not load analysis history', 'Error');
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
         }
+    </style>
 
-        // Fallback to localStorage
-        console.log('Falling back to localStorage');
-        const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-        updateStatsFromLocalStorage(history);
-    }
-
-    function updateStatsFromFirestore(history) {
-        const total = history.length;
-        let totalScore = 0;
-        let totalIssues = 0;
-
-        history.forEach(h => {
-            const mlScore = typeof h.mlQuality === 'string' ? parseInt(h.mlQuality) : (h.mlQuality || 0);
-            const aiScore = typeof h.aiQuality === 'string' ? parseInt(h.aiQuality) : (h.aiQuality || 0);
-            totalScore += (mlScore + aiScore) / 2;
-            totalIssues += (h.bugsCount || 0) + (h.securityCount || 0);
-        });
-
-        const avgScore = total > 0 ? (totalScore / total).toFixed(1) : 0;
-        const lastAnalysis = history[0]?.timestamp ? new Date(history[0].timestamp.toDate()).toLocaleDateString() : '-';
-
-        document.getElementById('totalAnalysesProfile').textContent = total;
-        document.getElementById('avgQualityProfile').textContent = total > 0 ? `${avgScore}/10` : '-';
-        document.getElementById('totalIssuesProfile').textContent = totalIssues;
-        document.getElementById('lastAnalysisProfile').textContent = lastAnalysis;
-    }
-
-    function updateStatsFromLocalStorage(history) {
-        const total = history.length;
-        let totalScore = 0;
-        let totalIssues = 0;
-
-        history.forEach(h => {
-            const mlScore = typeof h.mlScore === 'string' ? parseInt(h.mlScore) : (h.mlScore || 0);
-            const aiScore = typeof h.aiScore === 'string' ? parseInt(h.aiScore) : (h.aiScore || 0);
-            totalScore += (mlScore + aiScore) / 2;
-            totalIssues += (h.totalBugs || 0) + (h.totalSecurity || 0);
-        });
-
-        const avgScore = total > 0 ? (totalScore / total).toFixed(1) : 0;
-        const lastAnalysis = history[0]?.timestamp ? new Date(history[0].timestamp).toLocaleDateString() : '-';
-
-        document.getElementById('totalAnalysesProfile').textContent = total;
-        document.getElementById('avgQualityProfile').textContent = total > 0 ? `${avgScore}/10` : '-';
-        document.getElementById('totalIssuesProfile').textContent = totalIssues;
-        document.getElementById('lastAnalysisProfile').textContent = lastAnalysis;
-    }
-
-    function clearLocalData() {
-        if (confirm('Are you sure you want to clear all local data? This will remove your analysis history from this device.')) {
-            localStorage.removeItem('analysisHistory');
-            window.toast.success('Local data cleared successfully', 'Data Cleared');
-            setTimeout(() => location.reload(), 1000);
-        }
-    }
-
-    // Logout handler
-    window.handleLogout = async function () {
-        // Show confirmation dialog
-        const confirmed = confirm('Are you sure you want to logout?');
-
-        if (confirmed && window.firebaseAuth) {
-            try {
-                await window.firebaseAuth.signOut();
-                window.toast.success('Logged out successfully', 'Goodbye!');
+    <script>
+        // Wait for auth to load
+        setTimeout(() => {
+            if (window.currentUser) {
+                updateProfilePage();
+            } else {
+                // Retry after a delay
                 setTimeout(() => {
-                    window.location.href = '/';
+                    if (window.currentUser) {
+                        updateProfilePage();
+                    }
                 }, 500);
+            }
+        }, 100);
+
+        function updateProfilePage() {
+            const user = window.currentUser;
+            if (!user) return;
+
+            console.log('Updating profile with user:', user);
+
+            // Update user info
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userEmailInfo').textContent = user.email;
+            document.getElementById('userId').textContent = user.uid;
+
+            // Update avatar
+            const avatar = document.getElementById('profileAvatar');
+            if (user.photoURL) {
+                avatar.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                const initial = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
+                avatar.innerHTML = initial;
+            }
+
+            // Load statistics from Firestore or localStorage
+            loadUserStatistics();
+        }
+
+        async function loadUserStatistics() {
+            console.log('Loading user statistics...');
+
+            try {
+                // Try to load from Firestore first
+                if (window.firebaseDb && window.currentUser) {
+                    console.log('Fetching from Firestore for user:', window.currentUser.uid);
+
+                    const { collection, query, where, orderBy, getDocs } = window.firestoreExports;
+                    const analysesRef = collection(window.firebaseDb, 'analyses');
+                    const q = query(
+                        analysesRef,
+                        where('userId', '==', window.currentUser.uid),
+                        orderBy('timestamp', 'desc')
+                    );
+
+                    const querySnapshot = await getDocs(q);
+                    const history = [];
+
+                    querySnapshot.forEach((doc) => {
+                        history.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    console.log('Loaded', history.length, 'analyses from Firestore');
+
+                    if (history.length > 0) {
+                        updateStatsFromFirestore(history);
+                        return;
+                    } else {
+                        console.log('No analyses found in Firestore');
+                    }
+                }
             } catch (error) {
-                console.error('Logout error:', error);
-                window.toast.error('Failed to logout', 'Error');
+                console.error('Error loading from Firestore:', error);
+                window.toast && window.toast.error('Could not load analysis history', 'Error');
+            }
+
+            // Fallback to localStorage
+            console.log('Falling back to localStorage');
+            const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+            updateStatsFromLocalStorage(history);
+        }
+
+        function updateStatsFromFirestore(history) {
+            const total = history.length;
+            let totalScore = 0;
+            let totalIssues = 0;
+
+            history.forEach(h => {
+                const mlScore = typeof h.mlQuality === 'string' ? parseInt(h.mlQuality) : (h.mlQuality || 0);
+                const aiScore = typeof h.aiQuality === 'string' ? parseInt(h.aiQuality) : (h.aiQuality || 0);
+                totalScore += (mlScore + aiScore) / 2;
+                totalIssues += (h.bugsCount || 0) + (h.securityCount || 0);
+            });
+
+            const avgScore = total > 0 ? (totalScore / total).toFixed(1) : 0;
+            const lastAnalysis = history[0]?.timestamp ? new Date(history[0].timestamp.toDate()).toLocaleDateString() : '-';
+
+            document.getElementById('totalAnalysesProfile').textContent = total;
+            document.getElementById('avgQualityProfile').textContent = total > 0 ? `${avgScore}/10` : '-';
+            document.getElementById('totalIssuesProfile').textContent = totalIssues;
+            document.getElementById('lastAnalysisProfile').textContent = lastAnalysis;
+        }
+
+        function updateStatsFromLocalStorage(history) {
+            const total = history.length;
+            let totalScore = 0;
+            let totalIssues = 0;
+
+            history.forEach(h => {
+                const mlScore = typeof h.mlScore === 'string' ? parseInt(h.mlScore) : (h.mlScore || 0);
+                const aiScore = typeof h.aiScore === 'string' ? parseInt(h.aiScore) : (h.aiScore || 0);
+                totalScore += (mlScore + aiScore) / 2;
+                totalIssues += (h.totalBugs || 0) + (h.totalSecurity || 0);
+            });
+
+            const avgScore = total > 0 ? (totalScore / total).toFixed(1) : 0;
+            const lastAnalysis = history[0]?.timestamp ? new Date(history[0].timestamp).toLocaleDateString() : '-';
+
+            document.getElementById('totalAnalysesProfile').textContent = total;
+            document.getElementById('avgQualityProfile').textContent = total > 0 ? `${avgScore}/10` : '-';
+            document.getElementById('totalIssuesProfile').textContent = totalIssues;
+            document.getElementById('lastAnalysisProfile').textContent = lastAnalysis;
+        }
+
+        function clearLocalData() {
+            if (confirm('Are you sure you want to clear all local data? This will remove your analysis history from this device.')) {
+                localStorage.removeItem('analysisHistory');
+                window.toast.success('Local data cleared successfully', 'Data Cleared');
+                setTimeout(() => location.reload(), 1000);
             }
         }
-    };
-</script>
+
+        // Show logout modal
+        window.handleLogout = function () {
+            const modal = document.getElementById('logoutModal');
+            modal.style.display = 'flex';
+        };
+
+        // Close logout modal
+        window.closeLogoutModal = function () {
+            const modal = document.getElementById('logoutModal');
+            modal.style.display = 'none';
+        };
+
+        // Confirm logout
+        window.confirmLogout = async function () {
+            if (window.firebaseAuth) {
+                try {
+                    // Close modal and show loading
+                    closeLogoutModal();
+
+                    // Show loading spinner
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.id = 'logoutLoadingSpinner';
+                    loadingDiv.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;';
+                    loadingDiv.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; margin: 0 auto 1.5rem; border: 4px solid rgba(239, 68, 68, 0.3); border-top-color: #ef4444; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="color: white; font-size: 1.1rem; font-weight: 600; margin: 0;">Logging out...</p>
+                            <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 0.5rem;">Please wait</p>
+                        </div>
+                    `;
+                    document.body.appendChild(loadingDiv);
+
+                    window.toast.info('Signing you out...', 'Please wait');
+
+                    await window.firebaseAuth.signOut();
+
+                    // Remove loading spinner
+                    if (loadingDiv && loadingDiv.parentNode) {
+                        loadingDiv.parentNode.removeChild(loadingDiv);
+                    }
+
+                    window.toast.success('Logged out successfully', 'Goodbye!');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 500);
+                } catch (error) {
+                    // Remove loading spinner
+                    const loadingDiv = document.getElementById('logoutLoadingSpinner');
+                    if (loadingDiv && loadingDiv.parentNode) {
+                        loadingDiv.parentNode.removeChild(loadingDiv);
+                    }
+
+                    console.error('Logout error:', error);
+                    window.toast.error('Failed to logout', 'Error');
+                    closeLogoutModal();
+                }
+            }
+        };
+
+        // Close modal when clicking outside
+        document.getElementById('logoutModal')?.addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeLogoutModal();
+            }
+        });
+    </script>
 </body>
 
 </html>
