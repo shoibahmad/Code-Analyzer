@@ -264,14 +264,9 @@
             margin-top: 0.5rem;
         }
 
-        /* Mobile Menu */
+        /* Mobile Menu - Removed */
         .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 1.5rem;
-            cursor: pointer;
+            display: none !important;
         }
 
         /* Responsive */
@@ -291,27 +286,36 @@
             }
 
             .header {
-                padding: 1rem;
+                padding: 1.5rem 1rem;
+                min-height: 80px;
             }
 
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: var(--bg-secondary);
-                flex-direction: column;
-                padding: 1rem;
-                border-top: 1px solid var(--border);
+            .header-content {
+                flex-wrap: wrap;
+                gap: 1rem;
             }
 
-            .nav-links.active {
+            .logo-section {
+                flex: 1;
+            }
+
+            .logo-text {
+                font-size: 1.25rem;
+            }
+
+            .header-actions {
                 display: flex;
+                gap: 0.75rem;
+            }
+
+            .btn-profile,
+            .btn-logout {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
             }
 
             .mobile-menu-btn {
-                display: block;
+                display: none !important;
             }
 
             .hero {
@@ -722,15 +726,11 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <!-- Left: Logo and User Email -->
+            <!-- Left: Logo -->
             <div class="logo-section">
                 <div class="logo-main">
                     <i class="fas fa-shield-alt"></i>
                     <span class="logo-text">CodeSentinel AI</span>
-                </div>
-                <div class="user-email-display" id="headerUserEmail">
-                    <span class="logged-in-text">Logged in as</span>
-                    <span id="headerEmailText" class="email-text">Loading...</span>
                 </div>
             </div>
 
@@ -746,10 +746,6 @@
                 </button>
             </div>
         </div>
-
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-            <i class="fas fa-bars"></i>
-        </button>
     </header>
 
     <!-- Main Content -->
@@ -1294,6 +1290,86 @@
                 closeLogoutModal();
             }
         });
+
+        // Add green border feedback when content is pasted
+        function addGreenBorderFeedback() {
+            const codeInput = document.getElementById('codeInput');
+            const githubRepoUrl = document.getElementById('githubRepoUrl');
+
+            // Function to add green border
+            function addGreenBorder(element) {
+                if (element && element.value.trim().length > 0) {
+                    element.style.borderColor = '#10b981';
+                    element.style.borderWidth = '2px';
+                    element.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+
+                    // Add a subtle animation
+                    element.style.transition = 'all 0.3s ease';
+                }
+            }
+
+            // Function to remove green border when empty
+            function removeGreenBorder(element) {
+                if (element && element.value.trim().length === 0) {
+                    element.style.borderColor = '';
+                    element.style.borderWidth = '';
+                    element.style.boxShadow = '';
+                }
+            }
+
+            // Code Input - on paste and input
+            if (codeInput) {
+                codeInput.addEventListener('paste', function () {
+                    setTimeout(() => addGreenBorder(this), 10);
+                });
+
+                codeInput.addEventListener('input', function () {
+                    if (this.value.trim().length > 0) {
+                        addGreenBorder(this);
+                    } else {
+                        removeGreenBorder(this);
+                    }
+                });
+            }
+
+            // GitHub Repo URL - on paste and input
+            if (githubRepoUrl) {
+                githubRepoUrl.addEventListener('paste', function () {
+                    setTimeout(() => addGreenBorder(this), 10);
+                });
+
+                githubRepoUrl.addEventListener('input', function () {
+                    if (this.value.trim().length > 0) {
+                        addGreenBorder(this);
+                    } else {
+                        removeGreenBorder(this);
+                    }
+                });
+
+                // Also validate GitHub URL format
+                githubRepoUrl.addEventListener('blur', function () {
+                    const value = this.value.trim();
+                    if (value.length > 0) {
+                        // Check if it's a valid GitHub URL
+                        if (value.includes('github.com')) {
+                            addGreenBorder(this);
+                        } else {
+                            // Show warning border for invalid URL
+                            this.style.borderColor = '#f59e0b';
+                            this.style.borderWidth = '2px';
+                            this.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize green border feedback
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', addGreenBorderFeedback);
+        } else {
+            addGreenBorderFeedback();
+        }
     </script>
 </body>
 

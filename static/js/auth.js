@@ -151,13 +151,36 @@ window.updateUserName = function () {
 
         // Function to update profile email
         const updateProfileEmail = () => {
+            console.log('Attempting to update profile email...');
             const profileEmail = document.getElementById('userEmail');
-            if (profileEmail && window.currentUser.email) {
+            const profileEmailInfo = document.getElementById('userEmailInfo');
+            let updated = false;
+
+            console.log('Email update check:', {
+                hasUserEmail: !!profileEmail,
+                hasUserEmailInfo: !!profileEmailInfo,
+                hasCurrentUser: !!window.currentUser,
+                email: window.currentUser?.email
+            });
+
+            if (profileEmail && window.currentUser && window.currentUser.email) {
                 profileEmail.textContent = window.currentUser.email;
-                console.log('✅ Profile email updated:', window.currentUser.email);
-                return true;
+                profileEmail.style.color = 'rgba(255, 255, 255, 0.95)';
+                console.log('✅ Updated #userEmail to:', window.currentUser.email);
+                updated = true;
             }
-            return false;
+
+            if (profileEmailInfo && window.currentUser && window.currentUser.email) {
+                profileEmailInfo.textContent = window.currentUser.email;
+                console.log('✅ Updated #userEmailInfo to:', window.currentUser.email);
+                updated = true;
+            }
+
+            if (!updated) {
+                console.warn('⚠️ Could not update profile email - missing elements or user data');
+            }
+
+            return updated;
         };
 
         // Function to update profile avatar
@@ -442,9 +465,17 @@ window.saveAnalysisToFirestore = async (code, language, analysisData) => {
 };
 
 // Initialize Firestore collections (call this once to create collections)
+let firestoreInitialized = false;
+
 window.initializeFirestoreCollections = async () => {
     if (!window.currentUser) {
         console.log('Please log in first');
+        return;
+    }
+
+    // Prevent multiple initializations
+    if (firestoreInitialized) {
+        console.log('Firestore already initialized, skipping...');
         return;
     }
 
@@ -462,19 +493,28 @@ window.initializeFirestoreCollections = async () => {
 
         console.log('✅ Users collection created/updated');
 
-        // Create a test analysis document
-        await addDoc(collection(db, 'analyses'), {
-            userId: window.currentUser.uid,
-            language: 'javascript',
-            codeSnippet: '// Test analysis',
-            mlQuality: 'N/A',
-            aiQuality: 'N/A',
-            bugsCount: 0,
-            securityCount: 0,
-            timestamp: serverTimestamp(),
-            analysisTime: 0,
-            isTest: true
-        });
+        // Create a test analysis document ONLY if none exist
+        const analysesRef = collection(db, 'analyses');
+        const q = query(analysesRef, where('userId', '==', window.currentUser.uid), where('isTest', '==', true));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            await addDoc(collection(db, 'analyses'), {
+                userId: window.currentUser.uid,
+                language: 'javascript',
+                codeSnippet: '// Test analysis',
+                mlQuality: 'N/A',
+                aiQuality: 'N/A',
+                bugsCount: 0,
+                securityCount: 0,
+                timestamp: serverTimestamp(),
+                analysisTime: 0,
+                isTest: true
+            });
+            console.log('✅ Test analysis document created');
+        } else {
+            console.log('✅ Test analysis already exists, skipping');
+        }
 
         console.log('✅ Analyses collection created');
         console.log('✅ Firestore collections initialized successfully!');
@@ -505,7 +545,6 @@ window.initializeFirestoreCollections = async () => {
 };
 
 // Auto-initialize on first login
-let firestoreInitialized = false;
 window.autoInitializeFirestore = async () => {
     if (window.currentUser && !firestoreInitialized) {
         firestoreInitialized = true;

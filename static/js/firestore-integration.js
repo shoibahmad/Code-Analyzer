@@ -86,16 +86,24 @@ window.features.saveToHistory = function (code, language, analysisData) {
 // Update dashboard (tries Firestore first, falls back to localStorage)
 window.features.updateDashboard = function () {
     if (window.loadUserHistory) {
-        window.loadUserHistory().then(firestoreHistory => {
-            if (firestoreHistory && firestoreHistory.length > 0) {
-                window.features.updateDashboardWithFirestore(firestoreHistory);
-            } else {
-                // Fallback to localStorage
+        try {
+            window.loadUserHistory().then(firestoreHistory => {
+                if (firestoreHistory && firestoreHistory.length > 0) {
+                    window.features.updateDashboardWithFirestore(firestoreHistory);
+                } else {
+                    // Fallback to localStorage
+                    updateDashboardFromLocalStorage();
+                }
+            }).catch((error) => {
+                // Silently fallback to localStorage on any error
+                console.log('Using localStorage for dashboard data');
                 updateDashboardFromLocalStorage();
-            }
-        }).catch(() => {
+            });
+        } catch (error) {
+            // Catch synchronous errors
+            console.log('Using localStorage for dashboard data');
             updateDashboardFromLocalStorage();
-        });
+        }
     } else {
         updateDashboardFromLocalStorage();
     }

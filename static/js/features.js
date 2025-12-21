@@ -626,6 +626,30 @@ function saveToHistory(code, language, results) {
     updateDashboard();
 }
 
+// Show History Modal Function
+function showHistoryModal() {
+    const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+
+    if (history.length === 0) {
+        if (window.toast) {
+            window.toast.info('No analysis history yet. Start by analyzing some code!', 'History');
+        } else {
+            alert('No analysis history yet. Start by analyzing some code!');
+        }
+        return;
+    }
+
+    // For now, show a toast with history count
+    // In the future, this could open a modal with full history
+    if (window.toast) {
+        window.toast.success(`You have ${history.length} analyses in your history`, 'Analysis History');
+    } else {
+        alert(`You have ${history.length} analyses in your history`);
+    }
+
+    console.log('Analysis History:', history);
+}
+
 // Initialize Dashboard on Load
 document.addEventListener('DOMContentLoaded', function () {
     updateDashboard();

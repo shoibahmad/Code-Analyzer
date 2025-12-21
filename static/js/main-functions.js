@@ -561,6 +561,17 @@ async function analyzeGithubRepo() {
                                         </ul>
                                     </div>
                                 ` : ''}
+
+                                ${file.ml_analysis.improvements && file.ml_analysis.improvements.length > 0 ? `
+                                    <div class="mt-2">
+                                        <strong style="color: var(--primary);"><i class="fas fa-lightbulb"></i> Suggestions:</strong>
+                                        <ul class="mt-1">
+                                            ${file.ml_analysis.improvements.map(imp => `
+                                                <li class="text-secondary">${imp.suggestion || imp.description || imp}</li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
                             </div>
 
                             <!-- AI Analysis -->
@@ -594,6 +605,17 @@ async function analyzeGithubRepo() {
                                         <ul class="mt-1">
                                             ${file.ai_analysis.security.map(sec => `
                                                 <li class="text-secondary">${sec.description || sec.issue || sec}</li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+
+                                ${file.ai_analysis.improvements && file.ai_analysis.improvements.length > 0 ? `
+                                    <div class="mt-2">
+                                        <strong style="color: var(--secondary);"><i class="fas fa-magic"></i> AI Recommendations:</strong>
+                                        <ul class="mt-1">
+                                            ${file.ai_analysis.improvements.map(imp => `
+                                                <li class="text-secondary">${imp.suggestion || imp.description || imp}</li>
                                             `).join('')}
                                         </ul>
                                     </div>

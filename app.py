@@ -164,7 +164,7 @@ def get_gemini_analysis(code, language):
                 analysis = json.loads(fixed_text)
             except:
                 # If still fails, create a basic structure
-                app.logger.error(f"JSON Parse Error after fixes: {str(json_err)[:200]}")
+                app.logger.warning(f"Using fallback analysis structure due to JSON parse error")
                 
                 # Extract what we can using regex
                 quality_match = re.search(r'"overall_quality"\s*:\s*"([^"]+)"', response_text)
@@ -474,8 +474,10 @@ def analyze_github_repo():
                 # Count issues
                 ml_bugs = len(ml_result.get('bugs', []))
                 ml_security = len(ml_result.get('security', []))
+                ml_improvements = len(ml_result.get('improvements', []))
                 ai_bugs = len(ai_result.get('bugs', [])) if ai_result and 'bugs' in ai_result else 0
                 ai_security = len(ai_result.get('security', [])) if ai_result and 'security' in ai_result else 0
+                ai_improvements = len(ai_result.get('improvements', [])) if ai_result and 'improvements' in ai_result else 0
                 
                 total_bugs += ml_bugs + ai_bugs
                 total_security_issues += ml_security + ai_security
@@ -488,15 +490,19 @@ def analyze_github_repo():
                         'quality': ml_result.get('overall_quality', 'N/A'),
                         'bugs_count': ml_bugs,
                         'security_count': ml_security,
+                        'improvements_count': ml_improvements,
                         'bugs': ml_result.get('bugs', [])[:3],  # First 3 bugs
-                        'security': ml_result.get('security', [])[:3]  # First 3 security issues
+                        'security': ml_result.get('security', [])[:3],  # First 3 security issues
+                        'improvements': ml_result.get('improvements', [])[:3]  # First 3 improvements
                     },
                     'ai_analysis': {
                         'quality': ai_result.get('overall_quality', 'N/A') if ai_result else 'N/A',
                         'bugs_count': ai_bugs,
                         'security_count': ai_security,
+                        'improvements_count': ai_improvements,
                         'bugs': ai_result.get('bugs', [])[:3] if ai_result and 'bugs' in ai_result else [],
-                        'security': ai_result.get('security', [])[:3] if ai_result and 'security' in ai_result else []
+                        'security': ai_result.get('security', [])[:3] if ai_result and 'security' in ai_result else [],
+                        'improvements': ai_result.get('improvements', [])[:3] if ai_result and 'improvements' in ai_result else []
                     }
                 })
                 
