@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - AI Code Review</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <style>
+        .page-header {
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(88, 28, 135, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
+        }
+
+        .page-header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .content-section {
+            max-width: 900px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .info-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .team-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .team-card {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
+        }
+
+        .member-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <a href="/dashboard" class="btn btn-outline back-link">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <header class="page-header">
+        <h1>About the Project</h1>
+        <p class="text-secondary text-lg">Revolutionizing Code Quality with Artificial Intelligence</p>
+    </header>
+
+    <div class="content-section">
+        <div class="info-card">
+            <h2 class="mb-4"><i class="fas fa-rocket text-primary"></i> Our Mission</h2>
+            <p class="text-secondary mb-4" style="line-height: 1.8;">
+                In the rapidly evolving landscape of software development, code quality and security are paramount.
+                The AI Code Review Assistant was born from a vision to democratize elite-level code analysis.
+                We aim to empower developers of all skill levels—from students to industry veterans—with
+                instant, intelligent, and actionable feedback on their code.
+            </p>
+            <p class="text-secondary" style="line-height: 1.8;">
+                By combining traditional Machine Learning (CodeBERT) with state-of-the-art Generative AI (Google
+                Gemini),
+                we provide a dual-layer analysis system that catches syntax errors, logic bugs, security
+                vulnerabilities,
+                and offers architectural improvements in seconds.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h2 class="mb-4"><i class="fas fa-layer-group text-success"></i> Technology Stack</h2>
+            <div class="grid-2-col gap-3">
+                <div class="p-3 border-white-10 rounded">
+                    <h3 class="h5 text-primary mb-2">Frontend</h3>
+                    <ul class="text-muted text-sm space-y-2">
+                        <li>• Modern HTML5 & CSS3</li>
+                        <li>• Glassmorphism UI Design</li>
+                        <li>• Vanilla JavaScript (ES6+)</li>
+                        <li>• Chart.js Visualization</li>
+                    </ul>
+                </div>
+                <div class="p-3 border-white-10 rounded">
+                    <h3 class="h5 text-secondary mb-2">Backend & AI</h3>
+                    <ul class="text-muted text-sm space-y-2">
+                        <li>• Python Flask Framework</li>
+                        <li>• Microsoft CodeBERT (ML)</li>
+                        <li>• Google Gemini 2.0 (GenAI)</li>
+                        <li>• Firebase Authentication</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-center mb-5">Meet the Developer</h2>
+        <div class="team-section">
+            <div class="team-card">
+                <div class="member-avatar">
+                    <i class="fas fa-user-code"></i>
+                </div>
+                <h3 class="h3 mb-2">Alisha Shad</h3>
+                <div class="badge badge-primary mb-3">Lead Developer</div>
+
+                <div class="text-left mx-auto" style="max-width: 250px;">
+                    <div class="flex items-center gap-3 mb-2 text-muted">
+                        <i class="fas fa-graduation-cap w-5"></i>
+                        <span>MCA 2nd Year</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-2 text-muted">
+                        <i class="fas fa-clock w-5"></i>
+                        <span>Batch 2024 - 2026</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-2 text-muted">
+                        <i class="fas fa-university w-5"></i>
+                        <span>Department of Computer Applications</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-center gap-3">
+                    <a href="https://github.com/alishashad" target="_blank" rel="noopener noreferrer"
+                        class="btn btn-outline btn-icon rounded-full"><i class="fab fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/alisha-shad-983456380/" target="_blank"
+                        rel="noopener noreferrer" class="btn btn-outline btn-icon rounded-full"><i
+                            class="fab fa-linkedin"></i></a>
+                    <a href="mailto:alishasshad@gmail.com" class="btn btn-outline btn-icon rounded-full"><i
+                            class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer
+        style="text-align: center; padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem; color: var(--text-muted);">
+        <p>© 2025 AI Code Review Assistant. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

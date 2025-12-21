@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - AI Code Review</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <style>
+        .page-header {
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(88, 28, 135, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
+        }
+
+        .page-header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .content-section {
+            max-width: 900px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .policy-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 0.9rem;
+        }
+
+        .policy-item {
+            margin-bottom: 2rem;
+        }
+
+        .policy-item h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .policy-item p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .policy-item ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .policy-item li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <a href="/dashboard" class="btn btn-outline back-link">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <header class="page-header">
+        <h1>Privacy Policy</h1>
+        <p class="text-secondary text-lg">Your Data Security is Our Top Priority</p>
+    </header>
+
+    <div class="content-section">
+        <div class="last-updated">Last Updated: December 21, 2025</div>
+
+        <div class="policy-card">
+            <div class="policy-item">
+                <h3>1. Information We Collect</h3>
+                <p>
+                    When you use our AI Code Review Assistant, we collect information to provide you with the best
+                    analysis experience. This includes:
+                </p>
+                <ul>
+                    <li><strong>Authentication Data:</strong> Email address and profile information provided via Google
+                        or GitHub login.</li>
+                    <li><strong>Code Snippets:</strong> Code content you knowingly upload or paste for analysis.</li>
+                    <li><strong>Usage Data:</strong> Anonymous statistics about how you interact with our features
+                        (e.g., number of analyses, preferred languages).</li>
+                </ul>
+            </div>
+
+            <div class="policy-item">
+                <h3>2. How We Use Your Code</h3>
+                <p>
+                    We understand that your code is your intellectual property. Our handling of your code is strict and
+                    transparent:
+                </p>
+                <ul>
+                    <li><strong>Ephemeral Analysis:</strong> Code snippets sent for analysis are processed in real-time
+                        by our Machine Learning models and the Google Gemini API.</li>
+                    <li><strong>No Long-Term Retraining:</strong> We do NOT use your private code snippets to train our
+                        public models or the Google Gemini model.</li>
+                    <li><strong>History Storage:</strong> Your analysis history is stored locally in your browser's
+                        LocalStorage for your convenience. Minimal metadata may be stored on our servers for dashboard
+                        statistics.</li>
+                </ul>
+            </div>
+
+            <div class="policy-item">
+                <h3>3. Third-Party Services</h3>
+                <p>
+                    We utilize trusted third-party services to power our application:
+                </p>
+                <ul>
+                    <li><strong>Firebase (Google):</strong> For secure authentication and hosting.</li>
+                    <li><strong>Google Gemini API:</strong> For providing Generative AI code analysis.</li>
+                    <li><strong>GitHub API:</strong> For fetching repository details when you use the GitHub Analyzer.
+                    </li>
+                </ul>
+                <p>
+                    Each of these providers has their own privacy policies, and data shared with them is governed by
+                    their respective terms.
+                </p>
+            </div>
+
+            <div class="policy-item">
+                <h3>4. Data Security</h3>
+                <p>
+                    We implement industry-standard security measures to protect your data. All communication between
+                    your browser and our servers is encrypted via SSL/TLS. We do not store passwords or authentication
+                    tokens on our servers; these are handled securely by Firebase.
+                </p>
+            </div>
+
+            <div class="policy-item">
+                <h3>5. Contact Us</h3>
+                <p>
+                    If you have any questions about this Privacy Policy or our data practices, please contact the
+                    developer team:
+                </p>
+                <div class="mt-3 p-3 bg-white-5 rounded">
+                    <strong>Alisha Shad</strong><br>
+                    <span class="text-muted">Department of Computer Applications</span><br>
+                    <span class="text-muted">Batch 2024 - 2026</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer
+        style="text-align: center; padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem; color: var(--text-muted);">
+        <p>© 2025 AI Code Review Assistant. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

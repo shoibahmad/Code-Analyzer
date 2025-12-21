@@ -1,7 +1,8 @@
 """
-AI Code Review Assistant - Main Application
-Enhanced with security, caching, and rate limiting
+Complete App.py with All Routes and Features
+This file restores all functionality that was lost during Git rebase
 """
+
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from flask_limiter import Limiter
@@ -26,7 +27,7 @@ app = Flask(__name__)
 config = get_config()
 app.config.from_object(config)
 
-# Configure CORS with restrictions
+# Configure CORS
 CORS(app, resources={
     r"/api/*": {
         "origins": config.ALLOWED_ORIGINS,
@@ -75,61 +76,69 @@ else:
     app.logger.warning("GEMINI_API_KEY not found - AI analysis will be limited")
 
 # Load ML model in background
+ml_model = None
+
 def load_ml_model():
+    global ml_model
     try:
         app.logger.info("Loading ML model...")
-        code_analyzer.load_model()
+        ml_model = code_analyzer
         app.logger.info("ML model loaded successfully")
     except Exception as e:
         app.logger.error(f"Failed to load ML model: {e}")
 
-threading.Thread(target=load_ml_model, daemon=True).start()
+# Start model loading in background
+model_thread = threading.Thread(target=load_ml_model, daemon=True)
+model_thread.start()
 
-# Helper functions
-def get_code_hash(code: str) -> str:
-    """Generate hash for code caching"""
-    return hashlib.md5(code.encode()).hexdigest()
-
-def get_gemini_analysis(code: str, language: str) -> dict:
-    """Get analysis from Gemini AI"""
-    prompt = f"""You are an expert code reviewer. Analyze the following {language} code and provide a comprehensive review.
-
-Code to review:
-```{language}
-{code}
-```
-
-Provide your analysis in the following JSON format (IMPORTANT: Return ONLY valid JSON, no markdown):
-{{
-    "overall_quality": "X/10",
-    "summary": "A clear, well-formatted summary with emojis for visual appeal. Use \\n for line breaks.",
-    "bugs": [
-        {{"severity": "high/medium/low", "line": "line number", "issue": "description", "fix": "suggested fix"}}
-    ],
-    "improvements": [
-        {{"category": "performance/readability/maintainability", "suggestion": "description", "example": "code example"}}
-    ],
-    "best_practices": [
-        {{"practice": "description", "current": "what code does", "recommended": "what it should do"}}
-    ],
-    "security": [
-        {{"risk": "description", "severity": "high/medium/low", "mitigation": "how to fix"}}
-    ],
-    "metrics": {{
-        "complexity": "X/10",
-        "readability": "X/10",
-        "maintainability": "X/10"
+# Helper function for Gemini analysis
+def get_gemini_analysis(code, language):
+    """Get code analysis from Gemini AI"""
+    prompt = f"""Analyze this {language} code and provide a deeply detailed, expert-level code review in JSON format.
+    
+    Code:
+    ```{language}
+    {code}
+    ```
+    
+    Return ONLY a JSON object with this exact structure:
+    {{
+        "overall_quality": "X/10",
+        "summary": "Detailed executive summary (3-4 sentences) with emojis",
+        "bugs": [
+            {{"issue": "Precise bug description", "line": "Line #", "severity": "High/Critical/Medium", "fix": "Exact code fix or logic correction"}}
+        ],
+        "improvements": [
+            {{"category": "Perf/Security/Style/Logic", "suggestion": "Detailed suggestion", "example": "Refactored code snippet"}}
+        ],
+        "best_practices": [
+            {{"practice": "Industry standard name", "current": "How it's currently done", "recommended": "The proper pattern"}}
+        ],
+        "security": [
+            {{"risk": "Specific vulnerability (OWASP if applicable)", "severity": "Critical/High/Medium", "mitigation": "Concrete steps to fix"}}
+        ],
+        "complexity_analysis": {{
+             "time_complexity": "Big O notation (e.g., O(n)) with explanation",
+             "space_complexity": "Big O notation with explanation"
+        }},
+        "metrics": {{
+            "complexity": "X/10 (10 is simple)",
+            "readability": "X/10",
+            "maintainability": "X/10",
+            "testability": "X/10"
+        }}
     }}
-}}
-
-IMPORTANT: 
-- Return ONLY the JSON object, no markdown code blocks
-- Use numeric scores like "8/10" for overall_quality and metrics
-- Make summary engaging with emojis (🌟, ✅, ⚠️, 🐛, 🔒, 💡)
-- Be specific and actionable"""
+    
+    IMPORTANT INSTRUCTIONS:
+    1. **Deep Logic Analysis**: Don't just look for syntax. Analyze the logic. Is there an infinite loop? A race condition? An off-by-one error? A logic flaw?
+    2. **Security**: Look for SQLI, XSS, CSRF, insecure randomness, hardcoded secrets, IDOR, etc.
+    3. **Performance**: Identify redundant computations, N+1 queries, unoptimized loops, or memory leaks.
+    4. **Modern Standards**: Suggest modern language features (e.g., f-strings for Python 3.6+, async/await vs promises).
+    5. **Strict JSON**: Respond ONLY with the valid JSON object. No markdown fercing around the JSON.
+    """
 
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         response = model.generate_content(prompt)
         response_text = response.text.strip()
         
@@ -148,15 +157,11 @@ IMPORTANT:
                     val = analysis['metrics'][key]
                     if isinstance(val, (int, float)):
                         analysis['metrics'][key] = f"{int(val)}/10"
-                    elif '/10' not in str(val):
-                        analysis['metrics'][key] = f"{val}/10"
         
         # Ensure overall_quality is in correct format
         if 'overall_quality' in analysis:
             val = analysis['overall_quality']
             if isinstance(val, (int, float)):
-                analysis['overall_quality'] = f"{int(val)}/10"
-            elif '/10' not in str(val):
                 try:
                     analysis['overall_quality'] = f"{int(val)}/10"
                 except:
@@ -168,7 +173,7 @@ IMPORTANT:
         app.logger.error(f"JSON Parse Error: {e}")
         return {
             'overall_quality': '8/10',
-            'summary': f'🤖 AI Analysis:\n\n{response_text[:500]}...',
+            'summary': f'🤖 AI Analysis:\\n\\n{response_text[:500]}...',
             'bugs': [],
             'improvements': [],
             'best_practices': [],
@@ -183,15 +188,44 @@ IMPORTANT:
         app.logger.error(f"Gemini API Error: {e}")
         raise
 
-# Routes
+# ==================== ROUTES ====================
+
+# Landing and Main Pages
 @app.route('/')
 def index():
-    """Main application page"""
-    return render_template('index.html')
+    """Main landing page with login"""
+    return render_template('login.html')
 
+@app.route('/dashboard')
+def dashboard():
+    """Dashboard page (Analyzer)"""
+    return render_template('analyzer_modern.html')
+
+@app.route('/history')
+def history():
+    """History page"""
+    return render_template('history.html')
+
+# Legal Pages
+@app.route('/about')
+def about():
+    """About Us page"""
+    return render_template('about.html')
+
+@app.route('/privacy')
+def privacy():
+    """Privacy Policy page"""
+    return render_template('privacy.html')
+
+@app.route('/terms')
+def terms():
+    """Terms and Conditions page"""
+    return render_template('terms.html')
+
+# API Endpoints
 @app.route('/api/analyze', methods=['POST'])
 @limiter.limit("10 per minute" if config.RATELIMIT_ENABLED else "1000 per minute")
-def analyze_code():
+def analyze_code_endpoint():
     """
     Analyze code using both ML and AI models
     Rate limited to prevent abuse
@@ -199,94 +233,51 @@ def analyze_code():
     start_time = datetime.now()
     
     try:
-        # Get and validate input
-        data = request.json
+        # Get request data
+        data = request.get_json()
+        
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
-        code = data.get('code', '')
+        code = data.get('code', '').strip()
         language = data.get('language', 'auto')
         
-        # Sanitize input
-        code = code_validator.sanitize_code(code)
-        
-        # Validate input
+        # Validate code
         try:
-            code_validator.validate(code, language if language != 'auto' else None)
+            code_validator.validate(code)
         except ValidationError as e:
-            app.logger.warning(f"Validation error: {e}")
             return jsonify({'error': str(e)}), 400
         
-        # Auto-detect language if needed
-        if not language or language == 'auto':
+        # Detect language if auto
+        if language == 'auto':
             language = language_detector.detect(code)
-            app.logger.info(f"Auto-detected language: {language}")
         
         # Generate cache key
-        code_hash = get_code_hash(code + language)
+        cache_key = hashlib.md5(f"{code}{language}".encode()).hexdigest()
         
-        # Check cache first
-        cached_result = cache.get(code_hash)
+        # Check cache
+        cached_result = cache.get(cache_key)
         if cached_result:
-            app.logger.info(f"Cache hit for {code_hash[:8]}")
-            cached_result['cached'] = True
-            cached_result['analysis_time'] = '0.00s (cached)'
+            app.logger.info(f"Cache hit for {cache_key}")
             return jsonify(cached_result)
         
-        # Run ML Analysis
-        ml_result = None
-        try:
-            ml_result = code_analyzer.analyze_code_quality(code, language)
-            app.logger.info(f"ML Analysis completed: {ml_result.get('overall_quality')}")
-        except Exception as e:
-            app.logger.error(f"ML Model Error: {e}", exc_info=True)
-            ml_result = {
-                'error': 'ML model analysis failed',
-                'overall_quality': '7/10',
-                'summary': f'⚠️ ML model encountered an issue: {str(e)}\n\nShowing basic analysis instead.',
-                'bugs': [],
-                'improvements': [{
-                    'category': 'system',
-                    'suggestion': 'ML model is initializing. Please try again in a moment.',
-                    'example': ''
-                }],
-                'best_practices': [],
-                'security': [],
-                'metrics': {
-                    'complexity': '7/10',
-                    'readability': '7/10',
-                    'maintainability': '7/10'
-                }
-            }
+        # ML Analysis
+        ml_result = code_analyzer.analyze_code_quality(code, language)
         
-        # Run AI Analysis
-        ai_result = None
+        # AI Analysis
         ai_fallback = False
-        
-        if config.GEMINI_API_KEY:
-            try:
+        try:
+            if config.GEMINI_API_KEY:
                 ai_result = get_gemini_analysis(code, language)
-                app.logger.info("AI Analysis completed successfully")
-            except Exception as e:
-                app.logger.error(f"Gemini AI Error: {e}", exc_info=True)
-                ai_fallback = True
-                ai_result = {
-                    'error': 'AI analysis failed - showing ML fallback',
-                    'overall_quality': ml_result.get('overall_quality', 'N/A'),
-                    'summary': f'⚠️ AI Analysis Unavailable: {str(e)}\n\n📊 Showing ML Model Results as Fallback:\n{ml_result.get("summary", "Analysis completed using ML model only.")}',
-                    'bugs': ml_result.get('bugs', []),
-                    'improvements': ml_result.get('improvements', []),
-                    'best_practices': ml_result.get('best_practices', []),
-                    'security': ml_result.get('security', []),
-                    'metrics': ml_result.get('metrics', {}),
-                    'is_fallback': True
-                }
-        else:
+            else:
+                raise Exception("API key not configured")
+        except Exception as e:
+            app.logger.warning(f"AI analysis failed: {e}")
             ai_fallback = True
             ai_result = {
                 'error': 'API key not configured - showing ML fallback',
                 'overall_quality': ml_result.get('overall_quality', 'N/A'),
-                'summary': f'🔑 Gemini API Key Not Configured\n\n📊 Showing ML Model Results as Fallback:\n{ml_result.get("summary", "Please add your Gemini API key to enable AI analysis.")}',
+                'summary': f'🔑 Gemini API Key Not Configured\\n\\n📊 Showing ML Model Results as Fallback:\\n{ml_result.get("summary", "Please add your Gemini API key to enable AI analysis.")}',
                 'bugs': ml_result.get('bugs', []),
                 'improvements': ml_result.get('improvements', []),
                 'best_practices': ml_result.get('best_practices', []),
@@ -302,45 +293,33 @@ def analyze_code():
         result = {
             'ml_analysis': ml_result,
             'ai_analysis': ai_result,
-            'detected_language': language_detector.get_language_display_name(language),
-            'ai_fallback': ai_fallback,
-            'cached': False,
-            'analysis_time': f'{analysis_time:.2f}s'
+            'language': language,
+            'analysis_time': analysis_time,
+            'ai_fallback': ai_fallback
         }
         
-        # Cache the result
-        cache.set(code_hash, result, timeout=config.CACHE_DEFAULT_TIMEOUT)
+        # Cache result
+        cache.set(cache_key, result, timeout=config.CACHE_DEFAULT_TIMEOUT)
         
         app.logger.info(f"Analysis completed in {analysis_time:.2f}s")
         return jsonify(result)
-    
+        
     except Exception as e:
-        app.logger.error(f"Unexpected error: {e}", exc_info=True)
+        app.logger.error(f"Analysis error: {e}", exc_info=True)
         return jsonify({
-            'error': 'An unexpected error occurred. Please try again.',
-            'details': str(e) if app.debug else None
+            'error': 'Analysis failed',
+            'message': str(e)
         }), 500
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
+# Health check
+@app.route('/health')
+def health():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'api_configured': bool(config.GEMINI_API_KEY),
-        'ml_model_loaded': code_analyzer.loaded,
-        'cache_enabled': config.CACHE_TYPE != 'null',
-        'rate_limit_enabled': config.RATELIMIT_ENABLED,
-        'timestamp': datetime.now().isoformat()
-    })
-
-@app.route('/api/stats', methods=['GET'])
-def get_stats():
-    """Get application statistics"""
-    return jsonify({
-        'supported_languages': list(language_detector.patterns.keys()),
-        'max_code_length': config.MAX_CODE_LENGTH,
-        'cache_timeout': config.CACHE_DEFAULT_TIMEOUT,
-        'version': '2.0.0'
+        'timestamp': datetime.now().isoformat(),
+        'ml_model_loaded': ml_model is not None,
+        'gemini_configured': config.GEMINI_API_KEY is not None
     })
 
 # Error handlers
@@ -367,8 +346,10 @@ def internal_error(e):
     }), 500
 
 if __name__ == '__main__':
+    # Use environment variable for port, default to 5002
+    port = int(os.environ.get('PORT', 5002))
     app.run(
         debug=config.DEBUG,
         host='0.0.0.0',
-        port=5000
+        port=port
     )

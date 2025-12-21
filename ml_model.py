@@ -107,6 +107,22 @@ class CodeAnalyzerModel:
                         'issue': 'Unnecessary use of range(len())',
                         'fix': 'Use "for item in list:" or "for i, item in enumerate(list):"'
                     })
+                
+                if 'print(' in line:
+                    bugs.append({
+                        'severity': 'low',
+                        'line': str(i),
+                        'issue': 'Print statement found',
+                        'fix': 'Use logging module or remove for production'
+                    })
+
+                if 'open(' in line and 'with' not in line:
+                     bugs.append({
+                        'severity': 'medium',
+                        'line': str(i),
+                        'issue': 'File opened without context manager',
+                        'fix': 'Use "with open(...) as f:" to ensure file closure'
+                    })
         
         elif language == 'javascript':
             for i, line in enumerate(lines, 1):
@@ -124,6 +140,14 @@ class CodeAnalyzerModel:
                         'line': str(i),
                         'issue': 'Use let or const instead of var',
                         'fix': 'Replace var with const (immutable) or let (mutable)'
+                    })
+                
+                if 'console.log(' in line:
+                     bugs.append({
+                        'severity': 'low',
+                        'line': str(i),
+                        'issue': 'Console log found',
+                        'fix': 'Remove console.log statements from production code'
                     })
         
         return bugs
@@ -155,6 +179,14 @@ class CodeAnalyzerModel:
                         'severity': 'high',
                         'mitigation': 'Use environment variables or secure vaults'
                     })
+
+                if 'subprocess.call' in line or 'subprocess.Popen' in line:
+                     if 'shell=True' in line:
+                        security.append({
+                            'risk': 'Shell injection risk with shell=True',
+                            'severity': 'high',
+                            'mitigation': 'Set shell=False (default) or sanitize input carefully'
+                        })
         
         elif language == 'javascript':
             for i, line in enumerate(lines, 1):

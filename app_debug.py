@@ -284,4 +284,4 @@ if __name__ == '__main__':
     logger.info(f"ML model status: {'Loading...' if not code_analyzer.loaded else 'Loaded'}")
     logger.info("=" * 80)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5002)

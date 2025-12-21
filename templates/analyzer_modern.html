@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered code analysis with ML and Gemini AI">
+    <title>AI Code Review Assistant - Modern</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+
+    <style>
+        /* Page-specific styles */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.25rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background: var(--bg-tertiary);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        /* Analyzer Section */
+        .analyzer-section {
+            margin-top: 3rem;
+        }
+
+        .analyzer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .code-input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-xl);
+            min-height: 400px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+        }
+
+        /* Analysis Results */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .analysis-column {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .column-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .quality-score-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quality-score-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Monaco', monospace;
+        }
+
+        .quality-score-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .analyzer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-secondary);
+                flex-direction: column;
+                padding: 1rem;
+                border-top: 1px solid var(--border);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding: 2rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="/" class="logo">
+            <i class="fas fa-code"></i>
+            <span class="logo-text">AI Code Review</span>
+        </a>
+
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <nav class="nav-links" id="navLinks">
+            <a href="#" class="nav-link active" onclick="switchTab('code')">
+                <i class="fas fa-code"></i> Analyzer
+            </a>
+            <a href="#" class="nav-link"
+                onclick="if(window.features && window.features.showHistoryModal) { window.features.showHistoryModal(); return false; }">
+                <i class="fas fa-history"></i> History
+            </a>
+            <a href="#" class="nav-link" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>AI-Powered Code Analysis</h1>
+            <p>Get instant insights into your code quality with dual AI analysis using ML models and Google Gemini</p>
+
+            <div class="hero-badges">
+                <span class="badge badge-primary">
+                    <i class="fas fa-robot"></i> ML Analysis
+                </span>
+                <span class="badge badge-primary">
+                    <i class="fas fa-brain"></i> Gemini AI
+                </span>
+                <span class="badge badge-success">
+                    <i class="fas fa-shield-alt"></i> Security Scan
+                </span>
+                <span class="badge badge-success">
+                    <i class="fas fa-bug"></i> Bug Detection
+                </span>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">
+                <i class="fas fa-chart-line"></i>
+                Dashboard
+            </button>
+            <button class="tab-btn" onclick="switchTab('code')">
+                <i class="fas fa-code"></i>
+                Code Analyzer
+            </button>
+            <button class="tab-btn" onclick="switchTab('github')">
+                <i class="fab fa-github"></i>
+                GitHub Analyzer
+            </button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboardTab">
+            <div class="glass-card mb-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="mb-2">Welcome Back, <span class="user-display-name">User</span>!</h2>
+                        <p class="text-secondary">Here's an overview of your code analysis activity.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="switchTab('code')">
+                        <i class="fas fa-plus"></i> New Analysis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="card-grid">
+                <div class="stat-card">
+                    <i class="fas fa-search-code"></i>
+                    <div class="stat-value" id="totalAnalyses">0</div>
+                    <div class="stat-label">Total Analyses</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star-half-alt"></i>
+                    <div class="stat-value" id="avgQualityScore">-</div>
+                    <div class="stat-label">Avg. Quality Score</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-bug"></i>
+                    <div class="stat-value" id="totalIssues">0</div>
+                    <div class="stat-label">Issues Detected</div>
+                </div>
+                <!-- <div class="stat-card">
+                    <i class="fas fa-code"></i>
+                    <div class="stat-value" id="topLanguage">-</div>
+                    <div class="stat-label">Top Language</div>
+                </div> -->
+            </div>
+
+            <div class="grid-2-col gap-3">
+                <!-- Recent Activity -->
+                <div class="glass-card h-full">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                        <button class="btn btn-outline btn-sm"
+                            onclick="if(window.features) window.features.showHistoryModal()">View All</button>
+                    </div>
+                    <div id="dashboardRecentList" class="activity-list">
+                        <p class="text-muted text-center p-4">No recent activity.</p>
+                    </div>
+                </div>
+
+                <!-- Quick Tips / Insights -->
+                <div class="glass-card h-full">
+                    <h3><i class="fas fa-lightbulb"></i> AI Insights</h3>
+                    <div class="mt-3">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Tip of the Day</strong>
+                                <p>Consistent code formatting improves readability and reduces bugs. Try using an
+                                    automated formatter.</p>
+                            </div>
+                        </div>
+                        <div class="alert alert-success">
+                            <i class="fas fa-chart-line"></i>
+                            <div>
+                                <strong>Performance</strong>
+                                <p>Your average code quality score is trending upwards! Keep up the good work.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Analyzer Tab -->
+        <div class="tab-content" id="codeTab">
+            <div class="analyzer-grid">
+                <!-- Input Section -->
+                <div class="code-input-section">
+                    <div class="glass-card">
+                        <h3 class="mb-3">
+                            <i class="fas fa-file-code"></i> Paste Your Code
+                        </h3>
+
+                        <div class="input-group">
+                            <label>
+                                <i class="fas fa-language"></i>
+                                Programming Language
+                                <span id="detectedLanguageBadge" class="badge badge-primary hidden"
+                                    style="margin-left: 10px; font-size: 0.8em;"></span>
+                            </label>
+                            <select class="input-field" id="languageSelect">
+                                <option value="auto">Auto Detect</option>
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="typescript">TypeScript</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                                <option value="c">C</option>
+                                <option value="go">Go</option>
+                                <option value="rust">Rust</option>
+                                <option value="php">PHP</option>
+                                <option value="ruby">Ruby</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>
+                                <i class="fas fa-code"></i>
+                                Source Code
+                            </label>
+                            <textarea class="input-field" id="codeInput" placeholder="Paste your code here..."
+                                rows="15"></textarea>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary w-full" onclick="analyzeCode()">
+                                <i class="fas fa-play"></i>
+                                Analyze Code
+                            </button>
+                            <button class="btn btn-outline" onclick="clearCode()">
+                                <i class="fas fa-trash"></i>
+                                Clear
+                            </button>
+                        </div>
+
+                        <div class="progress-bar-container hidden" id="progressContainer">
+                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section">
+                    <div id="resultsContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-code-branch"></i>
+                            <h3>Ready to Analyze</h3>
+                            <p>Paste your code and click "Analyze Code" to get started</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub Analyzer Tab -->
+        <div class="tab-content" id="githubTab">
+            <div class="glass-card">
+                <h3 class="mb-3">
+                    <i class="fab fa-github"></i> GitHub Repository Analyzer
+                </h3>
+
+                <div class="input-group">
+                    <label>
+                        <i class="fas fa-link"></i>
+                        Repository URL
+                    </label>
+                    <input type="text" class="input-field" id="githubRepoUrl"
+                        placeholder="https://github.com/facebook/react">
+                    <small style="color: var(--text-muted); font-size: 0.875rem;">
+                        Enter the full GitHub repository URL
+                    </small>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <i class="fas fa-key"></i>
+                        GitHub Token (Optional)
+                    </label>
+                    <input type="password" class="input-field" id="githubToken" placeholder="ghp_...">
+                    <small style="color: var(--text-muted); font-size: 0.875rem;">
+                        For private repositories and higher rate limits
+                    </small>
+                </div>
+
+                <div class="flex gap-2">
+                    <button class="btn btn-primary" onclick="analyzeGithubRepo()">
+                        <i class="fab fa-github"></i>
+                        Analyze Repository
+                    </button>
+                    <button class="btn btn-secondary" onclick="analyzePullRequest()">
+                        <i class="fas fa-code-branch"></i>
+                        Analyze Pull Request
+                    </button>
+                </div>
+            </div>
+
+            <div id="githubResults" class="mt-4">
+                <div class="empty-state">
+                    <i class="fab fa-github"></i>
+                    <h3>GitHub Integration</h3>
+                    <p>Analyze repositories, files, and pull requests directly from GitHub</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer
+        style="background: var(--bg-secondary); padding: 4rem 0 2rem; border-top: 1px solid var(--border); margin-top: auto;">
+        <div class="container">
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-bottom: 3rem;">
+                <!-- Brand -->
+                <div>
+                    <h3
+                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: var(--text-primary);">
+                        <i class="fas fa-code" style="color: var(--primary);"></i> AI Code Review
+                    </h3>
+                    <p
+                        style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                        Empowering developers with intelligent code analysis, security auditing, and automated reviews
+                        powered by advanced ML and Gemini AI.
+                    </p>
+                    <div style="display: flex; gap: 1rem;">
+                        <a href="#" class="btn btn-outline"
+                            style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i
+                                class="fab fa-github"></i></a>
+                        <a href="#" class="btn btn-outline"
+                            style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i
+                                class="fab fa-linkedin"></i></a>
+                        <a href="#" class="btn btn-outline"
+                            style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i
+                                class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 1.5rem;">Quick Links</h4>
+                    <ul
+                        style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <li><a href="/dashboard"
+                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Dashboard</a>
+                        </li>
+                        <li><a href="/about"
+                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">About
+                                Us</a></li>
+                        <li><a href="/privacy"
+                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Privacy
+                                Policy</a></li>
+                        <li><a href="/terms"
+                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Terms
+                                & Conditions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Developer Info -->
+                <div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 1.5rem;">Project Team</h4>
+                    <div
+                        style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div
+                                style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                AS</div>
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: 600;">Alisha Shad</div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem;">Lead Developer</div>
+                            </div>
+                        </div>
+                        <div
+                            style="font-size: 0.85rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <i class="fas fa-university"
+                                    style="width: 16px; text-align: center; color: var(--primary);"></i>
+                                MCA 2nd Year
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <i class="fas fa-calendar-alt"
+                                    style="width: 16px; text-align: center; color: var(--primary);"></i>
+                                Batch 2024 - 2026
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <i class="fas fa-laptop-code"
+                                    style="width: 16px; text-align: center; color: var(--primary);"></i>
+                                Dept. of Computer Applications
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                style="text-align: center; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;">
+                &copy; 2025 AI Code Review Assistant. Developed by Alisha Shad. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <div id="loadingOverlay" class="hidden" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    ">
+        <div style="text-align: center;">
+            <div class="loading-spinner" style="margin: 0 auto 1rem;"></div>
+            <p style="color: var(--text-primary); font-size: 1.25rem; font-weight: 600;">
+                Analyzing your code...
+            </p>
+            <p style="color: var(--text-muted);">
+                This may take a few moments
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/firestore-integration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/features.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/main-functions.js') }}"></script>
+    <script>
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('onclick').includes(`switchTab('${tab}')`)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (tab === 'dashboard') {
+                document.getElementById('dashboardTab').classList.add('active');
+                // Refresh dashboard data if available
+                if (window.features && window.features.updateDashboard) {
+                    window.features.updateDashboard();
+                }
+            } else if (tab === 'code') {
+                document.getElementById('codeTab').classList.add('active');
+            } else if (tab === 'github') {
+                document.getElementById('githubTab').classList.add('active');
+            }
+        }
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'flex';
+            } else {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>

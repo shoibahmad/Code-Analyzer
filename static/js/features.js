@@ -83,7 +83,7 @@ getUser(123);`
 };
 
 // Initialize features when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // File Upload Handler
     const uploadBtn = document.getElementById('uploadBtn');
     const fileInput = document.getElementById('fileInput');
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             codeInput.style.borderColor = '';
             codeInput.style.background = '';
-            
+
             const file = e.dataTransfer.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -157,133 +157,192 @@ document.addEventListener('DOMContentLoaded', function() {
 // Analysis History
 let analysisHistory = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
 
+// Dashboard Logic
+function updateDashboard() {
+    const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+
+    // Stats elements
+    const totalEl = document.getElementById('totalAnalyses');
+    const avgScoreEl = document.getElementById('avgQualityScore');
+    const issuesEl = document.getElementById('totalIssues');
+    // const langEl = document.getElementById('topLanguage');
+
+    if (!totalEl) return; // Not on dashboard page or elements missing
+
+    // Calculate stats
+    const total = history.length;
+    let totalScore = 0;
+    let totalIssuesCount = 0;
+
+    history.forEach(h => {
+        // Parse scores which might be strings like "8/10"
+        const mlScore = typeof h.mlScore === 'string' ? parseInt(h.mlScore) : (h.mlScore || 0);
+        const aiScore = typeof h.aiScore === 'string' ? parseInt(h.aiScore) : (h.aiScore || 0);
+
+        // Use greater of the two or average? Let's use AI score if available, else ML
+        const score = aiScore || mlScore;
+        totalScore += score;
+
+        // Issues (estimate since we don't store full issue count in history summary, need to check how we save it)
+        // Current saveToHistory saves 'results' which is the full object but maybe we only want to store summary in LS to save space?
+        // Actually saveToHistory implementation above stores full object?
+        // Let's check saveToHistory implementation... 
+        // It stores: id, timestamp, code(snippet), language, mlScore, aiScore. 
+        // It DOES NOT store issue counts. We should update saveToHistory to store issue counts.
+        // For now, we'll leave issues as 0 or estimated.
+        if (h.stats) {
+            totalIssuesCount += (h.stats.bugs || 0) + (h.stats.security || 0);
+        }
+    });
+
+    const avg = total > 0 ? (totalScore / total).toFixed(1) : '-';
+
+    // Update DOM
+    if (totalEl) totalEl.textContent = total;
+    if (avgScoreEl) avgScoreEl.textContent = avg;
+    if (issuesEl) issuesEl.textContent = totalIssuesCount > 0 ? totalIssuesCount : '-'; // Placeholder until we fix storage
+
+    // Recent Activity List
+    const listEl = document.getElementById('dashboardRecentList');
+    if (listEl) {
+        if (history.length === 0) {
+            listEl.innerHTML = '<p class="text-muted text-center p-4">No recent activity.</p>';
+        } else {
+            listEl.innerHTML = history.slice(0, 5).map(entry => `
+                <div class="flex justify-between items-center p-3 border-b border-white-10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary-10 flex items-center justify-center text-primary">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium">${entry.language} Analysis</div>
+                            <div class="text-xs text-muted">${new Date(entry.timestamp).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold ${entry.aiScore >= 7 ? 'text-success' : 'text-warning'}">Score: ${entry.aiScore}</div>
+                        <div class="text-xs text-muted">Model: Gemini</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+}
+
+// Update saveToHistory to include stats
 function saveToHistory(code, language, results) {
+    // Calculate stats
+    const mlBugs = results.ml_analysis?.bugs?.length || 0;
+    const mlSec = results.ml_analysis?.security?.length || 0;
+    const aiBugs = results.ai_analysis?.bugs?.length || 0;
+    const aiSec = results.ai_analysis?.security?.length || 0;
+
     const entry = {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         code: code.substring(0, 200) + '...',
         language: language,
-        mlScore: results.ml_analysis.overall_quality,
-        aiScore: results.ai_analysis.overall_quality
+        mlScore: results.ml_analysis?.overall_quality || 'N/A',
+        aiScore: results.ai_analysis?.overall_quality || 'N/A',
+        stats: {
+            bugs: mlBugs + aiBugs,
+            security: mlSec + aiSec
+        }
     };
-    
+
+    let analysisHistory = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
     analysisHistory.unshift(entry);
-    if (analysisHistory.length > 10) analysisHistory.pop();
+    if (analysisHistory.length > 20) analysisHistory.pop(); // Increased limit
     localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+
+    // Update dashboard immediately if visible
+    updateDashboard();
 }
 
-// Initialize History Button
-document.addEventListener('DOMContentLoaded', function() {
-    const historyBtn = document.getElementById('historyBtn');
-    if (historyBtn) {
-        historyBtn.addEventListener('click', () => {
-            showHistoryModal();
-        });
-    }
+// Initialize Dashboard on Load
+document.addEventListener('DOMContentLoaded', function () {
+    updateDashboard();
 });
 
-function showHistoryModal() {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-history"></i> Analysis History</h2>
-                <button class="modal-close" onclick="this.closest('.modal').remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                ${analysisHistory.length === 0 ? 
-                    '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">No history yet. Analyze some code to see it here!</p>' :
-                    analysisHistory.map(entry => `
-                        <div class="history-item">
-                            <div class="history-header">
-                                <span class="history-lang">${entry.language}</span>
-                                <span class="history-time">${new Date(entry.timestamp).toLocaleString()}</span>
-                            </div>
-                            <div class="history-code">${entry.code}</div>
-                            <div class="history-scores">
-                                <span>ML: ${entry.mlScore}</span>
-                                <span>AI: ${entry.aiScore}</span>
-                            </div>
-                        </div>
-                    `).join('')
-                }
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
+window.features = {
+    saveToHistory,
+    addCopyButtons,
+    createCharts,
+    showNotification,
+    showHistoryModal,
+    updateDashboard
+};
+
+// ... existing code ...
 
 
 
 
 // Initialize Export PDF Button
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const exportPdfBtn = document.getElementById('exportPdfBtn');
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', async () => {
-    showNotification('Generating PDF report...', 'info');
-    
-    try {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        // Title
-        pdf.setFontSize(20);
-        pdf.setTextColor(88, 166, 255);
-        pdf.text('AI Code Review Report', 20, 20);
-        
-        // Date
-        pdf.setFontSize(10);
-        pdf.setTextColor(100, 100, 100);
-        pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, 28);
-        
-        // Language
-        const detectedLang = document.getElementById('detectedLanguage').textContent;
-        pdf.setFontSize(12);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(`Language: ${detectedLang}`, 20, 38);
-        
-        // ML Analysis
-        pdf.setFontSize(14);
-        pdf.setTextColor(63, 185, 80);
-        pdf.text('ML Model Analysis (CodeBERT)', 20, 50);
-        
-        const mlScore = document.getElementById('mlQualityScore').textContent;
-        const mlSummary = document.getElementById('mlQualitySummary').textContent;
-        
-        pdf.setFontSize(11);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(`Quality Score: ${mlScore}`, 20, 58);
-        
-        const mlSummaryLines = pdf.splitTextToSize(mlSummary, 170);
-        pdf.text(mlSummaryLines, 20, 66);
-        
-        // AI Analysis
-        let yPos = 66 + (mlSummaryLines.length * 5) + 10;
-        pdf.setFontSize(14);
-        pdf.setTextColor(88, 166, 255);
-        pdf.text('AI Analysis (Gemini 2.5 Flash)', 20, yPos);
-        
-        const aiScore = document.getElementById('aiQualityScore').textContent;
-        const aiSummary = document.getElementById('aiQualitySummary').textContent;
-        
-        pdf.setFontSize(11);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(`Quality Score: ${aiScore}`, 20, yPos + 8);
-        
-        const aiSummaryLines = pdf.splitTextToSize(aiSummary, 170);
-        pdf.text(aiSummaryLines, 20, yPos + 16);
-        
-        // Save
-        pdf.save(`code-review-${Date.now()}.pdf`);
-        showNotification('PDF exported successfully!', 'success');
-    } catch (error) {
-        console.error('PDF export error:', error);
-        showNotification('Failed to export PDF', 'error');
-    }
+            showNotification('Generating PDF report...', 'info');
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+
+                // Title
+                pdf.setFontSize(20);
+                pdf.setTextColor(88, 166, 255);
+                pdf.text('AI Code Review Report', 20, 20);
+
+                // Date
+                pdf.setFontSize(10);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, 28);
+
+                // Language
+                const detectedLang = document.getElementById('detectedLanguage').textContent;
+                pdf.setFontSize(12);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text(`Language: ${detectedLang}`, 20, 38);
+
+                // ML Analysis
+                pdf.setFontSize(14);
+                pdf.setTextColor(63, 185, 80);
+                pdf.text('ML Model Analysis (CodeBERT)', 20, 50);
+
+                const mlScore = document.getElementById('mlQualityScore').textContent;
+                const mlSummary = document.getElementById('mlQualitySummary').textContent;
+
+                pdf.setFontSize(11);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text(`Quality Score: ${mlScore}`, 20, 58);
+
+                const mlSummaryLines = pdf.splitTextToSize(mlSummary, 170);
+                pdf.text(mlSummaryLines, 20, 66);
+
+                // AI Analysis
+                let yPos = 66 + (mlSummaryLines.length * 5) + 10;
+                pdf.setFontSize(14);
+                pdf.setTextColor(88, 166, 255);
+                pdf.text('AI Analysis (Gemini 2.5 Flash)', 20, yPos);
+
+                const aiScore = document.getElementById('aiQualityScore').textContent;
+                const aiSummary = document.getElementById('aiQualitySummary').textContent;
+
+                pdf.setFontSize(11);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text(`Quality Score: ${aiScore}`, 20, yPos + 8);
+
+                const aiSummaryLines = pdf.splitTextToSize(aiSummary, 170);
+                pdf.text(aiSummaryLines, 20, yPos + 16);
+
+                // Save
+                pdf.save(`code-review-${Date.now()}.pdf`);
+                showNotification('PDF exported successfully!', 'success');
+            } catch (error) {
+                console.error('PDF export error:', error);
+                showNotification('Failed to export PDF', 'error');
+            }
         });
     }
 });
@@ -297,7 +356,7 @@ function showNotification(message, type = 'info') {
         <span>${message}</span>
     `;
     document.body.appendChild(notification);
-    
+
     setTimeout(() => notification.classList.add('show'), 10);
     setTimeout(() => {
         notification.classList.remove('show');
@@ -335,7 +394,7 @@ function createCharts(mlData, aiData) {
     // Metrics Comparison Chart
     const metricsCtx = document.getElementById('metricsChart');
     if (metricsChart) metricsChart.destroy();
-    
+
     metricsChart = new Chart(metricsCtx, {
         type: 'radar',
         data: {
@@ -377,18 +436,18 @@ function createCharts(mlData, aiData) {
             }
         }
     });
-    
+
     // Issues Distribution Chart
     const issuesCtx = document.getElementById('issuesChart');
     if (issuesChart) issuesChart.destroy();
-    
+
     const mlBugs = mlData.bugs?.length || 0;
     const mlSecurity = mlData.security?.length || 0;
     const mlImprovements = mlData.improvements?.length || 0;
     const aiBugs = aiData.bugs?.length || 0;
     const aiSecurity = aiData.security?.length || 0;
     const aiImprovements = aiData.improvements?.length || 0;
-    
+
     issuesChart = new Chart(issuesCtx, {
         type: 'doughnut',
         data: {
@@ -454,7 +513,7 @@ function closeModal(modalId) {
 window.closeModal = closeModal;
 
 // Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Terms Link
     const termsLink = document.getElementById('termsLink');
     if (termsLink) {
