@@ -10,9 +10,10 @@ To enable the full functionality of user history and dashboard, you need to conf
 2. Select your project: **code-analyzer-9d4e7**
 3. In the left sidebar, click on **Firestore Database**
 4. Click **Create database**
-5. Choose **Start in production mode** (we'll add security rules next)
-6. Select a Cloud Firestore location (choose the closest to your users)
+5. **IMPORTANT**: Choose **Start in test mode** (we'll update rules after)
+6. Select a Cloud Firestore location (choose the closest to your users, e.g., `us-central1`)
 7. Click **Enable**
+8. Wait for Firestore to be provisioned (this may take a minute)
 
 ### Step 2: Set Up Security Rules
 
@@ -38,6 +39,18 @@ service cloud.firestore {
 ```
 
 Click **Publish** to save the rules.
+
+**Note:** If you're still testing, you can temporarily use these permissive rules (NOT for production):
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
 
 ### Step 3: Enable Authentication Providers
 
@@ -113,6 +126,38 @@ After setup:
 5. **Verify in Firebase Console**:
    - Go to Firestore Database
    - You should see `users` and `analyses` collections with data
+
+## 🧪 **Testing Firestore Collections**
+
+### Manual Collection Initialization
+
+If collections aren't created automatically, you can manually initialize them:
+
+1. **Log in to your app**
+2. **Open browser console** (F12)
+3. **Run this command**:
+   ```javascript
+   window.initializeFirestoreCollections()
+   ```
+4. **Check the console** - you should see:
+   ```
+   Initializing Firestore collections...
+   ✅ Users collection created/updated
+   ✅ Analyses collection created
+   ✅ Firestore collections initialized successfully!
+   ```
+
+5. **Verify in Firebase Console**:
+   - Go to Firestore Database
+   - You should now see:
+     - `users` collection with your user document
+     - `analyses` collection with a test document
+
+### Automatic Initialization
+
+The app will automatically try to create collections when you:
+1. **First log in** (creates user document)
+2. **Perform first analysis** (creates analyses collection)
 
 ## 🔧 Troubleshooting
 

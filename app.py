@@ -206,6 +206,11 @@ def history():
     """History page"""
     return render_template('history.html')
 
+@app.route('/profile')
+def profile():
+    """User Profile page"""
+    return render_template('profile.html')
+
 # Legal Pages
 @app.route('/about')
 def about():

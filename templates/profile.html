@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - AI Code Analyzer</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+
+    <style>
+        body {
+            padding-top: 70px;
+        }
+
+        .back-to-dashboard {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all var(--transition-base);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .back-to-dashboard:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+            transform: translateX(-4px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .back-to-dashboard i {
+            font-size: 1rem;
+        }
+
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            text-align: center;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23ffffff"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="%23ffffff"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%23ffffff"/></svg>') no-repeat bottom;
+            background-size: cover;
+            opacity: 0.1;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 2rem;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-header h1 {
+            color: white;
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-card {
+            background: var(--bg-glass);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+        }
+
+        .profile-card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-align: right;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1rem;
+            }
+
+            .profile-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .profile-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<!-- Main Content -->
+<div class="profile-container">
+    <!-- Back to Dashboard Link -->
+    <a href="/dashboard" class="back-to-dashboard">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Dashboard</span>
+    </a>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <h1 class="user-display-name">User</h1>
+        <p id="userEmail">user@example.com</p>
+    </div>
+
+    <!-- Profile Grid -->
+    <div class="profile-grid">
+        <!-- Profile Information -->
+        <div class="profile-card">
+            <h2><i class="fas fa-user-circle"></i> Profile Information</h2>
+            <div class="info-row">
+                <span class="info-label">Display Name</span>
+                <span class="info-value user-display-name">User</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value" id="userEmailInfo">user@example.com</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">User ID</span>
+                <span class="info-value" id="userId" style="font-size: 0.75rem; font-family: monospace;">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Account Type</span>
+                <span class="info-value"><span class="badge badge-primary">Free</span></span>
+            </div>
+        </div>
+
+        <!-- Usage Statistics -->
+        <div class="profile-card">
+            <h2><i class="fas fa-chart-bar"></i> Usage Statistics</h2>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalAnalysesProfile">0</div>
+                    <div class="stat-label">Analyses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="avgQualityProfile">-</div>
+                    <div class="stat-label">Avg Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalIssuesProfile">0</div>
+                    <div class="stat-label">Issues</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="lastAnalysisProfile">-</div>
+                    <div class="stat-label">Last</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="profile-card">
+        <h2><i class="fas fa-cog"></i> Actions</h2>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </button>
+            <button class="btn btn-outline" onclick="clearLocalData()">
+                <i class="fas fa-trash"></i> Clear Data
+            </button>
+            <button class="btn btn-danger" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
+
+<script>
+    // Wait for auth to load
+    setTimeout(() => {
+        if (window.currentUser) {
+            updateProfilePage();
+        } else {
+            // Retry after a delay
+            setTimeout(() => {
+                if (window.currentUser) {
+                    updateProfilePage();
+                }
+            }, 500);
+        }
+    }, 100);
+
+    function updateProfilePage() {
+        const user = window.currentUser;
+        if (!user) return;
+
+        console.log('Updating profile with user:', user);
+
+        // Update user info
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userEmailInfo').textContent = user.email;
+        document.getElementById('userId').textContent = user.uid;
+
+        // Update avatar
+        const avatar = document.getElementById('profileAvatar');
+        if (user.photoURL) {
+            avatar.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        } else {
+            const initial = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
+            avatar.innerHTML = initial;
+        }
+
+        // Load statistics from Firestore or localStorage
+        loadUserStatistics();
+    }
+
+    async function loadUserStatistics() {
+        console.log('Loading user statistics...');
+
+        try {
+            // Try to load from Firestore first
+            if (window.firebaseDb && window.currentUser) {
+                console.log('Fetching from Firestore for user:', window.currentUser.uid);
+
+                const { collection, query, where, orderBy, getDocs } = window.firestoreExports;
+                const analysesRef = collection(window.firebaseDb, 'analyses');
+                const q = query(
+                    analysesRef,
+                    where('userId', '==', window.currentUser.uid),
+                    orderBy('timestamp', 'desc')
+                );
+
+                const querySnapshot = await getDocs(q);
+                const history = [];
+
+                querySnapshot.forEach((doc) => {
+                    history.push({ id: doc.id, ...doc.data() });
+                });
+
+                console.log('Loaded', history.length, 'analyses from Firestore');
+
+                if (history.length > 0) {
+                    updateStatsFromFirestore(history);
+                    return;
+                } else {
+                    console.log('No analyses found in Firestore');
+                }
+            }
+        } catch (error) {
+            console.error('Error loading from Firestore:', error);
+            window.toast && window.toast.error('Could not load analysis history', 'Error');
+        }
+
+        // Fallback to localStorage
+        console.log('Falling back to localStorage');
+        const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+        updateStatsFromLocalStorage(history);
+    }
+
+    function updateStatsFromFirestore(history) {
+        const total = history.length;
+        let totalScore = 0;
+        let totalIssues = 0;
+
+        history.forEach(h => {
+            const mlScore = typeof h.mlQuality === 'string' ? parseInt(h.mlQuality) : (h.mlQuality || 0);
+            const aiScore = typeof h.aiQuality === 'string' ? parseInt(h.aiQuality) : (h.aiQuality || 0);
+            totalScore += (mlScore + aiScore) / 2;
+            totalIssues += (h.bugsCount || 0) + (h.securityCount || 0);
+        });
+
+        const avgScore = total > 0 ? (totalScore / total).toFixed(1) : 0;
+        const lastAnalysis = history[0]?.timestamp ? new Date(history[0].timestamp.toDate()).toLocaleDateString() : '-';
+
+        document.getElementById('totalAnalysesProfile').textContent = total;
+        document.getElementById('avgQualityProfile').textContent = total > 0 ? `${avgScore}/10` : '-';
+        document.getElementById('totalIssuesProfile').textContent = totalIssues;
+        document.getElementById('lastAnalysisProfile').textContent = lastAnalysis;
+    }
+
+    function updateStatsFromLocalStorage(history) {
+        const total = history.length;
+        let totalScore = 0;
+        let totalIssues = 0;
+
+        history.forEach(h => {
+            const mlScore = typeof h.mlScore === 'string' ? parseInt(h.mlScore) : (h.mlScore || 0);
+            const aiScore = typeof h.aiScore === 'string' ? parseInt(h.aiScore) : (h.aiScore || 0);
+            totalScore += (mlScore + aiScore) / 2;
+            totalIssues += (h.totalBugs || 0) + (h.totalSecurity || 0);
+        });
+
+        const avgScore = total > 0 ? (totalScore / total).toFixed(1) : 0;
+        const lastAnalysis = history[0]?.timestamp ? new Date(history[0].timestamp).toLocaleDateString() : '-';
+
+        document.getElementById('totalAnalysesProfile').textContent = total;
+        document.getElementById('avgQualityProfile').textContent = total > 0 ? `${avgScore}/10` : '-';
+        document.getElementById('totalIssuesProfile').textContent = totalIssues;
+        document.getElementById('lastAnalysisProfile').textContent = lastAnalysis;
+    }
+
+    function clearLocalData() {
+        if (confirm('Are you sure you want to clear all local data? This will remove your analysis history from this device.')) {
+            localStorage.removeItem('analysisHistory');
+            window.toast.success('Local data cleared successfully', 'Data Cleared');
+            setTimeout(() => location.reload(), 1000);
+        }
+    }
+
+    // Logout handler
+    window.handleLogout = async function () {
+        // Show confirmation dialog
+        const confirmed = confirm('Are you sure you want to logout?');
+
+        if (confirmed && window.firebaseAuth) {
+            try {
+                await window.firebaseAuth.signOut();
+                window.toast.success('Logged out successfully', 'Goodbye!');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 500);
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.toast.error('Failed to logout', 'Error');
+            }
+        }
+    };
+</script>
+</body>
+
+</html>

@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="AI-powered code analysis with ML and Gemini AI">
-    <title>AI Code Review Assistant - Modern</title>
+    <title>CodeSentinel AI - Dashboard</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Icons -->
@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-sections.css') }}">
 
     <style>
         /* Page-specific styles */
@@ -325,33 +326,263 @@
                 font-size: 1rem;
             }
         }
+
+        /* Header Content Layout */
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Left: User Email */
+        .user-email-display {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            min-width: 200px;
+        }
+
+        .logged-in-text {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .email-text {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* Center: Logo */
+        .logo-container-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .logo-main {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo-main i {
+            font-size: 1.75rem;
+            color: var(--primary);
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+        }
+
+        .logo-tagline {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        /* Right: Logout Button */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 200px;
+            justify-content: flex-end;
+        }
+
+        .btn-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            text-decoration: none;
+        }
+
+        .btn-profile:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-profile:active {
+            transform: translateY(0);
+        }
+
+        .btn-profile i {
+            font-size: 1rem;
+        }
+
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+        }
+
+        .btn-logout i {
+            font-size: 1rem;
+        }
+
+        /* Tabs Container */
+        .tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-glass);
+            padding: 0.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .tab-btn i {
+            font-size: 1.1rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .user-email-display {
+                display: none !important;
+            }
+
+            .tabs-container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .tab-btn {
+                min-width: auto;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
 <body>
     <!-- Header -->
     <header class="header">
-        <a href="/" class="logo">
-            <i class="fas fa-code"></i>
-            <span class="logo-text">AI Code Review</span>
-        </a>
+        <div class="header-content">
+            <!-- Left: Logo and User Email -->
+            <div class="logo-section">
+                <div class="logo-main">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="logo-text">CodeSentinel AI</span>
+                </div>
+                <div class="user-email-display" id="headerUserEmail" style="display: none;">
+                    <span class="logged-in-text">Logged in as</span>
+                    <span id="headerEmailText" class="email-text">user@example.com</span>
+                </div>
+            </div>
+
+            <!-- Right: Profile and Logout -->
+            <div class="header-actions">
+                <a href="/profile" class="btn-profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <button class="btn-logout" onclick="handleLogoutClick(event)">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
 
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
             <i class="fas fa-bars"></i>
         </button>
-
-        <nav class="nav-links" id="navLinks">
-            <a href="#" class="nav-link active" onclick="switchTab('code')">
-                <i class="fas fa-code"></i> Analyzer
-            </a>
-            <a href="#" class="nav-link"
-                onclick="if(window.features && window.features.showHistoryModal) { window.features.showHistoryModal(); return false; }">
-                <i class="fas fa-history"></i> History
-            </a>
-            <a href="#" class="nav-link" id="logoutBtn">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </nav>
     </header>
 
     <!-- Main Content -->
@@ -601,7 +832,7 @@
                 <div>
                     <h3
                         style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: var(--text-primary);">
-                        <i class="fas fa-code" style="color: var(--primary);"></i> AI Code Review
+                        <i class="fas fa-code" style="color: var(--primary);"></i> CodeSentinel AI
                     </h3>
                     <p
                         style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
@@ -679,7 +910,7 @@
 
             <div
                 style="text-align: center; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;">
-                &copy; 2025 AI Code Review Assistant. Developed by Alisha Shad. All rights reserved.
+                &copy; 2026 CodeSentinel AI. Developed by Alisha Shad. All rights reserved.
             </div>
         </div>
     </footer>
@@ -712,6 +943,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
     <script src="{{ url_for('static', filename='js/firestore-integration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/pdf-generator.js') }}"></script>
     <script src="{{ url_for('static', filename='js/features.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/main-functions.js') }}"></script>
     <script>
@@ -755,6 +987,29 @@
             } else {
                 overlay.classList.add('hidden');
                 overlay.style.display = 'none';
+            }
+        }
+
+        // Logout confirmation handler
+        async function handleLogoutClick(event) {
+            event.preventDefault();
+
+            // Show confirmation dialog
+            const confirmed = confirm('Are you sure you want to logout?');
+
+            if (confirmed) {
+                try {
+                    if (window.firebaseAuth) {
+                        await window.firebaseAuth.signOut();
+                        window.toast.success('Logged out successfully', 'Goodbye!');
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 500);
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.toast.error('Failed to logout', 'Error');
+                }
             }
         }
     </script>

@@ -80,6 +80,11 @@ async function analyzeCode() {
 
         displayResults(data);
 
+        // Store data for PDF generation
+        if (window.pdfGenerator) {
+            window.pdfGenerator.storeAnalysisData(code, data.language, data);
+        }
+
         // Show success toast
         window.toast.success(`Code analysis completed successfully in ${data.analysis_time ? data.analysis_time.toFixed(2) : '0'}s`, 'Analysis Complete');
 
@@ -254,7 +259,7 @@ function displayResults(data) {
                 </div>
 
                 <!-- AI Summary -->
-                <div class="card bg-glass p-3 mb-3">
+                <div class="analysis-section summary-box">
                     <h4><i class="fas fa-align-left"></i> Executive Summary</h4>
                     <div class="text-limit">
                         <p style="white-space: pre-line; line-height: 1.8;">${aiData.summary ? aiData.summary.replace(/\\n/g, '\n') : 'No summary available.'}</p>
@@ -268,43 +273,41 @@ function displayResults(data) {
                 
                 <!-- AI Metrics -->
                 ${aiData.metrics ? `
-                    <div class="mb-4">
+                    <div class="analysis-section">
                         <h4><i class="fas fa-chart-bar"></i> Detailed Metrics</h4>
                         <div class="grid-2-col gap-2 mt-2">
-                            <div class="p-3 bg-white-5 rounded">
-                                <div class="text-lg font-bold text-primary">${aiData.metrics.complexity || 'N/A'}</div>
-                                <div class="text-xs text-muted mt-1">Complexity</div>
+                            <div class="metric-card">
+                                <div class="metric-label">Complexity</div>
+                                <div class="metric-value">${aiData.metrics.complexity || 'N/A'}</div>
                             </div>
-                            <div class="p-3 bg-white-5 rounded">
-                                <div class="text-lg font-bold text-success">${aiData.metrics.readability || 'N/A'}</div>
-                                <div class="text-xs text-muted mt-1">Readability</div>
+                            <div class="metric-card">
+                                <div class="metric-label">Readability</div>
+                                <div class="metric-value">${aiData.metrics.readability || 'N/A'}</div>
                             </div>
-                            <div class="p-3 bg-white-5 rounded">
-                                <div class="text-lg font-bold text-secondary">${aiData.metrics.maintainability || 'N/A'}</div>
-                                <div class="text-xs text-muted mt-1">Maintainability</div>
+                            <div class="metric-card">
+                                <div class="metric-label">Maintainability</div>
+                                <div class="metric-value">${aiData.metrics.maintainability || 'N/A'}</div>
                             </div>
-                            ${aiData.metrics.testability ? `
-                                <div class="p-3 bg-white-5 rounded">
-                                    <div class="text-lg font-bold text-warning">${aiData.metrics.testability}</div>
-                                    <div class="text-xs text-muted mt-1">Testability</div>
-                                </div>
-                            ` : ''}
+                            <div class="metric-card">
+                                <div class="metric-label">Testability</div>
+                                <div class="metric-value">${aiData.metrics.testability || 'N/A'}</div>
+                            </div>
                         </div>
                     </div>
                 ` : ''}
 
                 <!-- Complexity Analysis -->
                 ${aiData.complexity_analysis ? `
-                    <div class="card bg-glass p-3 mb-3">
+                    <div class="analysis-section">
                         <h4><i class="fas fa-project-diagram"></i> Complexity Analysis</h4>
-                        <div class="mt-2 space-y-2">
-                            <div class="p-2 bg-white-5 rounded">
-                                <div class="text-xs text-muted">Time Complexity</div>
-                                <div class="text-sm font-mono text-primary">${aiData.complexity_analysis.time_complexity || 'N/A'}</div>
+                        <div class="complexity-grid">
+                            <div class="complexity-item">
+                                <div class="label">Time Complexity</div>
+                                <div class="value">${aiData.complexity_analysis.time_complexity || 'N/A'}</div>
                             </div>
-                            <div class="p-2 bg-white-5 rounded">
-                                <div class="text-xs text-muted">Space Complexity</div>
-                                <div class="text-sm font-mono text-secondary">${aiData.complexity_analysis.space_complexity || 'N/A'}</div>
+                            <div class="complexity-item">
+                                <div class="label">Space Complexity</div>
+                                <div class="value">${aiData.complexity_analysis.space_complexity || 'N/A'}</div>
                             </div>
                         </div>
                     </div>
@@ -371,6 +374,13 @@ function displayResults(data) {
                     </div>
                 ` : ''}
             </div>
+        </div>
+
+        <!-- Download PDF Button -->
+        <div class="mt-4 text-center">
+            <button onclick="window.pdfGenerator.generatePDF()" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1rem;">
+                <i class="fas fa-download"></i> Download Analysis Report (PDF)
+            </button>
         </div>
 
         <!-- Analysis Metadata -->
@@ -541,4 +551,4 @@ window.fetchAndAnalyzeFile = async (url, filename) => {
     }
 };
 
-    console.log('displayResults function completed successfully');
+console.log('displayResults function completed successfully');

@@ -61,6 +61,13 @@ onAuthStateChanged(auth, (user) => {
         // Update dashboard with user name
         updateDashboardUserInfo();
 
+        // Auto-initialize Firestore collections on first login
+        setTimeout(() => {
+            if (window.autoInitializeFirestore) {
+                window.autoInitializeFirestore();
+            }
+        }, 1000);
+
         // Redirect to dashboard if on login page
         if (window.location.pathname === '/' || window.location.pathname === '/login') {
             window.location.href = '/dashboard';
@@ -80,18 +87,97 @@ onAuthStateChanged(auth, (user) => {
 // Update dashboard with user info
 function updateDashboardUserInfo() {
     if (window.currentUser) {
-        // Update user name in dashboard
+        console.log('Updating dashboard with user:', window.currentUser.displayName);
+
+        // Function to update elements
+        const updateElements = () => {
+            const userNameElements = document.querySelectorAll('.user-display-name');
+            console.log('Found user name elements:', userNameElements.length);
+
+            if (userNameElements.length > 0) {
+                userNameElements.forEach(el => {
+                    el.textContent = window.currentUser.displayName;
+                    console.log('Updated element with name:', window.currentUser.displayName);
+                });
+                return true; // Success
+            }
+            return false; // Elements not found
+        };
+
+        // Try to update immediately
+        if (!updateElements()) {
+            // If failed, retry with delays
+            let attempts = 0;
+            const maxAttempts = 10;
+            const retryInterval = setInterval(() => {
+                attempts++;
+                if (updateElements() || attempts >= maxAttempts) {
+                    clearInterval(retryInterval);
+                }
+            }, 100);
+        }
+
+        // Load user's analysis history from Firestore
+        if (typeof window.loadUserHistory === 'function') {
+            window.loadUserHistory();
+        }
+    }
+}
+
+// Global function to update user name (can be called from anywhere)
+window.updateUserName = function () {
+    if (window.currentUser) {
+        console.log('Updating user info for:', window.currentUser.email);
+
+        // Update display names
         const userNameElements = document.querySelectorAll('.user-display-name');
         userNameElements.forEach(el => {
             el.textContent = window.currentUser.displayName;
         });
 
-        // Load user's analysis history from Firestore
-        if (typeof loadUserHistory === 'function') {
-            loadUserHistory();
+        // Update header email
+        const headerEmail = document.getElementById('headerUserEmail');
+        const headerEmailText = document.getElementById('headerEmailText');
+
+        console.log('Header email element:', headerEmail);
+        console.log('Header email text element:', headerEmailText);
+
+        if (headerEmail && headerEmailText && window.currentUser.email) {
+            headerEmailText.textContent = window.currentUser.email;
+            headerEmail.style.display = 'flex';
+            console.log('✅ Email display updated:', window.currentUser.email);
+        } else {
+            console.log('❌ Could not update email display');
         }
     }
+};
+
+// Call on DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => window.updateUserName && window.updateUserName(), 100);
+    });
+} else {
+    setTimeout(() => window.updateUserName && window.updateUserName(), 100);
 }
+
+// Test function to manually show email (for debugging)
+window.testShowEmail = function () {
+    const headerEmail = document.getElementById('headerUserEmail');
+    const headerEmailText = document.getElementById('headerEmailText');
+
+    if (headerEmail && headerEmailText) {
+        if (window.currentUser && window.currentUser.email) {
+            headerEmailText.textContent = window.currentUser.email;
+        } else {
+            headerEmailText.textContent = 'test@example.com';
+        }
+        headerEmail.style.display = 'flex';
+        console.log('✅ Email display shown');
+    } else {
+        console.log('❌ Email elements not found');
+    }
+};
 
 // Error Message Mapping
 const getFriendlyErrorMessage = (error) => {
@@ -266,6 +352,89 @@ window.saveAnalysisToFirestore = async (code, language, analysisData) => {
         }
     } catch (error) {
         console.error('Error saving analysis:', error);
+        console.error('Error details:', error.code, error.message);
+
+        // Show user-friendly error
+        if (error.code === 'permission-denied') {
+            window.toast.error('Please enable Firestore in Firebase Console', 'Permission Denied');
+        } else if (error.code === 'unavailable') {
+            window.toast.error('Firestore is not available. Check your setup.', 'Service Unavailable');
+        } else {
+            window.toast.error('Failed to save analysis to cloud', 'Save Error');
+        }
+    }
+};
+
+// Initialize Firestore collections (call this once to create collections)
+window.initializeFirestoreCollections = async () => {
+    if (!window.currentUser) {
+        console.log('Please log in first');
+        return;
+    }
+
+    try {
+        console.log('Initializing Firestore collections...');
+
+        // Create a test user document
+        await setDoc(doc(db, 'users', window.currentUser.uid), {
+            displayName: window.currentUser.displayName,
+            email: window.currentUser.email,
+            createdAt: serverTimestamp(),
+            totalAnalyses: 0,
+            lastLogin: serverTimestamp()
+        }, { merge: true });
+
+        console.log('✅ Users collection created/updated');
+
+        // Create a test analysis document
+        await addDoc(collection(db, 'analyses'), {
+            userId: window.currentUser.uid,
+            language: 'javascript',
+            codeSnippet: '// Test analysis',
+            mlQuality: 'N/A',
+            aiQuality: 'N/A',
+            bugsCount: 0,
+            securityCount: 0,
+            timestamp: serverTimestamp(),
+            analysisTime: 0,
+            isTest: true
+        });
+
+        console.log('✅ Analyses collection created');
+        console.log('✅ Firestore collections initialized successfully!');
+
+        window.toast.success('Firestore collections created successfully!', 'Setup Complete');
+
+        return true;
+    } catch (error) {
+        console.error('❌ Error initializing Firestore:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+
+        if (error.code === 'permission-denied') {
+            window.toast.error(
+                'Firestore is not enabled or security rules are blocking access. Please check Firebase Console.',
+                'Permission Denied'
+            );
+            console.log('📋 To fix this:');
+            console.log('1. Go to Firebase Console');
+            console.log('2. Enable Firestore Database');
+            console.log('3. Set security rules (see FIREBASE_SETUP.md)');
+        } else {
+            window.toast.error('Failed to initialize Firestore: ' + error.message, 'Initialization Error');
+        }
+
+        return false;
+    }
+};
+
+// Auto-initialize on first login
+let firestoreInitialized = false;
+window.autoInitializeFirestore = async () => {
+    if (window.currentUser && !firestoreInitialized) {
+        firestoreInitialized = true;
+        console.log('Auto-initializing Firestore...');
+        await window.initializeFirestoreCollections();
     }
 };
 
