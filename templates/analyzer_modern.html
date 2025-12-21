@@ -335,7 +335,9 @@
             width: 100%;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         /* Left: User Email */
@@ -366,30 +368,39 @@
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
+            flex: 1;
+            min-width: 0;
         }
 
         .logo-main {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
+            gap: 0.5rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .logo-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .logo-main i {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             color: var(--primary);
             filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+            flex-shrink: 0;
         }
 
         /* Right: Profile and Logout Buttons */
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            min-width: 200px;
+            gap: 0.5rem;
             justify-content: flex-end;
+            flex-shrink: 0;
         }
 
         .btn-profile {
@@ -521,19 +532,187 @@
             }
         }
 
+        /* Analysis Sections Styling */
+        .analysis-section {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .analysis-section h4 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .analysis-section h4 i {
+            color: var(--secondary);
+        }
+
+        .analysis-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .analysis-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-item strong {
+            color: var(--primary-light);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .analysis-item p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0.5rem 0;
+        }
+
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .logo-main {
+                font-size: 1.1rem;
+            }
+
+            .logo-main i {
+                font-size: 1.3rem;
+            }
+
+            .btn-profile span,
+            .btn-logout span {
+                display: none;
+            }
+
+            .btn-profile,
+            .btn-logout {
+                padding: 0.625rem;
+                min-width: 40px;
+                justify-content: center;
+            }
+        }
+
         @media (max-width: 768px) {
+            .header {
+                padding: 0.75rem 0;
+            }
+
+            .header-content {
+                padding: 0 0.75rem;
+                gap: 0.5rem;
+            }
+
             .user-email-display {
                 display: none !important;
+            }
+
+            .logo-main {
+                font-size: 1rem;
+                gap: 0.4rem;
+            }
+
+            .logo-main i {
+                font-size: 1.2rem;
+            }
+
+            .header-actions {
+                gap: 0.4rem;
+            }
+
+            .btn-profile,
+            .btn-logout {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .btn-profile i,
+            .btn-logout i {
+                font-size: 0.9rem;
             }
 
             .tabs-container {
                 flex-direction: column;
                 gap: 0.5rem;
+                padding: 0.5rem;
             }
 
             .tab-btn {
                 min-width: auto;
                 width: 100%;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            .hero-badges {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .container {
+                padding: 1rem 0.75rem;
+            }
+
+            .analysis-section {
+                padding: 1rem;
+            }
+
+            .analysis-section h4 {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 0.9rem;
+            }
+
+            .header-actions {
+                gap: 0.3rem;
+            }
+
+            .btn-profile span,
+            .btn-logout span {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
             }
         }
     </style>
@@ -549,9 +728,9 @@
                     <i class="fas fa-shield-alt"></i>
                     <span class="logo-text">CodeSentinel AI</span>
                 </div>
-                <div class="user-email-display" id="headerUserEmail" style="display: none;">
+                <div class="user-email-display" id="headerUserEmail">
                     <span class="logged-in-text">Logged in as</span>
-                    <span id="headerEmailText" class="email-text">user@example.com</span>
+                    <span id="headerEmailText" class="email-text">Loading...</span>
                 </div>
             </div>
 
