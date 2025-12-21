@@ -258,43 +258,83 @@ function displayResults(data) {
                     <div class="quality-score-label">AI Quality Score</div>
                 </div>
 
-                <!-- AI Summary -->
-                <div class="analysis-section summary-box">
-                    <h4><i class="fas fa-align-left"></i> Executive Summary</h4>
-                    <div class="text-limit">
-                        <p style="white-space: pre-line; line-height: 1.8;">${aiData.summary ? aiData.summary.replace(/\\n/g, '\n') : 'No summary available.'}</p>
+
+                <!-- AI Executive Summary Section -->
+                <div class="executive-summary-container">
+                    <h3 style="color: var(--primary); font-size: 1.3rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-brain"></i> Executive Summary
+                    </h3>
+                    
+                    <!-- Quality Score Card -->
+                    <div class="summary-card quality-card">
+                        <div class="card-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-label">Overall Quality Score</div>
+                            <div class="card-value">${aiData.overall_quality || 'N/A'}</div>
+                        </div>
                     </div>
-                    ${aiData.summary && aiData.summary.length > 500 ? `
-                        <div class="read-more-btn" onclick="toggleReadMore(this)">
-                            Read More <i class="fas fa-chevron-down"></i>
+
+                    <!-- Metrics Grid -->
+                    ${aiData.metrics ? `
+                        <div class="metrics-grid-summary">
+                            <div class="summary-card metric-card-item">
+                                <div class="card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-label">Complexity</div>
+                                    <div class="card-value">${aiData.metrics.complexity || 'N/A'}</div>
+                                </div>
+                            </div>
+
+                            <div class="summary-card metric-card-item">
+                                <div class="card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-label">Readability</div>
+                                    <div class="card-value">${aiData.metrics.readability || 'N/A'}</div>
+                                </div>
+                            </div>
+
+                            <div class="summary-card metric-card-item">
+                                <div class="card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div class="card-label">Maintainability</div>
+                                    <div class="card-value">${aiData.metrics.maintainability || 'N/A'}</div>
+                                </div>
+                            </div>
+
+                            ${aiData.metrics.testability ? `
+                                <div class="summary-card metric-card-item">
+                                    <div class="card-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                        <i class="fas fa-vial"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-label">Testability</div>
+                                        <div class="card-value">${aiData.metrics.testability || 'N/A'}</div>
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
                     ` : ''}
-                </div>
-                
-                <!-- AI Metrics -->
-                ${aiData.metrics ? `
-                    <div class="analysis-section">
-                        <h4><i class="fas fa-chart-bar"></i> Detailed Metrics</h4>
-                        <div class="grid-2-col gap-2 mt-2">
-                            <div class="metric-card">
-                                <div class="metric-label">Complexity</div>
-                                <div class="metric-value">${aiData.metrics.complexity || 'N/A'}</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-label">Readability</div>
-                                <div class="metric-value">${aiData.metrics.readability || 'N/A'}</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-label">Maintainability</div>
-                                <div class="metric-value">${aiData.metrics.maintainability || 'N/A'}</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-label">Testability</div>
-                                <div class="metric-value">${aiData.metrics.testability || 'N/A'}</div>
-                            </div>
+
+                    <!-- Summary Text Card -->
+                    <div class="summary-card summary-text-card">
+                        <div class="card-header">
+                            <i class="fas fa-align-left"></i>
+                            <span>Analysis Summary</span>
+                        </div>
+                        <div class="card-text">
+                            <p style="white-space: pre-line; line-height: 1.8; margin: 0;">${aiData.summary ? aiData.summary.replace(/\\n/g, '\n') : 'No summary available.'}</p>
                         </div>
                     </div>
-                ` : ''}
+                </div>
+                
 
                 <!-- Complexity Analysis -->
                 ${aiData.complexity_analysis ? `

@@ -135,19 +135,29 @@ window.updateUserName = function () {
             el.textContent = window.currentUser.displayName;
         });
 
-        // Update header email
+        // Update header email (for analyzer/dashboard pages)
         const headerEmail = document.getElementById('headerUserEmail');
         const headerEmailText = document.getElementById('headerEmailText');
-
-        console.log('Header email element:', headerEmail);
-        console.log('Header email text element:', headerEmailText);
 
         if (headerEmail && headerEmailText && window.currentUser.email) {
             headerEmailText.textContent = window.currentUser.email;
             headerEmail.style.display = 'flex';
-            console.log('✅ Email display updated:', window.currentUser.email);
-        } else {
-            console.log('❌ Could not update email display');
+            console.log('✅ Header email updated:', window.currentUser.email);
+        }
+
+        // Update profile page email
+        const profileEmail = document.getElementById('userEmail');
+        if (profileEmail && window.currentUser.email) {
+            profileEmail.textContent = window.currentUser.email;
+            console.log('✅ Profile email updated:', window.currentUser.email);
+        }
+
+        // Update profile avatar initial
+        const profileAvatar = document.getElementById('profileAvatar');
+        if (profileAvatar && window.currentUser.displayName) {
+            const initial = window.currentUser.displayName.charAt(0).toUpperCase();
+            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: 700;">${initial}</span>`;
+            console.log('✅ Profile avatar updated');
         }
     }
 };
