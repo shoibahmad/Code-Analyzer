@@ -5,180 +5,567 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy - CodeSentinel AI</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .page-header {
-            padding: 6rem 2rem 4rem;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(88, 28, 135, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .page-header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
         }
 
-        .content-section {
+        .container {
             max-width: 900px;
-            margin: 0 auto 4rem;
-            padding: 0 2rem;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
         }
 
-        .policy-card {
-            background: var(--bg-glass);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 0 3rem;
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+
+        .header .last-updated {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .content-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 2.5rem;
             margin-bottom: 2rem;
         }
 
-        .last-updated {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 3rem;
-            font-size: 0.9rem;
+        .section {
+            margin-bottom: 2.5rem;
         }
 
-        .policy-item {
-            margin-bottom: 2rem;
+        .section:last-child {
+            margin-bottom: 0;
         }
 
-        .policy-item h3 {
-            color: var(--text-primary);
-            margin-bottom: 1rem;
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .section h2 {
             font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
-        .policy-item p {
-            color: var(--text-secondary);
+        .section p {
+            color: var(--text-muted);
             line-height: 1.8;
             margin-bottom: 1rem;
         }
 
-        .policy-item ul {
-            list-style-type: disc;
-            padding-left: 1.5rem;
-            color: var(--text-secondary);
+        .section ul,
+        .section ol {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-left: 1.5rem;
             margin-bottom: 1rem;
         }
 
-        .policy-item li {
-            margin-bottom: 0.5rem;
+        .section li {
+            margin-bottom: 0.75rem;
         }
 
-        .back-link {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            z-index: 100;
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 20px;
+            color: #22c55e;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .icon-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .icon-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .icon-list li i {
+            color: var(--primary);
+            margin-top: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            margin: 1.5rem 0;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .data-table td {
+            color: var(--text-muted);
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content-box {
+                padding: 1.5rem;
+            }
+
+            .section h2 {
+                font-size: 1.25rem;
+            }
+
+            .data-table {
+                font-size: 0.875rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+            }
         }
     </style>
 </head>
 
-<body class="dark-theme">
-    <a href="/dashboard" class="btn btn-outline back-link">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
-    </a>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
 
-    <header class="page-header">
-        <h1>Privacy Policy</h1>
-        <p class="text-secondary text-lg">Your Data Security is Our Top Priority</p>
-    </header>
-
-    <div class="content-section">
-        <div class="last-updated">Last Updated: December 21, 2026</div>
-
-        <div class="policy-card">
-            <div class="policy-item">
-                <h3>1. Information We Collect</h3>
-                <p>
-                    When you use CodeSentinel AI, we collect information to provide you with the best
-                    analysis experience. This includes:
-                </p>
-                <ul>
-                    <li><strong>Authentication Data:</strong> Email address and profile information provided via Google
-                        or GitHub login.</li>
-                    <li><strong>Code Snippets:</strong> Code content you knowingly upload or paste for analysis.</li>
-                    <li><strong>Usage Data:</strong> Anonymous statistics about how you interact with our features
-                        (e.g., number of analyses, preferred languages).</li>
-                </ul>
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-user-shield"></i>
             </div>
+            <h1>Privacy Policy</h1>
+            <p class="last-updated">Last Updated: December 21, 2024</p>
+        </div>
 
-            <div class="policy-item">
-                <h3>2. How We Use Your Code</h3>
-                <p>
-                    We understand that your code is your intellectual property. Our handling of your code is strict and
-                    transparent:
-                </p>
-                <ul>
-                    <li><strong>Ephemeral Analysis:</strong> Code snippets sent for analysis are processed in real-time
-                        by our Machine Learning models and the Google Gemini API.</li>
-                    <li><strong>No Long-Term Retraining:</strong> We do NOT use your private code snippets to train our
-                        public models or the Google Gemini model.</li>
-                    <li><strong>History Storage:</strong> Your analysis history is stored locally in your browser's
-                        LocalStorage for your convenience. Minimal metadata may be stored on our servers for dashboard
-                        statistics.</li>
-                </ul>
-            </div>
-
-            <div class="policy-item">
-                <h3>3. Third-Party Services</h3>
-                <p>
-                    We utilize trusted third-party services to power our application:
-                </p>
-                <ul>
-                    <li><strong>Firebase (Google):</strong> For secure authentication and hosting.</li>
-                    <li><strong>Google Gemini API:</strong> For providing Generative AI code analysis.</li>
-                    <li><strong>GitHub API:</strong> For fetching repository details when you use the GitHub Analyzer.
-                    </li>
-                </ul>
-                <p>
-                    Each of these providers has their own privacy policies, and data shared with them is governed by
-                    their respective terms.
-                </p>
-            </div>
-
-            <div class="policy-item">
-                <h3>4. Data Security</h3>
-                <p>
-                    We implement industry-standard security measures to protect your data. All communication between
-                    your browser and our servers is encrypted via SSL/TLS. We do not store passwords or authentication
-                    tokens on our servers; these are handled securely by Firebase.
-                </p>
-            </div>
-
-            <div class="policy-item">
-                <h3>5. Contact Us</h3>
-                <p>
-                    If you have any questions about this Privacy Policy or our data practices, please contact the
-                    developer team:
-                </p>
-                <div class="mt-3 p-3 bg-white-5 rounded">
-                    <strong>Alisha Shad</strong><br>
-                    <span class="text-muted">Department of Computer Applications</span><br>
-                    <span class="text-muted">Batch 2024 - 2026</span>
+        <div class="content-box">
+            <!-- Introduction -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2>Our Commitment to Privacy</h2>
                 </div>
+                <p>
+                    At CodeSentinel AI, we take your privacy seriously. This Privacy Policy explains how we collect,
+                    use, protect, and handle your information when you use our code analysis service.
+                </p>
+                <div class="highlight-box">
+                    <p><strong><i class="fas fa-lock"></i> Your Privacy Matters:</strong> We are committed to protecting
+                        your personal information and your code. We never sell your data to third parties.</p>
+                </div>
+                <div>
+                    <span class="security-badge"><i class="fas fa-check-circle"></i> GDPR Compliant</span>
+                    <span class="security-badge"><i class="fas fa-check-circle"></i> SSL Encrypted</span>
+                    <span class="security-badge"><i class="fas fa-check-circle"></i> Secure Storage</span>
+                </div>
+            </div>
+
+            <!-- Information We Collect -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h2>Information We Collect</h2>
+                </div>
+
+                <h3 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.125rem;">1. Account Information
+                </h3>
+                <ul class="icon-list">
+                    <li><i class="fas fa-user"></i> <span><strong>Name:</strong> Your display name for
+                            personalization</span></li>
+                    <li><i class="fas fa-envelope"></i> <span><strong>Email Address:</strong> For account creation and
+                            communication</span></li>
+                    <li><i class="fas fa-key"></i> <span><strong>Authentication Data:</strong> Securely stored via
+                            Firebase Authentication</span></li>
+                </ul>
+
+                <h3 style="color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.125rem;">2. Code Analysis
+                    Data</h3>
+                <ul class="icon-list">
+                    <li><i class="fas fa-code"></i> <span><strong>Code Snippets:</strong> Temporarily processed for
+                            analysis (not permanently stored)</span></li>
+                    <li><i class="fas fa-chart-bar"></i> <span><strong>Analysis Results:</strong> Quality scores, bug
+                            counts, security issues</span></li>
+                    <li><i class="fas fa-clock"></i> <span><strong>Analysis Metadata:</strong> Timestamps, language,
+                            file sizes</span></li>
+                </ul>
+
+                <h3 style="color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.125rem;">3. Usage Information
+                </h3>
+                <ul class="icon-list">
+                    <li><i class="fas fa-mouse-pointer"></i> <span><strong>Activity Logs:</strong> Features used,
+                            analysis frequency</span></li>
+                    <li><i class="fas fa-desktop"></i> <span><strong>Device Information:</strong> Browser type, OS,
+                            screen resolution</span></li>
+                    <li><i class="fas fa-map-marker-alt"></i> <span><strong>IP Address:</strong> For security and
+                            analytics</span></li>
+                </ul>
+            </div>
+
+            <!-- How We Use Information -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h2>How We Use Your Information</h2>
+                </div>
+                <p>We use collected information for the following purposes:</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Purpose</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Service Delivery</strong></td>
+                            <td>Provide code analysis and generate results</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Account Management</strong></td>
+                            <td>Create and maintain your account</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Service Improvement</strong></td>
+                            <td>Improve our AI models and algorithms</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Communication</strong></td>
+                            <td>Send updates, notifications, and support</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Security</strong></td>
+                            <td>Detect and prevent fraud and abuse</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analytics</strong></td>
+                            <td>Understand usage patterns and trends</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Data Storage & Security -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h2>Data Storage & Security</h2>
+                </div>
+
+                <h3 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.125rem;">Security Measures</h3>
+                <ul class="icon-list">
+                    <li><i class="fas fa-shield-alt"></i> <span><strong>Encryption:</strong> All data transmitted using
+                            SSL/TLS encryption</span></li>
+                    <li><i class="fas fa-database"></i> <span><strong>Secure Storage:</strong> Data stored in Firebase
+                            with enterprise-grade security</span></li>
+                    <li><i class="fas fa-user-lock"></i> <span><strong>Access Control:</strong> Strict access controls
+                            and authentication</span></li>
+                    <li><i class="fas fa-sync-alt"></i> <span><strong>Regular Backups:</strong> Automated backups for
+                            data protection</span></li>
+                </ul>
+
+                <h3 style="color: var(--text-primary); margin: 1.5rem 0 1rem; font-size: 1.125rem;">Code Privacy</h3>
+                <div class="highlight-box">
+                    <p><strong><i class="fas fa-code"></i> Important:</strong> Your code snippets are processed in
+                        real-time for analysis and are NOT permanently stored on our servers. Only analysis metadata
+                        (scores, counts) is retained.</p>
+                </div>
+            </div>
+
+            <!-- Third-Party Services -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                    <h2>Third-Party Services</h2>
+                </div>
+                <p>We use the following trusted third-party services:</p>
+
+                <ul class="icon-list">
+                    <li><i class="fab fa-google"></i> <span><strong>Firebase (Google):</strong> Authentication,
+                            database, and hosting</span></li>
+                    <li><i class="fas fa-brain"></i> <span><strong>Google Gemini AI:</strong> AI-powered code
+                            analysis</span></li>
+                    <li><i class="fab fa-github"></i> <span><strong>GitHub API:</strong> Repository analysis (when you
+                            provide access)</span></li>
+                </ul>
+
+                <p style="margin-top: 1rem;">
+                    These services have their own privacy policies. We recommend reviewing them:
+                </p>
+                <ul>
+                    <li>Google Privacy Policy: <a href="https://policies.google.com/privacy"
+                            style="color: var(--primary);">policies.google.com/privacy</a></li>
+                    <li>GitHub Privacy Statement: <a href="https://docs.github.com/en/site-policy/privacy-policies"
+                            style="color: var(--primary);">docs.github.com/privacy</a></li>
+                </ul>
+            </div>
+
+            <!-- Your Rights -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h2>Your Privacy Rights</h2>
+                </div>
+                <p>You have the following rights regarding your data:</p>
+
+                <ul class="icon-list">
+                    <li><i class="fas fa-eye"></i> <span><strong>Access:</strong> Request a copy of your personal
+                            data</span></li>
+                    <li><i class="fas fa-edit"></i> <span><strong>Correction:</strong> Update or correct your
+                            information</span></li>
+                    <li><i class="fas fa-trash-alt"></i> <span><strong>Deletion:</strong> Request deletion of your
+                            account and data</span></li>
+                    <li><i class="fas fa-download"></i> <span><strong>Export:</strong> Download your analysis
+                            history</span></li>
+                    <li><i class="fas fa-ban"></i> <span><strong>Opt-Out:</strong> Unsubscribe from marketing
+                            communications</span></li>
+                </ul>
+
+                <p style="margin-top: 1rem;">
+                    To exercise these rights, contact us at <a href="mailto:privacy@codesentinel.ai"
+                        style="color: var(--primary);">privacy@codesentinel.ai</a>
+                </p>
+            </div>
+
+            <!-- Cookies -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-cookie-bite"></i>
+                    </div>
+                    <h2>Cookies & Tracking</h2>
+                </div>
+                <p>We use cookies and similar technologies for:</p>
+
+                <ul class="icon-list">
+                    <li><i class="fas fa-sign-in-alt"></i> <span><strong>Authentication:</strong> Keep you logged
+                            in</span></li>
+                    <li><i class="fas fa-cog"></i> <span><strong>Preferences:</strong> Remember your settings</span>
+                    </li>
+                    <li><i class="fas fa-chart-line"></i> <span><strong>Analytics:</strong> Understand how you use our
+                            service</span></li>
+                </ul>
+
+                <p style="margin-top: 1rem;">
+                    You can control cookies through your browser settings. Note that disabling cookies may affect
+                    functionality.
+                </p>
+            </div>
+
+            <!-- Data Retention -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h2>Data Retention</h2>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data Type</th>
+                            <th>Retention Period</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Account Information</strong></td>
+                            <td>Until account deletion</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code Snippets</strong></td>
+                            <td>Not stored (processed in real-time)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analysis Results</strong></td>
+                            <td>20 most recent analyses</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Usage Logs</strong></td>
+                            <td>90 days</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Children's Privacy -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-child"></i>
+                    </div>
+                    <h2>Children's Privacy</h2>
+                </div>
+                <p>
+                    CodeSentinel AI is not intended for children under 13. We do not knowingly collect personal
+                    information from children. If you believe we have collected information from a child, please contact
+                    us immediately.
+                </p>
+            </div>
+
+            <!-- Changes to Policy -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h2>Changes to This Policy</h2>
+                </div>
+                <p>We may update this Privacy Policy from time to time. When we do:</p>
+                <ul>
+                    <li>We will update the "Last Updated" date</li>
+                    <li>Significant changes will be notified via email</li>
+                    <li>Continued use after changes constitutes acceptance</li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h2>Contact Us</h2>
+                </div>
+                <p>If you have questions about this Privacy Policy or your data:</p>
+                <ul class="icon-list">
+                    <li><i class="fas fa-envelope"></i> <span><strong>Email:</strong> privacy@codesentinel.ai</span>
+                    </li>
+                    <li><i class="fas fa-shield-alt"></i> <span><strong>Data Protection Officer:</strong>
+                            dpo@codesentinel.ai</span></li>
+                    <li><i class="fas fa-globe"></i> <span><strong>Website:</strong> www.codesentinel.ai</span></li>
+                </ul>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer
-        style="text-align: center; padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem; color: var(--text-muted);">
-        <p>© 2025 AI Code Review Assistant. All rights reserved.</p>
-    </footer>
 </body>
 
 </html>

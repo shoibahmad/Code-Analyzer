@@ -4,184 +4,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service - CodeSentinel AI</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Styles -->
+    <title>Terms & Conditions - CodeSentinel AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .page-header {
-            padding: 6rem 2rem 4rem;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(88, 28, 135, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .page-header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
         }
 
-        .content-section {
+        .container {
             max-width: 900px;
-            margin: 0 auto 4rem;
-            padding: 0 2rem;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
         }
 
-        .terms-card {
-            background: var(--bg-glass);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 0 3rem;
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+
+        .header .last-updated {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .content-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 2.5rem;
             margin-bottom: 2rem;
         }
 
-        .terms-item {
-            margin-bottom: 2rem;
+        .section {
+            margin-bottom: 2.5rem;
         }
 
-        .terms-item h3 {
-            color: var(--text-primary);
-            margin-bottom: 1rem;
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .section-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .section h2 {
             font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
-        .terms-item p {
-            color: var(--text-secondary);
+        .section p {
+            color: var(--text-muted);
             line-height: 1.8;
             margin-bottom: 1rem;
         }
 
-        .terms-item ul {
-            list-style-type: disc;
-            padding-left: 1.5rem;
-            color: var(--text-secondary);
+        .section ul,
+        .section ol {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-left: 1.5rem;
             margin-bottom: 1rem;
         }
 
-        .terms-item li {
-            margin-bottom: 0.5rem;
+        .section li {
+            margin-bottom: 0.75rem;
         }
 
         .highlight-box {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: var(--radius-md);
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary);
             padding: 1.5rem;
+            border-radius: 12px;
             margin: 1.5rem 0;
-            color: #fca5a5;
         }
 
-        .back-link {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            z-index: 100;
+        .highlight-box p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .icon-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .icon-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .icon-list li i {
+            color: var(--primary);
+            margin-top: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content-box {
+                padding: 1.5rem;
+            }
+
+            .section h2 {
+                font-size: 1.25rem;
+            }
         }
     </style>
 </head>
 
-<body class="dark-theme">
-    <a href="/dashboard" class="btn btn-outline back-link">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
-    </a>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
 
-    <header class="page-header">
-        <h1>Terms of Service</h1>
-        <p class="text-secondary text-lg">Guidelines for using our AI Analysis Platform</p>
-    </header>
-
-    <div class="content-section">
-        <div class="terms-card">
-            <div class="terms-item">
-                <h3>1. Acceptance of Terms</h3>
-                <p>
-                    By accessing and using CodeSentinel AI, you agree to comply with and be bound by these
-                    Terms of Service. If you do not agree to these terms, please do not use our services.
-                </p>
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-file-contract"></i>
             </div>
+            <h1>Terms & Conditions</h1>
+            <p class="last-updated">Last Updated: December 21, 2024</p>
+        </div>
 
-            <div class="terms-item">
-                <h3>2. Service Description</h3>
+        <div class="content-box">
+            <!-- Introduction -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <h2>Introduction</h2>
+                </div>
                 <p>
-                    We provide an automated code analysis tool powered by Artificial Intelligence and Machine Learning.
-                    The tool offers:
+                    Welcome to CodeSentinel AI. These Terms and Conditions ("Terms") govern your use of our code
+                    analysis platform and services. By accessing or using CodeSentinel AI, you agree to be bound by
+                    these Terms.
                 </p>
-                <ul>
-                    <li>Static Code Analysis for bug detection.</li>
-                    <li>AI-powered code reviews and suggestions.</li>
-                    <li>Security vulnerability scanning.</li>
-                    <li>GitHub repository analysis and insights.</li>
-                </ul>
-            </div>
-
-            <div class="terms-item">
-                <h3>3. Limitation of Liability</h3>
                 <div class="highlight-box">
-                    <strong>Important Disclaimer:</strong>
-                    <p class="mb-0 mt-2">
-                        The analysis provided by this tool is generated by AI and ML models. While we strive for
-                        accuracy, **we cannot guarantee** that the analysis is 100% correct, complete, or free from
-                        errors. This tool should be used as an assistant to, not a replacement for, professional human
-                        code review and testing.
-                    </p>
+                    <p><strong><i class="fas fa-exclamation-triangle"></i> Important:</strong> Please read these terms
+                        carefully before using our service. If you do not agree with any part of these terms, you may
+                        not use our service.</p>
                 </div>
-                <p>
-                    By using this service, you acknowledge that the developer (Alisha Shad) nor any associated parties
-                    shall be liable for any direct, indirect, incidental, or consequential damages resulting from the
-                    use or inability to use the service.
-                </p>
             </div>
 
-            <div class="terms-item">
-                <h3>4. User Responsibilities</h3>
-                <p>
-                    You agree NOT to use the service to:
-                </p>
-                <ul>
-                    <li>Analyze malicious code intended to harm systems.</li>
-                    <li>Attempt to reverse engineer the application or its models.</li>
-                    <li>Overload the system with excessive automated requests (rate limits apply).</li>
-                    <li>Upload sensitive personal data (PII) or secrets (API keys, passwords) within your code snippets.
-                    </li>
+            <!-- Acceptance of Terms -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">1</div>
+                    <h2>Acceptance of Terms</h2>
+                </div>
+                <p>By creating an account or using CodeSentinel AI, you acknowledge that you have read, understood, and
+                    agree to be bound by these Terms and our Privacy Policy.</p>
+                <ul class="icon-list">
+                    <li><i class="fas fa-check-circle"></i> <span>You must be at least 13 years old to use this
+                            service</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span>You must provide accurate and complete
+                            information</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span>You are responsible for maintaining account
+                            security</span></li>
                 </ul>
             </div>
 
-            <div class="terms-item">
-                <h3>5. Intellectual Property</h3>
-                <p>
-                    The interface, design, logo, and underlying application logic are the intellectual property of the
-                    developer. You retain full ownership of the code you submit for analysis.
-                </p>
+            <!-- Service Description -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">2</div>
+                    <h2>Service Description</h2>
+                </div>
+                <p>CodeSentinel AI provides:</p>
+                <ul class="icon-list">
+                    <li><i class="fas fa-code"></i> <span><strong>Code Analysis:</strong> AI-powered analysis of source
+                            code for bugs, security issues, and quality improvements</span></li>
+                    <li><i class="fab fa-github"></i> <span><strong>GitHub Integration:</strong> Direct repository
+                            analysis from GitHub</span></li>
+                    <li><i class="fas fa-chart-line"></i> <span><strong>Quality Metrics:</strong> Comprehensive code
+                            quality scoring and tracking</span></li>
+                    <li><i class="fas fa-lightbulb"></i> <span><strong>Recommendations:</strong> AI-generated
+                            suggestions for code improvement</span></li>
+                </ul>
             </div>
 
-            <div class="terms-item">
-                <h3>6. Project Credits</h3>
-                <p>
-                    This project is developed as part of an academic curriculum.
-                </p>
-                <div class="mt-3 p-3 bg-white-5 rounded">
-                    <strong>Developer:</strong> Alisha Shad<br>
-                    <strong>Stream:</strong> MCA (Master of Computer Applications)<br>
-                    <strong>Batch:</strong> 2024 - 2026
+            <!-- User Responsibilities -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">3</div>
+                    <h2>User Responsibilities</h2>
                 </div>
+                <p>As a user of CodeSentinel AI, you agree to:</p>
+                <ol>
+                    <li><strong>Lawful Use:</strong> Use the service only for lawful purposes and in accordance with
+                        these Terms</li>
+                    <li><strong>Code Ownership:</strong> Only analyze code that you own or have permission to analyze
+                    </li>
+                    <li><strong>Accurate Information:</strong> Provide accurate, current, and complete information</li>
+                    <li><strong>Account Security:</strong> Maintain the confidentiality of your account credentials</li>
+                    <li><strong>Prohibited Activities:</strong> Not engage in any activity that disrupts or interferes
+                        with the service</li>
+                </ol>
+            </div>
+
+            <!-- Prohibited Uses -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">4</div>
+                    <h2>Prohibited Uses</h2>
+                </div>
+                <p>You may NOT use CodeSentinel AI to:</p>
+                <ul class="icon-list">
+                    <li><i class="fas fa-times-circle" style="color: #ef4444;"></i> <span>Analyze code you don't have
+                            rights to</span></li>
+                    <li><i class="fas fa-times-circle" style="color: #ef4444;"></i> <span>Attempt to reverse engineer or
+                            hack the service</span></li>
+                    <li><i class="fas fa-times-circle" style="color: #ef4444;"></i> <span>Upload malicious code or
+                            malware</span></li>
+                    <li><i class="fas fa-times-circle" style="color: #ef4444;"></i> <span>Violate any applicable laws or
+                            regulations</span></li>
+                    <li><i class="fas fa-times-circle" style="color: #ef4444;"></i> <span>Abuse or overload our
+                            systems</span></li>
+                </ul>
+            </div>
+
+            <!-- Intellectual Property -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">5</div>
+                    <h2>Intellectual Property</h2>
+                </div>
+                <p><strong>Your Code:</strong> You retain all rights to the code you submit for analysis. We do not
+                    claim ownership of your code.</p>
+                <p><strong>Our Service:</strong> CodeSentinel AI, including its design, features, and technology, is
+                    protected by copyright, trademark, and other intellectual property laws.</p>
+                <p><strong>Analysis Results:</strong> While you own your code, the analysis results and insights
+                    generated by our AI are provided as a service and may be used to improve our algorithms.</p>
+            </div>
+
+            <!-- Data Usage -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">6</div>
+                    <h2>Data Usage & Privacy</h2>
+                </div>
+                <p>We take your privacy seriously:</p>
+                <ul class="icon-list">
+                    <li><i class="fas fa-lock"></i> <span>Code snippets are analyzed in real-time and not permanently
+                            stored</span></li>
+                    <li><i class="fas fa-shield-alt"></i> <span>Analysis metadata may be stored for service
+                            improvement</span></li>
+                    <li><i class="fas fa-user-shield"></i> <span>Personal data is handled according to our Privacy
+                            Policy</span></li>
+                    <li><i class="fas fa-database"></i> <span>We use Firebase for secure data storage</span></li>
+                </ul>
+                <p>For more details, please review our <a href="/privacy" style="color: var(--primary);">Privacy
+                        Policy</a>.</p>
+            </div>
+
+            <!-- Service Availability -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">7</div>
+                    <h2>Service Availability</h2>
+                </div>
+                <p>We strive to provide reliable service, but:</p>
+                <ul>
+                    <li>We do not guarantee 100% uptime</li>
+                    <li>Scheduled maintenance may cause temporary unavailability</li>
+                    <li>We may modify or discontinue features with notice</li>
+                    <li>Third-party services (GitHub, Firebase) may affect availability</li>
+                </ul>
+            </div>
+
+            <!-- Limitation of Liability -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">8</div>
+                    <h2>Limitation of Liability</h2>
+                </div>
+                <div class="highlight-box">
+                    <p><strong>Disclaimer:</strong> CodeSentinel AI is provided "as is" without warranties of any kind.
+                        We are not liable for:</p>
+                </div>
+                <ul>
+                    <li>Accuracy of analysis results</li>
+                    <li>Decisions made based on our recommendations</li>
+                    <li>Damages resulting from service use or inability to use</li>
+                    <li>Data loss or security breaches beyond our control</li>
+                    <li>Third-party actions or services</li>
+                </ul>
+                <p><strong>Use at Your Own Risk:</strong> Always review and test code changes before deployment.</p>
+            </div>
+
+            <!-- Account Termination -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">9</div>
+                    <h2>Account Termination</h2>
+                </div>
+                <p><strong>By You:</strong> You may delete your account at any time from your profile settings.</p>
+                <p><strong>By Us:</strong> We reserve the right to suspend or terminate accounts that:</p>
+                <ul class="icon-list">
+                    <li><i class="fas fa-ban"></i> <span>Violate these Terms</span></li>
+                    <li><i class="fas fa-ban"></i> <span>Engage in abusive behavior</span></li>
+                    <li><i class="fas fa-ban"></i> <span>Attempt to harm the service or other users</span></li>
+                </ul>
+            </div>
+
+            <!-- Changes to Terms -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">10</div>
+                    <h2>Changes to Terms</h2>
+                </div>
+                <p>We may update these Terms from time to time. When we do:</p>
+                <ul>
+                    <li>We will update the "Last Updated" date</li>
+                    <li>Significant changes will be notified via email or in-app notification</li>
+                    <li>Continued use after changes constitutes acceptance</li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h2>Contact Us</h2>
+                </div>
+                <p>If you have questions about these Terms, please contact us:</p>
+                <ul class="icon-list">
+                    <li><i class="fas fa-envelope"></i> <span><strong>Email:</strong> legal@codesentinel.ai</span></li>
+                    <li><i class="fas fa-globe"></i> <span><strong>Website:</strong> www.codesentinel.ai</span></li>
+                </ul>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer
-        style="text-align: center; padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem; color: var(--text-muted);">
-        <p>© 2026 CodeSentinel AI. All rights reserved.</p>
-    </footer>
 </body>
 
 </html>

@@ -391,12 +391,20 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .profile-container {
+                padding: 1.5rem 1rem;
+            }
+
             .profile-grid {
                 grid-template-columns: 1fr;
             }
 
             .stat-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                padding: 2.5rem 1.5rem;
             }
 
             .profile-header h1 {
@@ -407,6 +415,138 @@
                 width: 100px;
                 height: 100px;
                 font-size: 2.5rem;
+            }
+
+            .profile-card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-container {
+                padding: 1rem 0.75rem;
+            }
+
+            .back-to-dashboard {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.9rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .profile-header {
+                padding: 2rem 1.25rem;
+                border-radius: 16px;
+                margin-bottom: 1.5rem;
+            }
+
+            .profile-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .profile-header p {
+                font-size: 1rem;
+            }
+
+            .profile-avatar {
+                width: 85px;
+                height: 85px;
+                font-size: 2.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .profile-card {
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+
+            .profile-card h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .info-row {
+                padding: 0.875rem 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .info-label {
+                font-size: 0.8rem;
+            }
+
+            .info-value {
+                font-size: 0.95rem;
+            }
+
+            .stat-item {
+                padding: 1.25rem;
+            }
+
+            .stat-value {
+                font-size: 2.25rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+                width: 95%;
+            }
+
+            .modal-content h2 {
+                font-size: 1.35rem;
+            }
+
+            .input-field {
+                padding: 0.75rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 360px) {
+            .profile-container {
+                padding: 0.875rem 0.625rem;
+            }
+
+            .back-to-dashboard {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .profile-header {
+                padding: 1.75rem 1rem;
+            }
+
+            .profile-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .profile-avatar {
+                width: 75px;
+                height: 75px;
+                font-size: 2rem;
+            }
+
+            .profile-card {
+                padding: 1rem;
+            }
+
+            .profile-card h2 {
+                font-size: 1.15rem;
+            }
+
+            .btn {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
             }
         }
 

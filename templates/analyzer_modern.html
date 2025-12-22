@@ -623,6 +623,7 @@
         @media (max-width: 768px) {
             .header {
                 padding: 0.75rem 0;
+                min-height: 70px;
             }
 
             .header-content {
@@ -635,27 +636,27 @@
             }
 
             .logo-main {
-                font-size: 1rem;
-                gap: 0.4rem;
+                font-size: 1.1rem;
+                gap: 0.5rem;
             }
 
             .logo-main i {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
             }
 
             .header-actions {
-                gap: 0.4rem;
+                gap: 0.5rem;
             }
 
             .btn-profile,
             .btn-logout {
-                padding: 0.5rem;
-                font-size: 0.9rem;
+                padding: 0.625rem 0.875rem;
+                font-size: 0.875rem;
             }
 
             .btn-profile i,
             .btn-logout i {
-                font-size: 0.9rem;
+                font-size: 1rem;
             }
 
             .tabs-container {
@@ -698,17 +699,49 @@
         }
 
         @media (max-width: 480px) {
+            .header {
+                padding: 0.875rem 0;
+                min-height: 65px;
+            }
+
+            .header-content {
+                padding: 0 0.875rem;
+                gap: 0.625rem;
+            }
+
+            .logo-main {
+                font-size: 1.05rem;
+                gap: 0.5rem;
+            }
+
+            .logo-main i {
+                font-size: 1.35rem;
+            }
+
             .logo-text {
-                font-size: 0.9rem;
+                font-size: 1.05rem;
             }
 
             .header-actions {
-                gap: 0.3rem;
+                gap: 0.5rem;
             }
 
+            .btn-profile,
+            .btn-logout {
+                padding: 0.625rem 0.875rem;
+                font-size: 0.875rem;
+                min-width: auto;
+            }
+
+            .btn-profile i,
+            .btn-logout i {
+                font-size: 1rem;
+            }
+
+            /* Keep text visible on phones for better UX */
             .btn-profile span,
             .btn-logout span {
-                display: none;
+                display: inline !important;
             }
 
             .hero h1 {
@@ -717,6 +750,42 @@
 
             .stat-card {
                 padding: 1rem;
+            }
+
+            .container {
+                padding: 0.875rem;
+            }
+        }
+
+        /* Very small phones - optimize further */
+        @media (max-width: 375px) {
+            .header {
+                min-height: 60px;
+                padding: 0.75rem 0;
+            }
+
+            .header-content {
+                padding: 0 0.75rem;
+                gap: 0.5rem;
+            }
+
+            .logo-main {
+                font-size: 0.95rem;
+            }
+
+            .logo-main i {
+                font-size: 1.25rem;
+            }
+
+            .btn-profile,
+            .btn-logout {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .btn-profile i,
+            .btn-logout i {
+                font-size: 0.9rem;
             }
         }
     </style>

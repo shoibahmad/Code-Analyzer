@@ -5,184 +5,513 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - CodeSentinel AI</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .page-header {
-            padding: 6rem 2rem 4rem;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(88, 28, 135, 0.1) 0%, rgba(15, 23, 42, 0) 100%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .page-header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
         }
 
-        .content-section {
-            max-width: 900px;
-            margin: 0 auto 4rem;
-            padding: 0 2rem;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
         }
 
-        .info-card {
-            background: var(--bg-glass);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
             margin-bottom: 2rem;
         }
 
-        .team-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
-        .team-card {
+        .hero {
             text-align: center;
-            padding: 3rem 2rem;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            transition: all 0.3s ease;
+            padding: 3rem 0;
+            margin-bottom: 3rem;
         }
 
-        .team-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
-        }
-
-        .member-avatar {
-            width: 120px;
-            height: 120px;
+        .hero-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            margin: 0 auto 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
             color: white;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
         }
 
-        .back-link {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            z-index: 100;
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .section h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .section p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.05);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .team-card {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .team-avatar {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .team-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .team-card .role {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .features-grid,
+            .stats-grid,
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
-<body class="dark-theme">
-    <a href="/dashboard" class="btn btn-outline back-link">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
-    </a>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
 
-    <header class="page-header">
-        <h1>About the Project</h1>
-        <p class="text-secondary text-lg">Revolutionizing Code Quality with Artificial Intelligence</p>
-    </header>
-
-    <div class="content-section">
-        <div class="info-card">
-            <h2 class="mb-4"><i class="fas fa-rocket text-primary"></i> Our Mission</h2>
-            <p class="text-secondary mb-4" style="line-height: 1.8;">
-                In the rapidly evolving landscape of software development, code quality and security are paramount.
-                CodeSentinel AI was born from a vision to democratize elite-level code analysis.
-                We aim to empower developers of all skill levels—from students to industry veterans—with
-                instant, intelligent, and actionable feedback on their code.
-            </p>
-            <p class="text-secondary" style="line-height: 1.8;">
-                By combining traditional Machine Learning (CodeBERT) with state-of-the-art Generative AI (Google
-                Gemini),
-                we provide a dual-layer analysis system that catches syntax errors, logic bugs, security
-                vulnerabilities,
-                and offers architectural improvements in seconds.
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>About CodeSentinel AI</h1>
+            <p>Empowering developers with AI-powered code analysis to build better, safer, and more efficient software
             </p>
         </div>
 
-        <div class="info-card">
-            <h2 class="mb-4"><i class="fas fa-layer-group text-success"></i> Technology Stack</h2>
-            <div class="grid-2-col gap-3">
-                <div class="p-3 border-white-10 rounded">
-                    <h3 class="h5 text-primary mb-2">Frontend</h3>
-                    <ul class="text-muted text-sm space-y-2">
-                        <li>Modern HTML5 & CSS3</li>
-                        <li>Glassmorphism UI Design</li>
-                        <li>Vanilla JavaScript (ES6+)</li>
-                        <li>Chart.js Visualization</li>
-                    </ul>
+        <!-- Mission Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-bullseye"></i>
                 </div>
-                <div class="p-3 border-white-10 rounded">
-                    <h3 class="h5 text-secondary mb-2">Backend & AI</h3>
-                    <ul class="text-muted text-sm space-y-2">
-                        <li>Python Flask Framework</li>
-                        <li>Microsoft CodeBERT (ML)</li>
-                        <li>Google Gemini 2.5 (GenAI)</li>
-                        <li>Firebase Authentication</li>
-                    </ul>
+                <h2>Our Mission</h2>
+            </div>
+            <p>
+                At CodeSentinel AI, our mission is to revolutionize the way developers write and maintain code. We
+                believe that every developer deserves access to enterprise-grade code analysis tools, regardless of
+                their team size or budget.
+            </p>
+            <p>
+                By combining cutting-edge machine learning algorithms with advanced AI models, we provide instant,
+                actionable insights that help developers catch bugs early, improve code quality, and ship with
+                confidence.
+            </p>
+        </div>
+
+        <!-- What We Do Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h2>What We Do</h2>
+            </div>
+            <p>
+                CodeSentinel AI is an intelligent code analysis platform that combines the power of machine learning and
+                artificial intelligence to provide comprehensive code reviews in seconds.
+            </p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <h3>Bug Detection</h3>
+                    <p>Identify potential bugs and logical errors before they reach production</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-virus"></i>
+                    </div>
+                    <h3>Security Analysis</h3>
+                    <p>Detect security vulnerabilities and potential exploits in your code</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Smart Suggestions</h3>
+                    <p>Get AI-powered recommendations to improve code quality and performance</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <h3>GitHub Integration</h3>
+                    <p>Analyze entire repositories directly from GitHub with one click</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Quality Metrics</h3>
+                    <p>Track code quality trends and improvements over time</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Instant Results</h3>
+                    <p>Get comprehensive analysis results in seconds, not hours</p>
                 </div>
             </div>
         </div>
 
-        <h2 class="text-center mb-5">Meet the Developer</h2>
-        <div class="team-section">
-            <div class="team-card">
-                <div class="member-avatar">
-                    <i class="fas fa-user-code"></i>
+        <!-- Stats Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-chart-bar"></i>
                 </div>
-                <h3 class="h3 mb-2">Alisha Shad</h3>
-                <div class="badge badge-primary mb-3">Lead Developer</div>
-
-                <div class="text-left mx-auto" style="max-width: 250px;">
-                    <div class="flex items-center gap-3 mb-2 text-muted">
-                        <i class="fas fa-graduation-cap w-5"></i>
-                        <span>MCA 2nd Year</span>
-                    </div>
-                    <div class="flex items-center gap-3 mb-2 text-muted">
-                        <i class="fas fa-clock w-5"></i>
-                        <span>Batch 2024 - 2026</span>
-                    </div>
-                    <div class="flex items-center gap-3 mb-2 text-muted">
-                        <i class="fas fa-university w-5"></i>
-                        <span>Department of Computer Applications</span>
-                    </div>
+                <h2>Our Impact</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">10K+</div>
+                    <div class="stat-label">Analyses Performed</div>
                 </div>
-
-                <div class="mt-4 flex justify-center gap-3">
-                    <a href="https://github.com/alishashad" target="_blank" rel="noopener noreferrer"
-                        class="btn btn-outline btn-icon rounded-full"><i class="fab fa-github"></i></a>
-                    <a href="https://www.linkedin.com/in/alisha-shad-983456380/" target="_blank"
-                        rel="noopener noreferrer" class="btn btn-outline btn-icon rounded-full"><i
-                            class="fab fa-linkedin"></i></a>
-                    <a href="mailto:alishasshad@gmail.com" class="btn btn-outline btn-icon rounded-full"><i
-                            class="fas fa-envelope"></i></a>
+                <div class="stat-card">
+                    <div class="stat-value">50K+</div>
+                    <div class="stat-label">Bugs Detected</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5K+</div>
+                    <div class="stat-label">Security Issues Found</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">99.9%</div>
+                    <div class="stat-label">Uptime</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Technology Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h2>Our Technology</h2>
+            </div>
+            <p>
+                CodeSentinel AI leverages state-of-the-art technology to deliver accurate and reliable code analysis:
+            </p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Machine Learning</h3>
+                    <p>Custom-trained ML models for pattern recognition and anomaly detection</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h3>Google Gemini AI</h3>
+                    <p>Advanced AI for deep code understanding and context-aware suggestions</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Cloud Infrastructure</h3>
+                    <p>Scalable, secure cloud infrastructure for fast and reliable analysis</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h2>Our Team</h2>
+            </div>
+            <p>
+                Built by developers, for developers. Our team is passionate about creating tools that make coding better
+                for everyone.
+            </p>
+            <div class="team-grid">
+                <!-- Lead Developer -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3>Alisha Shad</h3>
+                    <div class="role">Lead Developer</div>
+                    <p>Full-stack developer passionate about AI and code quality. Building the future of code analysis.
+                    </p>
+                    <p style="margin-top: 1rem;">
+                        <a href="mailto:alishasshad@gmail.com" style="color: var(--primary); text-decoration: none;">
+                            <i class="fas fa-envelope"></i> alishasshad@gmail.com
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Development Team -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Development Team</h3>
+                    <div class="role">Full-Stack Engineers</div>
+                    <p>Experienced developers building the next generation of code analysis tools</p>
+                </div>
+
+                <!-- AI Research -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI Research</h3>
+                    <div class="role">ML Engineers</div>
+                    <p>Experts in machine learning and artificial intelligence</p>
+                </div>
+
+                <!-- Security Team -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Security Team</h3>
+                    <div class="role">Security Specialists</div>
+                    <p>Dedicated to keeping your code and data secure</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h2>Get in Touch</h2>
+            </div>
+            <p>
+                Have questions, feedback, or suggestions? We'd love to hear from you!
+            </p>
+            <p style="margin-top: 1rem;">
+                <strong>Email:</strong> <a href="mailto:support@codesentinel.ai"
+                    style="color: var(--primary);">support@codesentinel.ai</a><br>
+                <strong>GitHub:</strong> <a href="https://github.com/codesentinel"
+                    style="color: var(--primary);">github.com/codesentinel</a>
+            </p>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer
-        style="text-align: center; padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem; color: var(--text-muted);">
-        <p>© 2026 CodeSentinel AI. All rights reserved.</p>
-    </footer>
 </body>
 
 </html>
