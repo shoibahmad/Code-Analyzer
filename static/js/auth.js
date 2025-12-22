@@ -43,6 +43,7 @@ const db = getFirestore(app);
 // Export for use in other modules
 window.firebaseAuth = auth;
 window.firebaseDb = db;
+window.db = db; // Also export as window.db for convenience
 
 // Auth State Observer
 onAuthStateChanged(auth, (user) => {
@@ -446,8 +447,8 @@ window.saveAnalysisToFirestore = async (code, language, analysisData) => {
         console.log('Analysis saved to Firestore');
 
         // Reload history
-        if (typeof loadUserHistory === 'function') {
-            loadUserHistory();
+        if (typeof window.loadUserHistory === 'function') {
+            window.loadUserHistory();
         }
     } catch (error) {
         console.error('Error saving analysis:', error);
@@ -555,9 +556,14 @@ window.autoInitializeFirestore = async () => {
 
 // Load user history from Firestore
 window.loadUserHistory = async () => {
-    if (!window.currentUser) return;
+    if (!window.currentUser) {
+        console.warn('⚠️ loadUserHistory: No user logged in');
+        return [];
+    }
 
     try {
+        console.log('📊 Loading user history from Firestore for:', window.currentUser.email);
+
         const q = query(
             collection(db, 'analyses'),
             where('userId', '==', window.currentUser.uid),
@@ -569,11 +575,14 @@ window.loadUserHistory = async () => {
         const history = [];
 
         querySnapshot.forEach((doc) => {
+            const data = doc.data();
             history.push({
                 id: doc.id,
-                ...doc.data()
+                ...data
             });
         });
+
+        console.log(`✅ Loaded ${history.length} analyses from Firestore`);
 
         // Update dashboard with history
         if (window.features && window.features.updateDashboardWithFirestore) {
@@ -582,7 +591,25 @@ window.loadUserHistory = async () => {
 
         return history;
     } catch (error) {
-        console.error('Error loading history:', error);
+        console.error('❌ Error loading history from Firestore:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+
+        // Provide specific error messages
+        if (error.code === 'permission-denied') {
+            console.error('🔒 Permission denied - Check Firestore security rules');
+            window.toast?.error('Unable to access your analysis history. Please check permissions.', 'Permission Denied');
+        } else if (error.code === 'failed-precondition') {
+            console.error('📋 Missing index - Create composite index in Firestore');
+            window.toast?.error('Database index required. Please contact support.', 'Database Error');
+        } else if (error.code === 'unavailable') {
+            console.error('🌐 Firestore unavailable - Network or service issue');
+            window.toast?.error('Unable to connect to database. Please check your connection.', 'Connection Error');
+        }
+
         return [];
     }
 };
+
+// Export db for use in other modules
+window.db = db;

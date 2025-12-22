@@ -657,7 +657,8 @@
                 <i class="fas fa-user"></i>
             </div>
             <h1 class="user-display-name">User</h1>
-            <p id="userEmail">user@example.com</p>
+            <p id="userEmail" style="color: rgba(255, 255, 255, 0.95) !important; font-weight: 500;">user@example.com
+            </p>
         </div>
 
         <!-- Profile Grid -->
@@ -903,8 +904,48 @@
 
                     if (window.currentUser) {
                         console.log('User authenticated, loading stats...');
+                        console.log('User email:', window.currentUser.email);
+                        console.log('User display name:', window.currentUser.displayName);
+
                         // Update user ID
                         document.getElementById('userId').textContent = window.currentUser.uid;
+
+                        // Update email displays
+                        const userEmailEl = document.getElementById('userEmail');
+                        const userEmailInfoEl = document.getElementById('userEmailInfo');
+
+                        if (userEmailEl && window.currentUser.email) {
+                            userEmailEl.textContent = window.currentUser.email;
+                            console.log('✅ Updated #userEmail to:', window.currentUser.email);
+                        }
+
+                        if (userEmailInfoEl && window.currentUser.email) {
+                            userEmailInfoEl.textContent = window.currentUser.email;
+                            console.log('✅ Updated #userEmailInfo to:', window.currentUser.email);
+                        }
+
+                        // Update display name
+                        const displayNameElements = document.querySelectorAll('.user-display-name');
+                        if (displayNameElements.length > 0 && window.currentUser.displayName) {
+                            displayNameElements.forEach(el => {
+                                el.textContent = window.currentUser.displayName;
+                            });
+                            console.log('✅ Updated display name to:', window.currentUser.displayName);
+                        }
+
+                        // Update avatar
+                        const profileAvatar = document.getElementById('profileAvatar');
+                        if (profileAvatar && window.currentUser.displayName) {
+                            const initial = window.currentUser.displayName.charAt(0).toUpperCase();
+                            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: 700;">${initial}</span>`;
+                            console.log('✅ Updated profile avatar');
+                        }
+
+                        // Also call the global update function if available
+                        if (typeof window.updateUserName === 'function') {
+                            window.updateUserName();
+                        }
+
                         // Load user history and stats
                         const history = await loadUserHistory();
                         if (!history || history.length === 0) {
@@ -922,9 +963,48 @@
             }, 200);
         }
 
+        // Immediate update if user is already available
+        function updateUserInfoImmediately() {
+            if (window.currentUser) {
+                console.log('🚀 User already authenticated, updating immediately...');
+
+                // Update email
+                const userEmailEl = document.getElementById('userEmail');
+                const userEmailInfoEl = document.getElementById('userEmailInfo');
+                if (userEmailEl) userEmailEl.textContent = window.currentUser.email;
+                if (userEmailInfoEl) userEmailInfoEl.textContent = window.currentUser.email;
+
+                // Update display name
+                document.querySelectorAll('.user-display-name').forEach(el => {
+                    el.textContent = window.currentUser.displayName;
+                });
+
+                // Update avatar
+                const profileAvatar = document.getElementById('profileAvatar');
+                if (profileAvatar && window.currentUser.displayName) {
+                    const initial = window.currentUser.displayName.charAt(0).toUpperCase();
+                    profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: 700;">${initial}</span>`;
+                }
+
+                // Update user ID
+                const userIdEl = document.getElementById('userId');
+                if (userIdEl) userIdEl.textContent = window.currentUser.uid;
+
+                console.log('✅ Immediate update complete');
+                return true;
+            }
+            return false;
+        }
+
+        // Try immediate update first
+        updateUserInfoImmediately();
+
         // Call initialization when page loads
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeProfile);
+            document.addEventListener('DOMContentLoaded', () => {
+                updateUserInfoImmediately(); // Try again on DOMContentLoaded
+                initializeProfile();
+            });
         } else {
             initializeProfile();
         }
