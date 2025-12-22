@@ -17,6 +17,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+README.md
 lib64/
 parts/
 sdist/
