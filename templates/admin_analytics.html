@@ -116,7 +116,7 @@
 
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
         }
@@ -151,6 +151,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 600px;
         }
 
         th,
@@ -196,17 +197,87 @@
             color: var(--error);
         }
 
+        /* Mobile Responsive */
         @media (max-width: 768px) {
             .admin-container {
                 padding: 1rem;
             }
 
-            .charts-grid {
+            .admin-header {
+                padding: 1.5rem;
+            }
+
+            .admin-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .admin-header>div {
+                flex-direction: column !important;
+                gap: 1rem;
+                align-items: flex-start !important;
+            }
+
+            .admin-header .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
             }
 
             .stat-value {
                 font-size: 2rem;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .data-table {
+                padding: 1rem;
+                margin-left: -1rem;
+                margin-right: -1rem;
+                border-radius: 0;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th,
+            td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .admin-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .stat-value {
+                font-size: 1.75rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .chart-container {
+                height: 200px;
             }
         }
     </style>
