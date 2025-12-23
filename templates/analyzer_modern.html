@@ -803,6 +803,27 @@
                 </div>
             </div>
 
+            <!-- Burger Menu Button (Mobile Only) -->
+            <button class="burger-menu" id="burgerMenu" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Center: Navigation Links -->
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="/history" class="nav-link">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+                <a href="/admin/analytics" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    Analytics
+                </a>
+            </div>
+
             <!-- Right: Profile and Logout -->
             <div class="header-actions">
                 <a href="/profile" class="btn-profile">
@@ -816,6 +837,41 @@
             </div>
         </div>
     </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h3>Menu</h3>
+            <button class="close-menu" onclick="toggleMobileMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-menu-nav">
+            <a href="/dashboard" class="mobile-menu-link">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="/history" class="mobile-menu-link">
+                <i class="fas fa-history"></i>
+                History
+            </a>
+            <a href="/admin/analytics" class="mobile-menu-link">
+                <i class="fas fa-chart-pie"></i>
+                Analytics
+            </a>
+            <a href="/profile" class="mobile-menu-link">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
+            <a href="#" class="mobile-menu-link" onclick="handleLogoutClick(event); toggleMobileMenu();">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </nav>
+    </div>
 
     <!-- Main Content -->
     <div class="container">
@@ -995,12 +1051,30 @@
                         </div>
 
                         <div class="input-group">
-                            <label>
-                                <i class="fas fa-code"></i>
-                                Source Code
-                            </label>
-                            <textarea class="input-field" id="codeInput" placeholder="Paste your code here..."
-                                rows="15"></textarea>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <label style="margin-bottom: 0;">
+                                    <i class="fas fa-code"></i>
+                                    Source Code
+                                </label>
+                                <div id="codeStats"
+                                    style="display: flex; gap: 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <span title="Total lines of code">
+                                        <i class="fas fa-list-ol" style="color: var(--primary);"></i>
+                                        <strong id="lineCount">0</strong> lines
+                                    </span>
+                                    <span title="Total words">
+                                        <i class="fas fa-font" style="color: var(--secondary);"></i>
+                                        <strong id="wordCount">0</strong> words
+                                    </span>
+                                    <span title="Total characters">
+                                        <i class="fas fa-keyboard" style="color: var(--success);"></i>
+                                        <strong id="charCount">0</strong> chars
+                                    </span>
+                                </div>
+                            </div>
+                            <textarea class="input-field" id="codeInput" placeholder="Paste your code here..." rows="15"
+                                oninput="updateCodeStats()"></textarea>
                         </div>
 
                         <div class="flex gap-2">
@@ -1233,7 +1307,12 @@
     <script src="{{ url_for('static', filename='js/firestore-integration.js') }}"></script>
     <script src="{{ url_for('static', filename='js/pdf-generator.js') }}"></script>
     <script src="{{ url_for('static', filename='js/features.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/analysis-progress.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/main-functions.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/metrics-dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/complexity-visualizer.js') }}"></script>
 
     <style>
         @keyframes modalSlideIn {
@@ -1247,13 +1326,166 @@
                 opacity: 1;
             }
         }
+
+        /* Burger Menu Button */
+        .burger-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .burger-menu:hover {
+            color: var(--primary);
+        }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .mobile-menu-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            z-index: 999;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-menu-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+        }
+
+        .close-menu {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .close-menu:hover {
+            color: var(--error);
+        }
+
+        .mobile-menu-nav {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+        }
+
+        .mobile-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .mobile-menu-link:hover {
+            background: var(--bg-secondary);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .mobile-menu-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Responsive - Show burger menu on mobile */
+        @media (max-width: 768px) {
+            .burger-menu {
+                display: block;
+            }
+
+            .nav-links {
+                display: none !important;
+            }
+
+            .header-actions {
+                display: none !important;
+            }
+        }
     </style>
 
     <script>
+        // Toggle mobile menu
         function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            const burger = document.getElementById('burgerMenu');
+
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+
+            // Toggle burger icon
+            const icon = burger.querySelector('i');
+            if (menu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
         }
+
+        // Close menu when clicking on a link
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileLinks = document.querySelectorAll('.mobile-menu-link');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    // Don't close for logout link (handled separately)
+                    if (!link.getAttribute('onclick')?.includes('handleLogoutClick')) {
+                        setTimeout(toggleMobileMenu, 100);
+                    }
+                });
+            });
+        });
 
         function switchTab(tab) {
             // Update tab buttons

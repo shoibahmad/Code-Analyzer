@@ -9,7 +9,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <!-- Icons -->
@@ -20,20 +21,36 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
             overflow: hidden;
         }
 
-        /* Floating Shapes for Wow Factor */
         .shape {
             position: absolute;
-            filter: blur(50px);
-            z-index: -1;
-            animation: float 20s infinite;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out;
         }
 
         .shape-1 {
@@ -41,8 +58,8 @@
             left: -10%;
             width: 500px;
             height: 500px;
-            background: rgba(59, 130, 246, 0.3);
-            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%);
+            animation-delay: 0s;
         }
 
         .shape-2 {
@@ -50,69 +67,218 @@
             right: -10%;
             width: 600px;
             height: 600px;
-            background: rgba(139, 92, 246, 0.3);
-            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            animation-delay: -5s;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%);
+            animation-delay: -7s;
         }
 
         .shape-3 {
-            top: 50%;
-            left: 50%;
-            width: 300px;
-            height: 300px;
-            background: rgba(6, 182, 212, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: -10s;
+            top: 40%;
+            right: 10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.3) 0%, transparent 70%);
+            animation-delay: -14s;
         }
 
         @keyframes float {
-            0% {
-                transform: translate(0, 0) rotate(0deg);
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
             }
 
             33% {
-                transform: translate(30px, -50px) rotate(10deg);
+                transform: translate(50px, -50px) scale(1.1);
             }
 
             66% {
-                transform: translate(-20px, 20px) rotate(-5deg);
-            }
-
-            100% {
-                transform: translate(0, 0) rotate(0deg);
+                transform: translate(-30px, 30px) scale(0.9);
             }
         }
 
-        .auth-container {
-            width: 100%;
-            max-width: 450px;
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            min-height: 100vh;
             padding: 2rem;
-            animation: scaleIn 0.5s ease;
         }
 
-        @keyframes scaleIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
-            }
+        /* Left Side - Project Info */
+        .info-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
 
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
+        .logo-section {
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+
+        .logo-text p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .project-description {
+            margin-bottom: 2rem;
+        }
+
+        .project-description h2 {
+            font-size: 1.75rem;
+            color: white;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .project-description p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .feature-card i {
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .stats-section {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        /* Right Side - Auth Form */
+        .auth-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            max-width: 550px;
+            margin-left: auto;
         }
 
         .auth-card {
-            background: rgba(15, 23, 42, 0.6);
+            width: 100%;
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
-            padding: 3rem 2rem;
+            padding: 3rem 2.5rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
+            animation: slideIn 0.6s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .auth-card::before {
@@ -121,35 +287,25 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
         }
 
-        .brand-logo {
+        .auth-header {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        .brand-logo i {
-            font-size: 3rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-
-        .brand-logo h1 {
-            font-size: 1.5rem;
-            margin: 0;
+        .auth-header h2 {
+            font-size: 1.75rem;
+            color: white;
             font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
-        .brand-logo p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
+        .auth-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
         }
 
         .form-group {
@@ -159,33 +315,35 @@
 
         .form-group i {
             position: absolute;
-            left: 1rem;
+            left: 1.25rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.4);
             transition: color 0.3s;
+            font-size: 1rem;
         }
 
         .form-input {
             width: 100%;
-            padding: 1rem 1rem 1rem 3rem;
-            background: rgba(30, 41, 59, 0.5);
+            padding: 1rem 1rem 1rem 3.25rem;
+            background: rgba(30, 41, 59, 0.6);
             border: 1px solid rgba(148, 163, 184, 0.2);
             border-radius: 12px;
             color: white;
             font-size: 1rem;
             transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: #3b82f6;
             background: rgba(30, 41, 59, 0.8);
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .form-input:focus+i {
-            color: var(--primary);
+            color: #3b82f6;
         }
 
         .submit-btn {
@@ -194,42 +352,30 @@
             border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
 
         .submit-btn:active {
             transform: scale(0.98);
         }
 
-        .auth-switch {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .auth-switch a {
-            color: var(--primary-light);
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .auth-switch a:hover {
-            text-decoration: underline;
-        }
-
-        .hidden {
-            display: none;
-        }
-
         .divider {
             display: flex;
             align-items: center;
             margin: 1.5rem 0;
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.4);
             font-size: 0.8rem;
         }
 
@@ -252,9 +398,9 @@
 
         .social-btn {
             flex: 1;
-            padding: 0.75rem;
+            padding: 0.875rem;
             border-radius: 12px;
-            background: rgba(30, 41, 59, 0.5);
+            background: rgba(30, 41, 59, 0.6);
             border: 1px solid rgba(148, 163, 184, 0.2);
             color: white;
             cursor: pointer;
@@ -263,63 +409,290 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            font-size: 0.95rem;
         }
 
         .social-btn:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: var(--primary);
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
         }
 
-        /* Error Message */
+        .auth-switch {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .auth-switch a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
         .error-message {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
-            padding: 0.75rem;
-            border-radius: 8px;
+            padding: 0.875rem;
+            border-radius: 10px;
             margin-bottom: 1rem;
             font-size: 0.9rem;
             border: 1px solid rgba(239, 68, 68, 0.2);
-            display: flex;
+            display: none;
             align-items: center;
             gap: 0.5rem;
-            display: none;
         }
 
         .error-message.visible {
             display: flex;
         }
 
-        /* ==================== Mobile Responsive Styles ==================== */
-        @media (max-width: 768px) {
-            .auth-container {
+        .hidden {
+            display: none !important;
+        }
+
+        .text-right {
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+
+        .text-right a {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .text-right a:hover {
+            color: #3b82f6;
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        footer a {
+            color: inherit;
+            text-decoration: none;
+            margin: 0 0.5rem;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: #3b82f6;
+        }
+
+        /* Loading Spinner */
+        #authLoadingSpinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(59, 130, 246, 0.3);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ==================== RESPONSIVE DESIGN ==================== */
+
+        /* Tablets and below */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
                 padding: 1.5rem;
+            }
+
+            .info-section {
                 max-width: 100%;
+                padding: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .logo-section {
+                margin-bottom: 2rem;
+            }
+
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.75rem;
+            }
+
+            .logo-text h1 {
+                font-size: 1.75rem;
+            }
+
+            .project-description h2 {
+                font-size: 1.5rem;
+            }
+
+            .project-description p {
+                font-size: 0.95rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 0.875rem;
+            }
+
+            .feature-card {
+                padding: 1rem;
+            }
+
+            .stats-section {
+                gap: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 1.75rem;
+            }
+
+            .auth-section {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .auth-card {
+                padding: 2.5rem 2rem;
+            }
+        }
+
+        /* Mobile phones */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+                padding-bottom: 5rem;
+            }
+
+            .info-section {
+                padding: 0.5rem;
+            }
+
+            .logo {
+                gap: 0.75rem;
+            }
+
+            .logo-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+                border-radius: 12px;
+            }
+
+            .logo-text h1 {
+                font-size: 1.5rem;
+            }
+
+            .logo-text p {
+                font-size: 0.85rem;
+            }
+
+            .project-description {
+                margin-bottom: 1.5rem;
+            }
+
+            .project-description h2 {
+                font-size: 1.35rem;
+            }
+
+            .project-description p {
+                font-size: 0.9rem;
+                line-height: 1.6;
+            }
+
+            .feature-card {
+                padding: 0.875rem;
+            }
+
+            .feature-card i {
+                font-size: 1.5rem;
+            }
+
+            .feature-card h3 {
+                font-size: 0.95rem;
+            }
+
+            .feature-card p {
+                font-size: 0.8rem;
+            }
+
+            .stats-section {
+                flex-wrap: wrap;
+                gap: 1rem;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+            }
+
+            .stat-item {
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
             }
 
             .auth-card {
                 padding: 2rem 1.5rem;
-                border-radius: 16px;
+                border-radius: 20px;
             }
 
-            .brand-logo i {
-                font-size: 2.5rem;
+            .auth-header h2 {
+                font-size: 1.5rem;
             }
 
-            .brand-logo h1 {
-                font-size: 1.35rem;
-            }
-
-            .brand-logo p {
-                font-size: 0.85rem;
+            .auth-header p {
+                font-size: 0.9rem;
             }
 
             .form-input {
-                padding: 0.875rem 0.875rem 0.875rem 2.75rem;
+                padding: 0.875rem 0.875rem 0.875rem 3rem;
                 font-size: 0.95rem;
             }
 
             .form-group i {
-                left: 0.875rem;
+                left: 1rem;
                 font-size: 0.95rem;
             }
 
@@ -329,77 +702,113 @@
             }
 
             .social-btn {
-                padding: 0.625rem;
+                padding: 0.75rem;
                 font-size: 0.9rem;
             }
 
-            .divider {
-                font-size: 0.75rem;
-                margin: 1.25rem 0;
-            }
-
-            .auth-switch {
-                font-size: 0.85rem;
-                margin-top: 1.25rem;
-            }
-
             footer {
-                padding: 0.75rem !important;
-                font-size: 0.7rem !important;
+                padding: 0.875rem;
+                font-size: 0.75rem;
+            }
+
+            footer br {
+                display: none;
             }
 
             footer a {
-                margin: 0 0.35rem !important;
-                font-size: 0.7rem !important;
-            }
-
-            footer span {
-                font-size: 0.65rem !important;
-            }
-
-            /* Reduce floating shapes size on tablets */
-            .shape-1 {
-                width: 350px;
-                height: 350px;
-            }
-
-            .shape-2 {
-                width: 400px;
-                height: 400px;
-            }
-
-            .shape-3 {
-                width: 200px;
-                height: 200px;
+                margin: 0 0.35rem;
+                font-size: 0.75rem;
             }
         }
 
+        /* Small phones */
         @media (max-width: 480px) {
-            body {
-                overflow-x: hidden;
+            .main-container {
+                padding: 0.75rem;
+                padding-bottom: 4.5rem;
             }
 
-            .auth-container {
-                padding: 1rem;
-                max-width: 100%;
+            .logo-section {
+                margin-bottom: 1.5rem;
+            }
+
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.35rem;
+                border-radius: 10px;
+            }
+
+            .logo-text h1 {
+                font-size: 1.35rem;
+            }
+
+            .logo-text p {
+                font-size: 0.8rem;
+            }
+
+            .project-description h2 {
+                font-size: 1.25rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .project-description p {
+                font-size: 0.85rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .features-grid {
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+            }
+
+            .feature-card {
+                padding: 0.75rem;
+            }
+
+            .feature-card i {
+                font-size: 1.35rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .feature-card h3 {
+                font-size: 0.9rem;
+                margin-bottom: 0.35rem;
+            }
+
+            .feature-card p {
+                font-size: 0.75rem;
+            }
+
+            .stats-section {
+                gap: 0.75rem;
+                margin-top: 1.25rem;
+                padding-top: 1.25rem;
+            }
+
+            .stat-number {
+                font-size: 1.35rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
             }
 
             .auth-card {
                 padding: 1.75rem 1.25rem;
-                border-radius: 12px;
+                border-radius: 18px;
             }
 
-            .brand-logo i {
-                font-size: 2rem;
-                margin-bottom: 0.75rem;
+            .auth-header {
+                margin-bottom: 1.5rem;
             }
 
-            .brand-logo h1 {
-                font-size: 1.2rem;
+            .auth-header h2 {
+                font-size: 1.35rem;
             }
 
-            .brand-logo p {
-                font-size: 0.8rem;
+            .auth-header p {
+                font-size: 0.85rem;
             }
 
             .form-group {
@@ -407,13 +816,13 @@
             }
 
             .form-input {
-                padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+                padding: 0.75rem 0.75rem 0.75rem 2.75rem;
                 font-size: 0.9rem;
                 border-radius: 10px;
             }
 
             .form-group i {
-                left: 0.75rem;
+                left: 0.875rem;
                 font-size: 0.9rem;
             }
 
@@ -423,86 +832,70 @@
                 border-radius: 10px;
             }
 
+            .divider {
+                margin: 1.25rem 0;
+                font-size: 0.75rem;
+            }
+
             .social-login {
                 gap: 0.75rem;
             }
 
             .social-btn {
-                padding: 0.5rem;
+                padding: 0.625rem;
                 font-size: 0.85rem;
                 border-radius: 10px;
             }
 
-            .divider {
-                font-size: 0.7rem;
-                margin: 1rem 0;
-            }
-
-            .divider span {
-                padding: 0 0.75rem;
-            }
-
             .auth-switch {
+                font-size: 0.85rem;
+                margin-top: 1.25rem;
+            }
+
+            .text-right {
+                text-align: center;
+                margin-bottom: 0.875rem;
+            }
+
+            .text-right a {
                 font-size: 0.8rem;
-                margin-top: 1rem;
             }
 
             footer {
-                position: relative !important;
-                padding: 0.65rem !important;
-                font-size: 0.65rem !important;
-                line-height: 1.4 !important;
+                padding: 0.75rem;
+                font-size: 0.7rem;
             }
 
             footer a {
-                margin: 0 0.25rem !important;
-                font-size: 0.65rem !important;
-                display: inline-block;
+                margin: 0 0.25rem;
+                font-size: 0.7rem;
             }
 
-            footer br {
-                display: none;
-            }
-
-            footer span {
-                font-size: 0.6rem !important;
-                margin-top: 0.15rem !important;
-            }
-
-            /* Hide or minimize floating shapes on small phones */
+            /* Reduce background shapes */
             .shape-1,
             .shape-2 {
-                opacity: 0.3;
-                width: 250px;
-                height: 250px;
+                opacity: 0.25;
+                width: 300px;
+                height: 300px;
             }
 
             .shape-3 {
                 display: none;
             }
-
-            /* Adjust text input for forgot password link */
-            .text-right {
-                text-align: center !important;
-            }
-
-            .text-right a {
-                font-size: 0.8rem !important;
-            }
         }
 
-        /* Extra small devices */
+        /* Extra small phones */
         @media (max-width: 360px) {
-            .auth-container {
-                padding: 0.75rem;
-            }
-
             .auth-card {
                 padding: 1.5rem 1rem;
             }
 
-            .brand-logo h1 {
-                font-size: 1.1rem;
+            .logo-text h1 {
+                font-size: 1.2rem;
+            }
+
+            .project-description h2 {
+                font-size: 1.15rem;
             }
 
             .form-input,
@@ -510,189 +903,246 @@
             .social-btn {
                 font-size: 0.85rem;
             }
+
+            .stat-number {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Loading Spinner Overlay -->
-    <div id="authLoadingSpinner"
-        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;">
+    <!-- Loading Spinner -->
+    <div id="authLoadingSpinner">
         <div style="text-align: center;">
-            <div
-                style="width: 60px; height: 60px; margin: 0 auto 1.5rem; border: 4px solid rgba(59, 130, 246, 0.3); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;">
-            </div>
-            <p style="color: white; font-size: 1.1rem; font-weight: 600; margin: 0;">Processing...</p>
+            <div class="spinner"></div>
+            <p style="color: white; font-size: 1.1rem; font-weight: 600; margin-top: 1.5rem;">Processing...</p>
             <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 0.5rem;">Please wait</p>
         </div>
     </div>
 
-    <style>
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
 
-    <!-- Background Shapes -->
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
-
-    <div class="auth-container">
-        <!-- Sign In Form -->
-        <div id="signin-form" class="auth-card">
-            <div class="brand-logo">
-                <i class="fas fa-code-branch"></i>
-                <h1>Welcome Back</h1>
-                <p>Sign in to continue analyzing your code</p>
-            </div>
-
-            <div id="signin-error" class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                <span></span>
-            </div>
-
-            <form onsubmit="handleSignIn(event)">
-                <div class="form-group">
-                    <input type="email" id="signin-email" class="form-input" placeholder="Email Address" required>
-                    <i class="fas fa-envelope"></i>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Side - Project Information -->
+        <div class="info-section">
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>AI Code Analyzer</h1>
+                        <p>Powered by ML & Gemini AI</p>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <input type="password" id="signin-password" class="form-input" placeholder="Password" required>
-                    <i class="fas fa-lock"></i>
-                </div>
-
-                <div class="text-right mb-2">
-                    <a href="#" onclick="switchView('forgot')"
-                        style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">Forgot
-                        Password?</a>
-                </div>
-
-                <button type="submit" class="btn btn-primary submit-btn">
-                    Sign In <i class="fas fa-arrow-right"></i>
-                </button>
-            </form>
-
-            <div class="divider">
-                <span>OR CONTINUE WITH</span>
             </div>
 
-            <div class="social-login">
-                <button class="social-btn" onclick="handleGoogleSignIn()">
-                    <i class="fab fa-google"></i> Google
-                </button>
-                <button class="social-btn" onclick="handleGithubSignIn()">
-                    <i class="fab fa-github"></i> GitHub
-                </button>
+            <div class="project-description">
+                <h2>🚀 Transform Your Code Quality</h2>
+                <p>
+                    Experience enterprise-level code analysis powered by cutting-edge Machine Learning and Google's
+                    Gemini AI.
+                    Get comprehensive insights, security assessments, and actionable recommendations in seconds.
+                </p>
+                <p>
+                    Our dual-engine analysis system combines CodeBERT ML models with Gemini 2.0 Flash AI to provide
+                    the most detailed code review available, covering 15+ analysis dimensions from architecture to
+                    performance.
+                </p>
             </div>
 
-            <div class="auth-switch">
-                Don't have an account? <a href="#" onclick="switchView('signup')">Sign Up</a>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>Dual AI Analysis</h3>
+                    <p>ML + Gemini AI working together for comprehensive code review</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Security Scanning</h3>
+                    <p>Detect vulnerabilities, OWASP risks, and security issues</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h3>Performance Insights</h3>
+                    <p>Identify bottlenecks and optimization opportunities</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>Professional Reports</h3>
+                    <p>Generate detailed PDF reports for documentation</p>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-item">
+                    <span class="stat-number">15+</span>
+                    <span class="stat-label">Analysis Sections</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">10+</span>
+                    <span class="stat-label">Languages Supported</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Accurate Results</span>
+                </div>
             </div>
         </div>
 
-        <!-- Sign Up Form -->
-        <div id="signup-form" class="auth-card hidden">
-            <div class="brand-logo">
-                <i class="fas fa-user-plus"></i>
-                <h1>Create Account</h1>
-                <p>Join the CodeSentinel AI community</p>
-            </div>
-
-            <div id="signup-error" class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                <span></span>
-            </div>
-
-            <form onsubmit="handleSignUp(event)">
-                <div class="form-group">
-                    <input type="text" id="signup-name" class="form-input" placeholder="Full Name" required>
-                    <i class="fas fa-user"></i>
+        <!-- Right Side - Authentication Forms -->
+        <div class="auth-section">
+            <!-- Sign In Form -->
+            <div id="signin-form" class="auth-card">
+                <div class="auth-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to continue analyzing your code</p>
                 </div>
 
-                <div class="form-group">
-                    <input type="email" id="signup-email" class="form-input" placeholder="Email Address" required>
-                    <i class="fas fa-envelope"></i>
+                <div id="signin-error" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span></span>
                 </div>
 
-                <div class="form-group">
-                    <input type="password" id="signup-password" class="form-input" placeholder="Password" required>
-                    <i class="fas fa-lock"></i>
+                <form onsubmit="handleSignIn(event)">
+                    <div class="form-group">
+                        <input type="email" id="signin-email" class="form-input" placeholder="Email Address" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" id="signin-password" class="form-input" placeholder="Password" required>
+                        <i class="fas fa-lock"></i>
+                    </div>
+
+                    <div class="text-right">
+                        <a href="#" onclick="switchView('forgot')">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary submit-btn">
+                        Sign In <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>OR CONTINUE WITH</span>
                 </div>
 
-                <button type="submit" class="btn btn-secondary submit-btn">
-                    Create Account <i class="fas fa-user-plus"></i>
-                </button>
-            </form>
-
-            <div class="auth-switch">
-                Already have an account? <a href="#" onclick="switchView('signin')">Sign In</a>
-            </div>
-        </div>
-
-        <!-- Forgot Password Form -->
-        <div id="forgot-form" class="auth-card hidden">
-            <div class="brand-logo">
-                <i class="fas fa-key"></i>
-                <h1>Reset Password</h1>
-                <p>Enter your email to receive recovery instructions</p>
-            </div>
-
-            <div id="forgot-error" class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                <span></span>
-            </div>
-
-            <div id="forgot-success" class="error-message"
-                style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: var(--success);">
-                <i class="fas fa-check-circle"></i>
-                <span>Password reset email sent!</span>
-            </div>
-
-            <form onsubmit="handleForgotPass(event)">
-                <div class="form-group">
-                    <input type="email" id="forgot-email" class="form-input" placeholder="Email Address" required>
-                    <i class="fas fa-envelope"></i>
+                <div class="social-login">
+                    <button class="social-btn" onclick="handleGoogleSignIn()">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button class="social-btn" onclick="handleGithubSignIn()">
+                        <i class="fab fa-github"></i> GitHub
+                    </button>
                 </div>
 
-                <button type="submit" class="btn btn-primary submit-btn">
-                    Send Link <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
+                <div class="auth-switch">
+                    Don't have an account? <a href="#" onclick="switchView('signup')">Sign Up</a>
+                </div>
+            </div>
 
-            <div class="auth-switch">
-                Remember your password? <a href="#" onclick="switchView('signin')">Sign In</a>
+            <!-- Sign Up Form -->
+            <div id="signup-form" class="auth-card hidden">
+                <div class="auth-header">
+                    <h2>Create Account</h2>
+                    <p>Join the AI Code Analyzer community</p>
+                </div>
+
+                <div id="signup-error" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span></span>
+                </div>
+
+                <form onsubmit="handleSignUp(event)">
+                    <div class="form-group">
+                        <input type="text" id="signup-name" class="form-input" placeholder="Full Name" required>
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" id="signup-email" class="form-input" placeholder="Email Address" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" id="signup-password" class="form-input"
+                            placeholder="Password (min 6 characters)" required minlength="6">
+                        <i class="fas fa-lock"></i>
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary submit-btn">
+                        Create Account <i class="fas fa-user-plus"></i>
+                    </button>
+                </form>
+
+                <div class="auth-switch">
+                    Already have an account? <a href="#" onclick="switchView('signin')">Sign In</a>
+                </div>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div id="forgot-form" class="auth-card hidden">
+                <div class="auth-header">
+                    <h2>Reset Password</h2>
+                    <p>Enter your email to receive recovery instructions</p>
+                </div>
+
+                <div id="forgot-error" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span></span>
+                </div>
+
+                <div id="forgot-success" class="error-message"
+                    style="background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: #10b981;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Password reset email sent!</span>
+                </div>
+
+                <form onsubmit="handleForgotPass(event)">
+                    <div class="form-group">
+                        <input type="email" id="forgot-email" class="form-input" placeholder="Email Address" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary submit-btn">
+                        Send Reset Link <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+
+                <div class="auth-switch">
+                    Remember your password? <a href="#" onclick="switchView('signin')">Sign In</a>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer
-        style="position: fixed; bottom: 0; left: 0; right: 0; padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(5px); z-index: 10;">
-        <a href="/privacy"
-            style="color: inherit; text-decoration: none; margin: 0 0.5rem; transition: color 0.2s;">Privacy Policy</a>
-        &bull;
-        <a href="/terms"
-            style="color: inherit; text-decoration: none; margin: 0 0.5rem; transition: color 0.2s;">Terms</a> &bull;
-        <a href="/about" style="color: inherit; text-decoration: none; margin: 0 0.5rem; transition: color 0.2s;">About
-            Us</a>
+    <footer>
+        <a href="/privacy">Privacy Policy</a> &bull;
+        <a href="/terms">Terms</a> &bull;
+        <a href="/about">About Us</a>
         <br>
-        <span style="opacity: 0.7; font-size: 0.7rem; display: inline-block; margin-top: 0.25rem;">&copy; 2026 Alisha
-            Shad (MCA 2024-26)</span>
+        <span style="opacity: 0.7; font-size: 0.7rem; display: inline-block; margin-top: 0.25rem;">
+            &copy; 2025 Alisha Shad (MCA 2024-26)
+        </span>
     </footer>
+
     <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
 
     <script>
-        // Simple View Switcher
+        // View Switcher
         function switchView(view) {
             document.querySelectorAll('.auth-card').forEach(card => card.classList.add('hidden'));
             document.getElementById(view + '-form').classList.remove('hidden');
-
-            // Clear errors
             document.querySelectorAll('.error-message').forEach(el => el.classList.remove('visible'));
         }
     </script>

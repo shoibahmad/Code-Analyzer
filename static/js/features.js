@@ -639,15 +639,8 @@ function showHistoryModal() {
         return;
     }
 
-    // For now, show a toast with history count
-    // In the future, this could open a modal with full history
-    if (window.toast) {
-        window.toast.success(`You have ${history.length} analyses in your history`, 'Analysis History');
-    } else {
-        alert(`You have ${history.length} analyses in your history`);
-    }
-
-    console.log('Analysis History:', history);
+    // Redirect to history page
+    window.location.href = '/history';
 }
 
 // Initialize Dashboard on Load
@@ -949,4 +942,43 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+});
+
+// Update code statistics (lines, words, characters)
+function updateCodeStats() {
+    const codeInput = document.getElementById('codeInput');
+    if (!codeInput) return;
+
+    const code = codeInput.value;
+
+    // Count lines (including empty lines)
+    const lines = code.split('\n').length;
+
+    // Count words (split by whitespace and filter empty strings)
+    const words = code.trim() === '' ? 0 : code.trim().split(/\s+/).length;
+
+    // Count characters
+    const chars = code.length;
+
+    // Update display
+    const lineCountEl = document.getElementById('lineCount');
+    const wordCountEl = document.getElementById('wordCount');
+    const charCountEl = document.getElementById('charCount');
+
+    if (lineCountEl) lineCountEl.textContent = lines.toLocaleString();
+    if (wordCountEl) wordCountEl.textContent = words.toLocaleString();
+    if (charCountEl) charCountEl.textContent = chars.toLocaleString();
+}
+
+// Initialize stats on page load
+document.addEventListener('DOMContentLoaded', () => {
+    updateCodeStats();
+
+    // Also update when sample code is loaded
+    const sampleSelect = document.getElementById('sampleSelect');
+    if (sampleSelect) {
+        sampleSelect.addEventListener('change', () => {
+            setTimeout(updateCodeStats, 100);
+        });
+    }
 });

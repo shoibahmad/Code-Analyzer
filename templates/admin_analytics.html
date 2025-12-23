@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics - CodeSentinel AI</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-stat-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--error);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .chart-card h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .data-table {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--text-primary);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1><i class="fas fa-chart-pie"></i> Admin Analytics Dashboard</h1>
+                    <p style="color: var(--text-secondary);">Comprehensive usage statistics and insights</p>
+                </div>
+                <a href="/dashboard" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+                    <i class="fas fa-users" style="color: white;"></i>
+                </div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +12% this month
+                </div>
+            </div>
+
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="fas fa-code" style="color: white;"></i>
+                </div>
+                <div class="stat-value" id="totalAnalyses">0</div>
+                <div class="stat-label">Total Analyses</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +25% this week
+                </div>
+            </div>
+
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="fas fa-bug" style="color: white;"></i>
+                </div>
+                <div class="stat-value" id="totalBugs">0</div>
+                <div class="stat-label">Bugs Detected</div>
+                <div class="stat-change">
+                    <i class="fas fa-minus"></i> Stable
+                </div>
+            </div>
+
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="fas fa-shield-alt" style="color: white;"></i>
+                </div>
+                <div class="stat-value" id="totalSecurity">0</div>
+                <div class="stat-label">Security Issues</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-arrow-down"></i> -8% improvement
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-line"></i> Analysis Trend (Last 30 Days)</h3>
+                <div class="chart-container">
+                    <canvas id="analysisTrendChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="fas fa-code"></i> Language Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="languageDistChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="fas fa-star"></i> Quality Score Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="qualityDistChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3><i class="fas fa-clock"></i> Peak Usage Hours</h3>
+                <div class="chart-container">
+                    <canvas id="usageHoursChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Table -->
+        <div class="data-table">
+            <h3 style="margin-bottom: 1rem;"><i class="fas fa-history"></i> Recent Analyses</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Language</th>
+                        <th>Quality Score</th>
+                        <th>Bugs</th>
+                        <th>Security</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recentAnalysesTable">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">Loading data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Load analytics data
+        function loadAnalytics() {
+            const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+
+            // Calculate stats
+            const totalAnalyses = history.length;
+            const totalBugs = history.reduce((sum, h) => sum + (h.stats?.bugs || 0), 0);
+            const totalSecurity = history.reduce((sum, h) => sum + (h.stats?.security || 0), 0);
+
+            // Update stat cards
+            document.getElementById('totalUsers').textContent = '1'; // Simulated
+            document.getElementById('totalAnalyses').textContent = totalAnalyses;
+            document.getElementById('totalBugs').textContent = totalBugs;
+            document.getElementById('totalSecurity').textContent = totalSecurity;
+
+            // Create charts
+            createAnalysisTrendChart(history);
+            createLanguageDistChart(history);
+            createQualityDistChart(history);
+            createUsageHoursChart(history);
+
+            // Populate table
+            populateRecentTable(history);
+        }
+
+        function createAnalysisTrendChart(history) {
+            const ctx = document.getElementById('analysisTrendChart');
+            const last30 = history.slice(0, 30).reverse();
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last30.map((_, i) => `Day ${i + 1}`),
+                    datasets: [{
+                        label: 'Analyses',
+                        data: last30.map((_, i) => i + 1),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    },
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
+                    }
+                }
+            });
+        }
+
+        function createLanguageDistChart(history) {
+            const ctx = document.getElementById('languageDistChart');
+            const langCounts = {};
+            history.forEach(h => {
+                langCounts[h.language] = (langCounts[h.language] || 0) + 1;
+            });
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(langCounts),
+                    datasets: [{
+                        data: Object.values(langCounts),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        function createQualityDistChart(history) {
+            const ctx = document.getElementById('qualityDistChart');
+            const scores = { 'Excellent (8-10)': 0, 'Good (6-7)': 0, 'Poor (0-5)': 0 };
+
+            history.forEach(h => {
+                const score = parseInt(h.aiScore || h.mlScore || 5);
+                if (score >= 8) scores['Excellent (8-10)']++;
+                else if (score >= 6) scores['Good (6-7)']++;
+                else scores['Poor (0-5)']++;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(scores),
+                    datasets: [{
+                        label: 'Count',
+                        data: Object.values(scores),
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
+                    }
+                }
+            });
+        }
+
+        function createUsageHoursChart(history) {
+            const ctx = document.getElementById('usageHoursChart');
+            const hours = new Array(24).fill(0);
+
+            history.forEach(h => {
+                const hour = new Date(h.timestamp).getHours();
+                hours[hour]++;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: hours.map((_, i) => `${i}:00`),
+                    datasets: [{
+                        label: 'Analyses',
+                        data: hours,
+                        backgroundColor: 'rgba(139, 92, 246, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+                        x: { ticks: { color: '#94a3b8', maxRotation: 45 }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
+                    }
+                }
+            });
+        }
+
+        function populateRecentTable(history) {
+            const tbody = document.getElementById('recentAnalysesTable');
+            const recent = history.slice(0, 10);
+
+            if (recent.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No data available</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = recent.map(h => {
+                const score = parseInt(h.aiScore || h.mlScore || 5);
+                const statusClass = score >= 8 ? 'success' : score >= 6 ? 'warning' : 'error';
+                const statusText = score >= 8 ? 'Excellent' : score >= 6 ? 'Good' : 'Poor';
+
+                return `
+                    <tr>
+                        <td>${new Date(h.timestamp).toLocaleString()}</td>
+                        <td><strong>${h.language}</strong></td>
+                        <td>${score}/10</td>
+                        <td>${h.stats?.bugs || 0}</td>
+                        <td>${h.stats?.security || 0}</td>
+                        <td><span class="badge badge-${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Load analytics on page load
+        document.addEventListener('DOMContentLoaded', loadAnalytics);
+    </script>
+</body>
+
+</html>

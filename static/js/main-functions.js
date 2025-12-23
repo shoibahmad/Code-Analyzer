@@ -314,6 +314,30 @@ function displayResults(data) {
                                     </div>
                                 </div>
                             ` : ''}
+                            
+                            ${aiData.metrics.reusability ? `
+                                <div class="summary-card metric-card-item">
+                                    <div class="card-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                                        <i class="fas fa-recycle"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-label">Reusability</div>
+                                        <div class="card-value">${aiData.metrics.reusability || 'N/A'}</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            ${aiData.metrics.reliability ? `
+                                <div class="summary-card metric-card-item">
+                                    <div class="card-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-label">Reliability</div>
+                                        <div class="card-value">${aiData.metrics.reliability || 'N/A'}</div>
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
                     ` : ''}
 
@@ -332,18 +356,239 @@ function displayResults(data) {
 
                 <!-- Complexity Analysis -->
                 ${aiData.complexity_analysis ? `
-                    <div class="analysis-section">
-                        <h4><i class="fas fa-project-diagram"></i> Complexity Analysis</h4>
-                        <div class="complexity-grid">
-                            <div class="complexity-item">
-                                <div class="label">Time Complexity</div>
-                                <div class="value">${aiData.complexity_analysis.time_complexity || 'N/A'}</div>
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-project-diagram"></i> 🧮 Complexity Analysis</h4>
+                        <div class="complexity-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            <div class="complexity-item p-3 bg-white-5 rounded">
+                                <div class="label text-muted text-xs mb-1">⏱️ Time Complexity</div>
+                                <div class="value text-primary font-bold">${aiData.complexity_analysis.time_complexity || 'N/A'}</div>
                             </div>
-                            <div class="complexity-item">
-                                <div class="label">Space Complexity</div>
-                                <div class="value">${aiData.complexity_analysis.space_complexity || 'N/A'}</div>
+                            <div class="complexity-item p-3 bg-white-5 rounded">
+                                <div class="label text-muted text-xs mb-1">💾 Space Complexity</div>
+                                <div class="value text-secondary font-bold">${aiData.complexity_analysis.space_complexity || 'N/A'}</div>
+                            </div>
+                            ${aiData.complexity_analysis.cyclomatic_complexity ? `
+                                <div class="complexity-item p-3 bg-white-5 rounded">
+                                    <div class="label text-muted text-xs mb-1">🔄 Cyclomatic Complexity</div>
+                                    <div class="value text-warning font-bold">${aiData.complexity_analysis.cyclomatic_complexity}</div>
+                                </div>
+                            ` : ''}
+                            ${aiData.complexity_analysis.cognitive_complexity ? `
+                                <div class="complexity-item p-3 bg-white-5 rounded">
+                                    <div class="label text-muted text-xs mb-1">🧠 Cognitive Complexity</div>
+                                    <div class="value text-info font-bold">${aiData.complexity_analysis.cognitive_complexity}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Architecture Analysis -->
+                ${aiData.architecture_analysis ? `
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-sitemap"></i> 🏗️ Architecture Analysis</h4>
+                        <div class="alert alert-info mt-2">
+                            <div class="grid gap-2">
+                                ${aiData.architecture_analysis.design_patterns ? `
+                                    <div><strong>🎨 Design Patterns:</strong> ${aiData.architecture_analysis.design_patterns}</div>
+                                ` : ''}
+                                ${aiData.architecture_analysis.separation_of_concerns ? `
+                                    <div><strong>📦 Separation of Concerns:</strong> ${aiData.architecture_analysis.separation_of_concerns}</div>
+                                ` : ''}
+                                ${aiData.architecture_analysis.modularity ? `
+                                    <div><strong>🧩 Modularity:</strong> ${aiData.architecture_analysis.modularity}</div>
+                                ` : ''}
+                                ${aiData.architecture_analysis.coupling ? `
+                                    <div><strong>🔗 Coupling:</strong> ${aiData.architecture_analysis.coupling}</div>
+                                ` : ''}
+                                ${aiData.architecture_analysis.cohesion ? `
+                                    <div><strong>🎯 Cohesion:</strong> ${aiData.architecture_analysis.cohesion}</div>
+                                ` : ''}
                             </div>
                         </div>
+                    </div>
+                ` : ''}
+
+                <!-- Code Smells -->
+                ${aiData.code_smells && aiData.code_smells.length > 0 ? `
+                    <div class="mb-4">
+                        <h4><i class="fas fa-exclamation-triangle text-warning"></i> 👃 Code Smells Detected (${aiData.code_smells.length})</h4>
+                        ${aiData.code_smells.map(smell => `
+                            <div class="alert alert-warning mt-2">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="badge badge-${smell.severity === 'High' ? 'danger' : smell.severity === 'Medium' ? 'warning' : 'info'}">${smell.severity || 'Medium'}</span>
+                                </div>
+                                <strong>🔍 ${smell.smell || 'Code Smell Detected'}</strong>
+                                ${smell.location ? `<p class="text-xs text-muted mt-1">📍 Location: ${smell.location}</p>` : ''}
+                                <p class="mt-2 text-sm"><strong>🔧 Refactoring:</strong> ${smell.refactoring || 'Review and refactor'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+
+                <!-- Performance Optimization -->
+                ${aiData.performance_optimization && aiData.performance_optimization.length > 0 ? `
+                    <div class="mb-4">
+                        <h4><i class="fas fa-tachometer-alt text-success"></i> ⚡ Performance Optimization (${aiData.performance_optimization.length})</h4>
+                        ${aiData.performance_optimization.map(perf => `
+                            <div class="alert alert-success mt-2">
+                                <strong>🎯 ${perf.issue || 'Performance Issue'}</strong>
+                                <p class="text-sm mt-2"><strong>Current:</strong> ${perf.current_approach || 'N/A'}</p>
+                                <p class="text-sm mt-1"><strong>✨ Optimized:</strong> ${perf.optimized_approach || 'N/A'}</p>
+                                ${perf.expected_improvement ? `<p class="text-xs text-success mt-1">📈 Expected Improvement: ${perf.expected_improvement}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+
+                <!-- Error Handling -->
+                ${aiData.error_handling ? `
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-exclamation-circle"></i> ⚠️ Error Handling Assessment</h4>
+                        <div class="alert alert-info mt-2">
+                            <div class="mb-2"><strong>Rating:</strong> <span class="badge badge-primary">${aiData.error_handling.rating || 'N/A'}</span></div>
+                            ${aiData.error_handling.issues && aiData.error_handling.issues.length > 0 ? `
+                                <div class="mb-2">
+                                    <strong>❌ Issues:</strong>
+                                    <ul class="mt-1 ml-4">
+                                        ${aiData.error_handling.issues.map(issue => `<li class="text-sm">${issue}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${aiData.error_handling.recommendations && aiData.error_handling.recommendations.length > 0 ? `
+                                <div>
+                                    <strong>✅ Recommendations:</strong>
+                                    <ul class="mt-1 ml-4">
+                                        ${aiData.error_handling.recommendations.map(rec => `<li class="text-sm">${rec}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Documentation Quality -->
+                ${aiData.documentation_quality ? `
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-book"></i> 📚 Documentation Quality</h4>
+                        <div class="alert alert-info mt-2">
+                            <div class="mb-2"><strong>Rating:</strong> <span class="badge badge-primary">${aiData.documentation_quality.rating || 'N/A'}</span></div>
+                            ${aiData.documentation_quality.missing && aiData.documentation_quality.missing.length > 0 ? `
+                                <div class="mb-2">
+                                    <strong>📝 Missing:</strong>
+                                    <ul class="mt-1 ml-4">
+                                        ${aiData.documentation_quality.missing.map(item => `<li class="text-sm">${item}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${aiData.documentation_quality.suggestions && aiData.documentation_quality.suggestions.length > 0 ? `
+                                <div>
+                                    <strong>💡 Suggestions:</strong>
+                                    <ul class="mt-1 ml-4">
+                                        ${aiData.documentation_quality.suggestions.map(sug => `<li class="text-sm">${sug}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Testing Recommendations -->
+                ${aiData.testing_recommendations && aiData.testing_recommendations.length > 0 ? `
+                    <div class="mb-4">
+                        <h4><i class="fas fa-vial text-info"></i> 🧪 Testing Recommendations (${aiData.testing_recommendations.length})</h4>
+                        ${aiData.testing_recommendations.map(test => `
+                            <div class="alert alert-info mt-2">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="badge badge-${test.priority === 'High' ? 'danger' : test.priority === 'Medium' ? 'warning' : 'info'}">${test.priority || 'Medium'}</span>
+                                    <span class="badge badge-outline">${test.test_type || 'Test'}</span>
+                                </div>
+                                <strong>🎯 ${test.scenario || 'Test Scenario'}</strong>
+                                ${test.example ? `<div class="mt-2 p-2 bg-black-20 rounded"><code class="text-xs">${test.example}</code></div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+
+                <!-- Dependency Analysis -->
+                ${aiData.dependency_analysis ? `
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-cubes"></i> 📦 Dependency Analysis</h4>
+                        <div class="alert alert-info mt-2">
+                            ${aiData.dependency_analysis.external_dependencies ? `
+                                <div class="mb-2"><strong>External Dependencies:</strong> ${aiData.dependency_analysis.external_dependencies}</div>
+                            ` : ''}
+                            ${aiData.dependency_analysis.recommendations ? `
+                                <div class="mb-2"><strong>💡 Recommendations:</strong> ${aiData.dependency_analysis.recommendations}</div>
+                            ` : ''}
+                            ${aiData.dependency_analysis.security_concerns ? `
+                                <div><strong>🔒 Security Concerns:</strong> ${aiData.dependency_analysis.security_concerns}</div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Scalability Assessment -->
+                ${aiData.scalability_assessment ? `
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-chart-line"></i> 📈 Scalability Assessment</h4>
+                        <div class="alert alert-info mt-2">
+                            ${aiData.scalability_assessment.current_scalability ? `
+                                <div class="mb-2"><strong>Current Scalability:</strong> ${aiData.scalability_assessment.current_scalability}</div>
+                            ` : ''}
+                            ${aiData.scalability_assessment.bottlenecks && aiData.scalability_assessment.bottlenecks.length > 0 ? `
+                                <div class="mb-2">
+                                    <strong>🚧 Bottlenecks:</strong>
+                                    <ul class="mt-1 ml-4">
+                                        ${aiData.scalability_assessment.bottlenecks.map(b => `<li class="text-sm">${b}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${aiData.scalability_assessment.recommendations && aiData.scalability_assessment.recommendations.length > 0 ? `
+                                <div>
+                                    <strong>✅ Recommendations:</strong>
+                                    <ul class="mt-1 ml-4">
+                                        ${aiData.scalability_assessment.recommendations.map(r => `<li class="text-sm">${r}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Code Duplication -->
+                ${aiData.code_duplication && aiData.code_duplication.detected !== 'No' ? `
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-copy"></i> 🔄 Code Duplication</h4>
+                        <div class="alert alert-warning mt-2">
+                            <div class="mb-2"><strong>Detected:</strong> ${aiData.code_duplication.detected || 'Unknown'}</div>
+                            ${aiData.code_duplication.instances && aiData.code_duplication.instances.length > 0 ? `
+                                <div class="mb-2">
+                                    <strong>📍 Instances:</strong>
+                                    <ul class="mt-1 ml-4">
+                                        ${aiData.code_duplication.instances.map(inst => `<li class="text-sm">${inst}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${aiData.code_duplication.refactoring_suggestion ? `
+                                <div><strong>🔧 Refactoring Suggestion:</strong> ${aiData.code_duplication.refactoring_suggestion}</div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Refactoring Opportunities -->
+                ${aiData.refactoring_opportunities && aiData.refactoring_opportunities.length > 0 ? `
+                    <div class="mb-4">
+                        <h4><i class="fas fa-wrench text-primary"></i> 🔨 Refactoring Opportunities (${aiData.refactoring_opportunities.length})</h4>
+                        ${aiData.refactoring_opportunities.map(refactor => `
+                            <div class="alert alert-primary mt-2">
+                                <strong>🎯 ${refactor.area || 'Refactoring Area'}</strong>
+                                <p class="text-sm mt-2"><strong>Why:</strong> ${refactor.reason || 'N/A'}</p>
+                                <p class="text-sm mt-1"><strong>How:</strong> ${refactor.approach || 'N/A'}</p>
+                                ${refactor.benefit ? `<p class="text-xs text-success mt-1">✨ Benefit: ${refactor.benefit}</p>` : ''}
+                            </div>
+                        `).join('')}
                     </div>
                 ` : ''}
 

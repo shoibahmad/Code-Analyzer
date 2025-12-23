@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View your code analysis history">
+    <title>Analysis History - CodeSentinel AI</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toast.css') }}">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-main {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-main i {
+            font-size: 2rem;
+            color: var(--primary);
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.25rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background: var(--bg-tertiary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-profile,
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-profile {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-profile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* History List */
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .history-header h2 {
+            font-size: 1.75rem;
+            color: var(--text-primary);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--primary);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .history-item-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .language-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .history-item-date {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .history-item-scores {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .score-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .score-value.high {
+            color: var(--success);
+        }
+
+        .score-value.medium {
+            color: var(--warning);
+        }
+
+        .score-value.low {
+            color: var(--error);
+        }
+
+        .history-item-stats {
+            display: flex;
+            gap: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+        }
+
+        .stat-badge i {
+            color: var(--primary);
+        }
+
+        .code-preview {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--bg-glass);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-xl);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .history-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .filter-buttons {
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .history-item-header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .history-item-scores {
+                flex-wrap: wrap;
+            }
+
+            .history-item-stats {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <!-- Logo -->
+            <div class="logo-section">
+                <a href="/dashboard" class="logo-main">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="logo-text">CodeSentinel AI</span>
+                </a>
+            </div>
+
+            <!-- Navigation -->
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="/history" class="nav-link active">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+                <a href="/admin/analytics" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    Analytics
+                </a>
+            </div>
+
+            <!-- Actions -->
+            <div class="header-actions">
+                <a href="/profile" class="btn-profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <button class="btn-logout" onclick="handleLogoutClick(event)">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-history"></i> Analysis History</h1>
+            <p>View and manage your code analysis history</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-value" id="totalAnalyses">0</div>
+                <div class="stat-label">Total Analyses</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-value" id="avgScore">-</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div class="stat-value" id="topLanguage">-</div>
+                <div class="stat-label">Top Language</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-bug"></i>
+                </div>
+                <div class="stat-value" id="totalIssues">0</div>
+                <div class="stat-label">Issues Found</div>
+            </div>
+        </div>
+
+        <!-- History List -->
+        <div class="history-header">
+            <h2>Recent Analyses</h2>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterHistory('all')">All</button>
+                <button class="filter-btn" onclick="filterHistory('python')">Python</button>
+                <button class="filter-btn" onclick="filterHistory('javascript')">JavaScript</button>
+                <button class="filter-btn" onclick="filterHistory('java')">Java</button>
+                <button class="filter-btn" onclick="filterHistory('cpp')">C++</button>
+            </div>
+        </div>
+
+        <div id="historyList" class="history-list">
+            <!-- History items will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
+
+    <script>
+        // Load and display history
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+            const historyList = document.getElementById('historyList');
+
+            // Update stats
+            updateStats(history);
+
+            // Display history items
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No Analysis History</h3>
+                        <p>You haven't analyzed any code yet. Start analyzing to see your history here!</p>
+                        <a href="/dashboard" class="btn-primary">
+                            <i class="fas fa-code"></i>
+                            Start Analyzing
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = history.map((item, index) => {
+                const scoreClass = getScoreClass(item.aiScore || item.mlScore);
+                const date = new Date(item.timestamp).toLocaleString();
+
+                return `
+                    <div class="history-item" data-language="${item.language.toLowerCase()}" data-index="${index}">
+                        <div class="history-item-header">
+                            <div class="history-item-title">
+                                <span class="language-badge">
+                                    <i class="fas fa-code"></i>
+                                    ${item.language}
+                                </span>
+                                <div>
+                                    <div style="color: var(--text-primary); font-weight: 600; font-size: 1.1rem;">
+                                        Analysis #${history.length - index}
+                                    </div>
+                                    <div class="history-item-date">
+                                        <i class="fas fa-clock"></i> ${date}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="history-item-scores">
+                            <div class="score-item">
+                                <span class="score-label">ML Score</span>
+                                <span class="score-value ${scoreClass}">${item.mlScore || 'N/A'}</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">AI Score</span>
+                                <span class="score-value ${scoreClass}">${item.aiScore || 'N/A'}</span>
+                            </div>
+                        </div>
+
+                        ${item.stats ? `
+                            <div class="history-item-stats">
+                                <span class="stat-badge">
+                                    <i class="fas fa-bug"></i>
+                                    ${item.stats.bugs || 0} Bugs
+                                </span>
+                                <span class="stat-badge">
+                                    <i class="fas fa-shield-alt"></i>
+                                    ${item.stats.security || 0} Security Issues
+                                </span>
+                            </div>
+                        ` : ''}
+
+                        <div class="code-preview">${item.code}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats(history) {
+            // Total analyses
+            document.getElementById('totalAnalyses').textContent = history.length;
+
+            // Average score
+            if (history.length > 0) {
+                const scores = history.map(h => {
+                    const score = h.aiScore || h.mlScore;
+                    return typeof score === 'string' ? parseInt(score) : score;
+                }).filter(s => !isNaN(s));
+
+                const avg = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : '-';
+                document.getElementById('avgScore').textContent = avg;
+            }
+
+            // Top language
+            const languages = {};
+            history.forEach(h => {
+                languages[h.language] = (languages[h.language] || 0) + 1;
+            });
+            const topLang = Object.keys(languages).sort((a, b) => languages[b] - languages[a])[0] || '-';
+            document.getElementById('topLanguage').textContent = topLang;
+
+            // Total issues
+            const totalIssues = history.reduce((sum, h) => {
+                return sum + (h.stats ? (h.stats.bugs || 0) + (h.stats.security || 0) : 0);
+            }, 0);
+            document.getElementById('totalIssues').textContent = totalIssues;
+        }
+
+        function getScoreClass(score) {
+            const numScore = typeof score === 'string' ? parseInt(score) : score;
+            if (numScore >= 7) return 'high';
+            if (numScore >= 4) return 'medium';
+            return 'low';
+        }
+
+        function filterHistory(language) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter items
+            const items = document.querySelectorAll('.history-item');
+            items.forEach(item => {
+                if (language === 'all' || item.dataset.language === language) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Logout handler
+        function handleLogoutClick(event) {
+            event.preventDefault();
+            if (confirm('Are you sure you want to logout?')) {
+                // Import and use auth logout
+                import('{{ url_for("static", filename="js/auth.js") }}').then(module => {
+                    if (module.logout) {
+                        module.logout();
+                    } else {
+                        window.location.href = '/';
+                    }
+                }).catch(() => {
+                    window.location.href = '/';
+                });
+            }
+        }
+
+        // Load history on page load
+        document.addEventListener('DOMContentLoaded', loadHistory);
+    </script>
+</body>
+
+</html>
