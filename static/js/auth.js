@@ -45,6 +45,24 @@ window.firebaseAuth = auth;
 window.firebaseDb = db;
 window.db = db; // Also export as window.db for convenience
 
+// Firebase Connection Diagnostics (for debugging production issues)
+console.log('🔥 Firebase Initialization:');
+console.log('  ✓ App initialized:', !!app);
+console.log('  ✓ Auth initialized:', !!auth);
+console.log('  ✓ Firestore initialized:', !!db);
+console.log('  ✓ Project ID:', firebaseConfig.projectId);
+console.log('  ✓ Auth Domain:', firebaseConfig.authDomain);
+console.log('  ✓ Current URL:', window.location.href);
+
+// Test Firestore connection
+try {
+    console.log('  ✓ Firestore app:', db.app.name);
+    console.log('  ✓ Firestore type:', db.type);
+} catch (error) {
+    console.error('  ✗ Firestore connection error:', error);
+}
+
+
 // Auth State Observer
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -563,6 +581,8 @@ window.loadUserHistory = async () => {
 
     try {
         console.log('📊 Loading user history from Firestore for:', window.currentUser.email);
+        console.log('  ✓ User ID:', window.currentUser.uid);
+        console.log('  ✓ Firestore DB:', !!db);
 
         const q = query(
             collection(db, 'analyses'),
@@ -571,8 +591,12 @@ window.loadUserHistory = async () => {
             limit(20)
         );
 
+        console.log('  ✓ Query created successfully');
+
         const querySnapshot = await getDocs(q);
         const history = [];
+
+        console.log('  ✓ Query executed, documents found:', querySnapshot.size);
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
@@ -592,24 +616,46 @@ window.loadUserHistory = async () => {
         return history;
     } catch (error) {
         console.error('❌ Error loading history from Firestore:', error);
-        console.error('Error code:', error.code);
-        console.error('Error message:', error.message);
+        console.error('  Error code:', error.code);
+        console.error('  Error message:', error.message);
+        console.error('  Error name:', error.name);
+
+        // Log additional context
+        console.error('  Context:', {
+            hasUser: !!window.currentUser,
+            userId: window.currentUser?.uid,
+            hasDb: !!db,
+            currentUrl: window.location.href
+        });
 
         // Provide specific error messages
         if (error.code === 'permission-denied') {
             console.error('🔒 Permission denied - Check Firestore security rules');
+            console.error('  Solution: Deploy security rules from firestore.rules file');
+            console.error('  Command: firebase deploy --only firestore:rules');
             window.toast?.error('Unable to access your analysis history. Please check permissions.', 'Permission Denied');
         } else if (error.code === 'failed-precondition') {
             console.error('📋 Missing index - Create composite index in Firestore');
+            console.error('  Solution: Deploy indexes from firestore.indexes.json');
+            console.error('  Command: firebase deploy --only firestore:indexes');
             window.toast?.error('Database index required. Please contact support.', 'Database Error');
         } else if (error.code === 'unavailable') {
             console.error('🌐 Firestore unavailable - Network or service issue');
+            console.error('  Check: Internet connection and Firebase status');
             window.toast?.error('Unable to connect to database. Please check your connection.', 'Connection Error');
+        } else if (error.code === 'unauthenticated') {
+            console.error('🔑 User not authenticated');
+            console.error('  Solution: User needs to log in again');
+            window.toast?.error('Please log in to view your history.', 'Authentication Required');
+        } else {
+            console.error('❓ Unknown error:', error);
+            window.toast?.error('Failed to load analysis history. Please try again.', 'Error');
         }
 
         return [];
     }
 };
+
 
 // Export db for use in other modules
 window.db = db;
