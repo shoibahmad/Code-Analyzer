@@ -521,132 +521,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Theme removed - keeping dark theme only
 
-// Analysis History
-let analysisHistory = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-
-// Dashboard Logic
+// Dashboard Logic (now handled by firestore-integration.js)
+// Dashboard update is now handled by firestore-integration.js
+// This function is kept for backward compatibility but does nothing
 function updateDashboard() {
-    const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-
-    // Stats elements
-    const totalEl = document.getElementById('totalAnalyses');
-    const avgScoreEl = document.getElementById('avgQualityScore');
-    const issuesEl = document.getElementById('totalIssues');
-    // const langEl = document.getElementById('topLanguage');
-
-    if (!totalEl) return; // Not on dashboard page or elements missing
-
-    // Calculate stats
-    const total = history.length;
-    let totalScore = 0;
-    let totalIssuesCount = 0;
-
-    history.forEach(h => {
-        // Parse scores which might be strings like "8/10"
-        const mlScore = typeof h.mlScore === 'string' ? parseInt(h.mlScore) : (h.mlScore || 0);
-        const aiScore = typeof h.aiScore === 'string' ? parseInt(h.aiScore) : (h.aiScore || 0);
-
-        // Use greater of the two or average? Let's use AI score if available, else ML
-        const score = aiScore || mlScore;
-        totalScore += score;
-
-        // Issues (estimate since we don't store full issue count in history summary, need to check how we save it)
-        // Current saveToHistory saves 'results' which is the full object but maybe we only want to store summary in LS to save space?
-        // Actually saveToHistory implementation above stores full object?
-        // Let's check saveToHistory implementation... 
-        // It stores: id, timestamp, code(snippet), language, mlScore, aiScore. 
-        // It DOES NOT store issue counts. We should update saveToHistory to store issue counts.
-        // For now, we'll leave issues as 0 or estimated.
-        if (h.stats) {
-            totalIssuesCount += (h.stats.bugs || 0) + (h.stats.security || 0);
-        }
-    });
-
-    const avg = total > 0 ? (totalScore / total).toFixed(1) : '-';
-
-    // Update DOM
-    if (totalEl) totalEl.textContent = total;
-    if (avgScoreEl) avgScoreEl.textContent = avg;
-    if (issuesEl) issuesEl.textContent = totalIssuesCount > 0 ? totalIssuesCount : '-'; // Placeholder until we fix storage
-
-    // Recent Activity List
-    const listEl = document.getElementById('dashboardRecentList');
-    if (listEl) {
-        if (history.length === 0) {
-            listEl.innerHTML = '<p class="text-muted text-center p-4">No recent activity.</p>';
-        } else {
-            listEl.innerHTML = history.slice(0, 5).map(entry => `
-                <div class="flex justify-between items-center p-3 border-b border-white-10">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-primary-10 flex items-center justify-center text-primary">
-                            <i class="fas fa-code"></i>
-                        </div>
-                        <div>
-                            <div class="font-medium">${entry.language} Analysis</div>
-                            <div class="text-xs text-muted">${new Date(entry.timestamp).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-bold ${entry.aiScore >= 7 ? 'text-success' : 'text-warning'}">Score: ${entry.aiScore}</div>
-                        <div class="text-xs text-muted">Model: Gemini</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-    }
+    console.log('⚠️ updateDashboard called - now handled by Firestore integration');
 }
 
-// Update saveToHistory to include stats
+// saveToHistory is now handled by firestore-integration.js
+// This function is kept for backward compatibility
 function saveToHistory(code, language, results) {
-    // Calculate stats
-    const mlBugs = results.ml_analysis?.bugs?.length || 0;
-    const mlSec = results.ml_analysis?.security?.length || 0;
-    const aiBugs = results.ai_analysis?.bugs?.length || 0;
-    const aiSec = results.ai_analysis?.security?.length || 0;
+    console.log('💾 saveToHistory called - redirecting to Firestore');
 
-    const entry = {
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        code: code.substring(0, 200) + '...',
-        language: language,
-        mlScore: results.ml_analysis?.overall_quality || 'N/A',
-        aiScore: results.ai_analysis?.overall_quality || 'N/A',
-        stats: {
-            bugs: mlBugs + aiBugs,
-            security: mlSec + aiSec
-        }
-    };
-
-    let analysisHistory = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-    analysisHistory.unshift(entry);
-    if (analysisHistory.length > 20) analysisHistory.pop(); // Increased limit
-    localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
-
-    // Update dashboard immediately if visible
-    updateDashboard();
+    // Use the Firestore integration if available
+    if (window.features && window.features.saveToHistory) {
+        window.features.saveToHistory(code, language, results);
+    } else if (window.saveAnalysisToFirestore) {
+        window.saveAnalysisToFirestore(code, language, results);
+    } else {
+        console.error('❌ No Firestore save function available');
+    }
 }
 
 // Show History Modal Function
 function showHistoryModal() {
-    const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-
-    if (history.length === 0) {
-        if (window.toast) {
-            window.toast.info('No analysis history yet. Start by analyzing some code!', 'History');
-        } else {
-            alert('No analysis history yet. Start by analyzing some code!');
-        }
-        return;
-    }
-
-    // Redirect to history page
+    // Always redirect to history page (it will load from Firestore)
     window.location.href = '/history';
 }
 
-// Initialize Dashboard on Load
-document.addEventListener('DOMContentLoaded', function () {
-    updateDashboard();
-});
+// Dashboard initialization is now handled by firestore-integration.js
 
 window.features = {
     saveToHistory,

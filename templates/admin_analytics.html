@@ -399,9 +399,53 @@
         </div>
     </div>
 
+    <!-- Load Firestore Integration -->
+    <script type="module" src="{{ url_for('static', filename='js/admin-firestore.js') }}"></script>
+
     <script>
-        // Load analytics data
-        function loadAnalytics() {
+        // Load analytics data (Firestore only)
+        async function loadAnalytics() {
+            console.log('📊 Loading admin analytics from Firestore...');
+
+            // Try Firestore first
+            if (window.loadFirestoreAnalytics) {
+                try {
+                    const result = await window.loadFirestoreAnalytics();
+
+                    if (result.success) {
+                        console.log('✅ Using Firestore data');
+                        const history = result.history;
+
+                        // Calculate stats
+                        const totalAnalyses = history.length;
+                        const totalBugs = history.reduce((sum, h) => sum + (h.stats?.bugs || 0), 0);
+                        const totalSecurity = history.reduce((sum, h) => sum + (h.stats?.security || 0), 0);
+                        const totalUsers = result.totalUsers;
+
+                        // Update stat cards
+                        document.getElementById('totalUsers').textContent = totalUsers;
+                        document.getElementById('totalAnalyses').textContent = totalAnalyses;
+                        document.getElementById('totalBugs').textContent = totalBugs;
+                        document.getElementById('totalSecurity').textContent = totalSecurity;
+
+                        // Create charts
+                        createAnalysisTrendChart(history);
+                        createLanguageDistChart(history);
+                        createQualityDistChart(history);
+                        createUsageHoursChart(history);
+
+                        // Populate table
+                        populateRecentTable(history);
+
+                        return; // Success, exit function
+                    }
+                } catch (error) {
+                    console.error('Error with Firestore:', error);
+                }
+            }
+
+            // Fallback to localStorage
+            console.log('📦 Using localStorage fallback');
             const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
 
             // Calculate stats
