@@ -1,10 +1,1 @@
-@echo off
-echo ========================================
-echo AI Code Review Assistant - DEBUG MODE
-echo ========================================
-echo.
-echo Starting debug server...
-echo Logs will be saved to debug.log
-echo.
-python app_debug.py
-pause
+for i in {1..15}; do curl -X POST http://localhost:5000/api/analyze -H "Content-Type: application/json" -d '{"code":"print(1)","language":"python"}'; done
