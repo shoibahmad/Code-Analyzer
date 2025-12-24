@@ -614,15 +614,37 @@
             }
 
             tbody.innerHTML = recent.map(h => {
-                const score = parseInt(h.aiScore || h.mlScore || 5);
+                // Parse quality score properly
+                let score = 0;
+                const aiScore = h.aiScore || h.mlScore || 'N/A';
+
+                if (typeof aiScore === 'string') {
+                    // Extract number from strings like "8/10" or "N/A"
+                    const match = aiScore.match(/(\d+)/);
+                    score = match ? parseInt(match[1]) : 0;
+                } else {
+                    score = parseInt(aiScore) || 0;
+                }
+
                 const statusClass = score >= 8 ? 'success' : score >= 6 ? 'warning' : 'error';
                 const statusText = score >= 8 ? 'Excellent' : score >= 6 ? 'Good' : 'Poor';
 
+                // Format timestamp
+                let dateStr = 'Unknown';
+                try {
+                    if (h.timestamp) {
+                        const date = typeof h.timestamp === 'number' ? new Date(h.timestamp) : new Date(h.timestamp);
+                        dateStr = date.toLocaleString();
+                    }
+                } catch (e) {
+                    console.error('Error parsing date:', e);
+                }
+
                 return `
                     <tr>
-                        <td>${new Date(h.timestamp).toLocaleString()}</td>
-                        <td><strong>${h.language}</strong></td>
-                        <td>${score}/10</td>
+                        <td>${dateStr}</td>
+                        <td><strong>${h.language || 'Unknown'}</strong></td>
+                        <td>${score > 0 ? score + '/10' : 'N/A'}</td>
                         <td>${h.stats?.bugs || 0}</td>
                         <td>${h.stats?.security || 0}</td>
                         <td><span class="badge badge-${statusClass}">${statusText}</span></td>

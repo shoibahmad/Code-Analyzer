@@ -16,9 +16,23 @@ class Config:
     # API Keys
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     
+    # Firebase Configuration
+    FIREBASE_CONFIG = {
+        'apiKey': os.getenv('FIREBASE_API_KEY'),
+        'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
+        'projectId': os.getenv('FIREBASE_PROJECT_ID'),
+        'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET'),
+        'messagingSenderId': os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+        'appId': os.getenv('FIREBASE_APP_ID'),
+        'measurementId': os.getenv('FIREBASE_MEASUREMENT_ID')
+    }
+    
     # Security
     MAX_CODE_LENGTH = int(os.getenv('MAX_CODE_LENGTH', 50000))
     ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5000').split(',')
+    SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+    SESSION_COOKIE_HTTPONLY = os.getenv('SESSION_COOKIE_HTTPONLY', 'True').lower() == 'true'
+    SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
     
     # Rate Limiting
     RATELIMIT_ENABLED = os.getenv('RATELIMIT_ENABLED', 'True').lower() == 'true'

@@ -810,17 +810,17 @@
 
             <!-- Center: Navigation Links -->
             <div class="nav-links">
-                <a href="/dashboard" class="nav-link active">
+                <a href="/analyzer" class="nav-link active">
                     <i class="fas fa-home"></i>
-                    Dashboard
+                    Home
                 </a>
                 <a href="/history" class="nav-link">
                     <i class="fas fa-history"></i>
                     History
                 </a>
                 <a href="/admin/analytics" class="nav-link">
-                    <i class="fas fa-chart-pie"></i>
-                    Analytics
+                    <i class="fas fa-chart-line"></i>
+                    Dashboard
                 </a>
             </div>
 
@@ -850,17 +850,17 @@
             </button>
         </div>
         <nav class="mobile-menu-nav">
-            <a href="/dashboard" class="mobile-menu-link">
+            <a href="/analyzer" class="mobile-menu-link">
                 <i class="fas fa-home"></i>
-                Dashboard
+                Home
             </a>
             <a href="/history" class="mobile-menu-link">
                 <i class="fas fa-history"></i>
                 History
             </a>
             <a href="/admin/analytics" class="mobile-menu-link">
-                <i class="fas fa-chart-pie"></i>
-                Analytics
+                <i class="fas fa-chart-line"></i>
+                Dashboard
             </a>
             <a href="/profile" class="mobile-menu-link">
                 <i class="fas fa-user"></i>
@@ -898,11 +898,7 @@
 
         <!-- Tabs -->
         <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('dashboard')">
-                <i class="fas fa-chart-line"></i>
-                Dashboard
-            </button>
-            <button class="tab-btn" onclick="switchTab('code')">
+            <button class="tab-btn active" onclick="switchTab('code')">
                 <i class="fas fa-code"></i>
                 Code Analyzer
             </button>
@@ -912,83 +908,9 @@
             </button>
         </div>
 
-        <!-- Dashboard Tab -->
-        <div class="tab-content active" id="dashboardTab">
-            <div class="glass-card mb-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="mb-2">Welcome Back, <span class="user-display-name">User</span>!</h2>
-                        <p class="text-secondary">Here's an overview of your code analysis activity.</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="switchTab('code')">
-                        <i class="fas fa-plus"></i> New Analysis
-                    </button>
-                </div>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="card-grid">
-                <div class="stat-card">
-                    <i class="fas fa-search-code"></i>
-                    <div class="stat-value" id="totalAnalyses">0</div>
-                    <div class="stat-label">Total Analyses</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-star-half-alt"></i>
-                    <div class="stat-value" id="avgQualityScore">-</div>
-                    <div class="stat-label">Avg. Quality Score</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-bug"></i>
-                    <div class="stat-value" id="totalIssues">0</div>
-                    <div class="stat-label">Issues Detected</div>
-                </div>
-                <!-- <div class="stat-card">
-                    <i class="fas fa-code"></i>
-                    <div class="stat-value" id="topLanguage">-</div>
-                    <div class="stat-label">Top Language</div>
-                </div> -->
-            </div>
-
-            <div class="grid-2-col gap-3">
-                <!-- Recent Activity -->
-                <div class="glass-card h-full">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
-                        <button class="btn btn-outline btn-sm"
-                            onclick="if(window.features) window.features.showHistoryModal()">View All</button>
-                    </div>
-                    <div id="dashboardRecentList" class="activity-list">
-                        <p class="text-muted text-center p-4">No recent activity.</p>
-                    </div>
-                </div>
-
-                <!-- Quick Tips / Insights -->
-                <div class="glass-card h-full">
-                    <h3><i class="fas fa-lightbulb"></i> AI Insights</h3>
-                    <div class="mt-3">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <div>
-                                <strong>Tip of the Day</strong>
-                                <p>Consistent code formatting improves readability and reduces bugs. Try using an
-                                    automated formatter.</p>
-                            </div>
-                        </div>
-                        <div class="alert alert-success">
-                            <i class="fas fa-chart-line"></i>
-                            <div>
-                                <strong>Performance</strong>
-                                <p>Your average code quality score is trending upwards! Keep up the good work.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Code Analyzer Tab -->
-        <div class="tab-content" id="codeTab">
+        <div class="tab-content active" id="codeTab">
             <div class="analyzer-grid">
                 <!-- Input Section -->
                 <div class="code-input-section">
@@ -1954,13 +1876,7 @@
                 content.classList.remove('active');
             });
 
-            if (tab === 'dashboard') {
-                document.getElementById('dashboardTab').classList.add('active');
-                // Refresh dashboard data if available
-                if (window.features && window.features.updateDashboard) {
-                    window.features.updateDashboard();
-                }
-            } else if (tab === 'code') {
+            if (tab === 'code') {
                 document.getElementById('codeTab').classList.add('active');
             } else if (tab === 'github') {
                 document.getElementById('githubTab').classList.add('active');

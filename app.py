@@ -3,7 +3,7 @@ Complete App.py with All Routes and Features
 This file restores all functionality that was lost during Git rebase
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -16,6 +16,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 import threading
+from functools import wraps
+import bleach  # For XSS prevention
 
 from config import get_config
 from validators import code_validator, ValidationError
@@ -26,6 +28,12 @@ from language_detector import language_detector
 app = Flask(__name__)
 config = get_config()
 app.config.from_object(config)
+
+# Configure session security
+app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['SESSION_COOKIE_SECURE'] = config.SESSION_COOKIE_SECURE
+app.config['SESSION_COOKIE_HTTPONLY'] = config.SESSION_COOKIE_HTTPONLY
+app.config['SESSION_COOKIE_SAMESITE'] = config.SESSION_COOKIE_SAMESITE
 
 # Configure CORS
 CORS(app, resources={
@@ -90,6 +98,107 @@ def load_ml_model():
 # Start model loading in background
 model_thread = threading.Thread(target=load_ml_model, daemon=True)
 model_thread.start()
+
+# ==================== AUTHENTICATION & SECURITY ====================
+
+def login_required(f):
+    """Decorator to protect routes that require authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check if user is logged in (Firebase auth sets this)
+        if 'user_id' not in session and 'firebase_user' not in session:
+            app.logger.warning(f"Unauthorized access attempt to {request.path}")
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def sanitize_input(text, max_length=None):
+    """Sanitize user input to prevent XSS attacks"""
+    if not text:
+        return ""
+    
+    # Remove any HTML tags and scripts
+    cleaned = bleach.clean(
+        text,
+        tags=[],  # No HTML tags allowed
+        attributes={},
+        strip=True
+    )
+    
+    # Limit length if specified
+    if max_length and len(cleaned) > max_length:
+        cleaned = cleaned[:max_length]
+    
+    return cleaned.strip()
+
+def validate_code_input(code, language):
+    """Validate code input before processing"""
+    errors = []
+    
+    # Check if code is provided
+    if not code or not code.strip():
+        errors.append("Code cannot be empty")
+    
+    # Check code length
+    if len(code) > config.MAX_CODE_LENGTH:
+        errors.append(f"Code exceeds maximum length of {config.MAX_CODE_LENGTH} characters")
+    
+    # Check if language is valid
+    valid_languages = ['python', 'javascript', 'java', 'cpp', 'c', 'csharp', 'go', 'rust', 'php', 'ruby', 'swift', 'kotlin', 'typescript']
+    if language and language.lower() not in valid_languages:
+        errors.append(f"Invalid language: {language}")
+    
+    return errors
+
+def validate_github_url(url):
+    """Validate GitHub URL"""
+    if not url:
+        return ["GitHub URL cannot be empty"]
+    
+    errors = []
+    
+    # Basic URL validation
+    if not url.startswith('https://github.com/'):
+        errors.append("URL must start with https://github.com/")
+    
+    # Check for suspicious patterns
+    suspicious_patterns = ['<script', 'javascript:', 'data:', 'vbscript:']
+    for pattern in suspicious_patterns:
+        if pattern in url.lower():
+            errors.append("URL contains suspicious content")
+            break
+    
+    return errors
+
+# ==================== SESSION MANAGEMENT ====================
+
+@app.before_request
+def before_request():
+    """Run before each request"""
+    # Make session permanent (expires after browser close)
+    session.permanent = False
+    
+    # Log request for debugging (in development only)
+    if config.DEBUG:
+        app.logger.debug(f"{request.method} {request.path}")
+
+@app.after_request
+def after_request(response):
+    """Add security headers to all responses"""
+    # Prevent clickjacking
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    # Prevent MIME type sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    
+    # Enable XSS protection
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    # Content Security Policy
+    response.headers['Content-Security-Policy'] = "default-src 'self' https://www.gstatic.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:;"
+    
+    return response
+
 
 # Helper function for Gemini analysis
 def get_gemini_analysis(code, language):
@@ -397,20 +506,30 @@ def index():
 
 @app.route('/dashboard')
 def dashboard():
-    """Dashboard page (Analyzer)"""
+    """Redirect to analyzer (admin analytics serves as dashboard)"""
+    from flask import redirect
+    return redirect('/analyzer')
+
+@app.route('/analyzer')
+@login_required
+def analyzer():
+    """Code Analyzer page"""
     return render_template('analyzer_modern.html')
 
 @app.route('/history')
+@login_required
 def history():
     """History page"""
     return render_template('history.html')
 
 @app.route('/profile')
+@login_required
 def profile():
     """User Profile page"""
     return render_template('profile.html')
 
 @app.route('/admin/analytics')
+@login_required
 def admin_analytics():
     """Admin Analytics Dashboard"""
     return render_template('admin_analytics.html')
@@ -451,12 +570,21 @@ def analyze_code_endpoint():
         code = data.get('code', '').strip()
         language = data.get('language', 'auto')
         
-        # Validate code
+        # Validate and sanitize inputs
         app.logger.info("=" * 60)
         app.logger.info("🚀 STARTING CODE ANALYSIS")
         app.logger.info("=" * 60)
         app.logger.info(f"📝 Code length: {len(code)} characters")
         app.logger.info(f"📝 Code lines: {len(code.split(chr(10)))} lines")
+        
+        # Input validation
+        validation_errors = validate_code_input(code, language)
+        if validation_errors:
+            app.logger.error(f"❌ Input validation failed: {', '.join(validation_errors)}")
+            return jsonify({'error': '; '.join(validation_errors)}), 400
+        
+        # Sanitize language input (but not code - we need original code for analysis)
+        language = sanitize_input(language, max_length=50)
         
         try:
             app.logger.info("✓ Step 1/4: Validating code...")
