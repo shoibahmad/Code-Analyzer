@@ -10,7 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <!-- Icons -->
@@ -792,86 +792,7 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <!-- Left: Logo -->
-            <div class="logo-section">
-                <div class="logo-main">
-                    <i class="fas fa-shield-alt"></i>
-                    <span class="logo-text">CodeSentinel AI</span>
-                </div>
-            </div>
-
-            <!-- Burger Menu Button (Mobile Only) -->
-            <button class="burger-menu" id="burgerMenu" onclick="toggleMobileMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
-
-            <!-- Center: Navigation Links -->
-            <div class="nav-links">
-                <a href="/analyzer" class="nav-link active">
-                    <i class="fas fa-home"></i>
-                    Home
-                </a>
-                <a href="/history" class="nav-link">
-                    <i class="fas fa-history"></i>
-                    History
-                </a>
-                <a href="/admin/analytics" class="nav-link">
-                    <i class="fas fa-chart-line"></i>
-                    Dashboard
-                </a>
-            </div>
-
-            <!-- Right: Profile and Logout -->
-            <div class="header-actions">
-                <a href="/profile" class="btn-profile">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
-                <button class="btn-logout" onclick="handleLogoutClick(event)">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Mobile Menu Overlay -->
-    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="toggleMobileMenu()"></div>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
-        <div class="mobile-menu-header">
-            <h3>Menu</h3>
-            <button class="close-menu" onclick="toggleMobileMenu()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <nav class="mobile-menu-nav">
-            <a href="/analyzer" class="mobile-menu-link">
-                <i class="fas fa-home"></i>
-                Home
-            </a>
-            <a href="/history" class="mobile-menu-link">
-                <i class="fas fa-history"></i>
-                History
-            </a>
-            <a href="/admin/analytics" class="mobile-menu-link">
-                <i class="fas fa-chart-line"></i>
-                Dashboard
-            </a>
-            <a href="/profile" class="mobile-menu-link">
-                <i class="fas fa-user"></i>
-                Profile
-            </a>
-            <a href="#" class="mobile-menu-link" onclick="handleLogoutClick(event); toggleMobileMenu();">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </a>
-        </nav>
-    </div>
+    {% include 'components/header.html' %}
 
     <!-- Main Content -->
     <div class="container">
@@ -1105,98 +1026,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer
-        style="background: var(--bg-secondary); padding: 4rem 0 2rem; border-top: 1px solid var(--border); margin-top: auto;">
-        <div class="container">
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-bottom: 3rem;">
-                <!-- Brand -->
-                <div>
-                    <h3
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: var(--text-primary);">
-                        <i class="fas fa-code" style="color: var(--primary);"></i> CodeSentinel AI
-                    </h3>
-                    <p
-                        style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
-                        Empowering developers with intelligent code analysis, security auditing, and automated reviews
-                        powered by advanced ML and Gemini AI.
-                    </p>
-                    <div style="display: flex; gap: 1rem;">
-                        <a href="#" class="btn btn-outline"
-                            style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i
-                                class="fab fa-github"></i></a>
-                        <a href="#" class="btn btn-outline"
-                            style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i
-                                class="fab fa-linkedin"></i></a>
-                        <a href="#" class="btn btn-outline"
-                            style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;"><i
-                                class="fas fa-envelope"></i></a>
-                    </div>
-                </div>
-
-                <!-- Links -->
-                <div>
-                    <h4 style="color: var(--text-primary); margin-bottom: 1.5rem;">Quick Links</h4>
-                    <ul
-                        style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
-                        <li><a href="/dashboard"
-                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Dashboard</a>
-                        </li>
-                        <li><a href="/about"
-                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">About
-                                Us</a></li>
-                        <li><a href="/privacy"
-                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Privacy
-                                Policy</a></li>
-                        <li><a href="/terms"
-                                style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Terms
-                                & Conditions</a></li>
-                    </ul>
-                </div>
-
-                <!-- Developer Info -->
-                <div>
-                    <h4 style="color: var(--text-primary); margin-bottom: 1.5rem;">Project Team</h4>
-                    <div
-                        style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem;">
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                            <div
-                                style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                                AS</div>
-                            <div>
-                                <div style="color: var(--text-primary); font-weight: 600;">Alisha Shad</div>
-                                <div style="color: var(--text-muted); font-size: 0.8rem;">Lead Developer</div>
-                            </div>
-                        </div>
-                        <div
-                            style="font-size: 0.85rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.5rem;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <i class="fas fa-university"
-                                    style="width: 16px; text-align: center; color: var(--primary);"></i>
-                                MCA 2nd Year
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <i class="fas fa-calendar-alt"
-                                    style="width: 16px; text-align: center; color: var(--primary);"></i>
-                                Batch 2024 - 2026
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <i class="fas fa-laptop-code"
-                                    style="width: 16px; text-align: center; color: var(--primary);"></i>
-                                Dept. of Computer Applications
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                style="text-align: center; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;">
-                &copy; 2026 CodeSentinel AI. Developed by Alisha Shad. All rights reserved.
-            </div>
-        </div>
-    </footer>
 
     <!-- Advanced Code Analysis Loading Animation -->
     <div id="loadingOverlay" class="loading-overlay-advanced hidden">
@@ -2041,6 +1870,8 @@
             addGreenBorderFeedback();
         }
     </script>
+
+    {% include 'components/footer.html' %}
 </body>
 
 </html>

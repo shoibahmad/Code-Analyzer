@@ -26,9 +26,9 @@ export async function loadFirestoreAnalytics() {
     console.log('📊 Loading admin analytics from Firestore...');
 
     try {
-        // Load all analyses
+        // Load all analyses - removed orderBy to avoid index requirement
         const analysesRef = collection(db, 'analyses');
-        const q = query(analysesRef, orderBy('timestamp', 'desc'), limit(1000));
+        const q = query(analysesRef, limit(1000));
         const querySnapshot = await getDocs(q);
 
         const history = [];
@@ -36,23 +36,32 @@ export async function loadFirestoreAnalytics() {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
+
+            // Handle different quality score formats
+            const mlScore = data.mlQuality || data.ml_quality || data.mlScore || 'N/A';
+            const aiScore = data.aiQuality || data.ai_quality || data.aiScore || 'N/A';
+
             history.push({
                 id: doc.id,
                 timestamp: data.timestamp?.toDate ? data.timestamp.toDate().getTime() : Date.now(),
                 language: data.language || 'Unknown',
-                mlScore: data.mlQuality || 'N/A',
-                aiScore: data.aiQuality || 'N/A',
+                mlScore: mlScore,
+                aiScore: aiScore,
                 stats: {
-                    bugs: data.bugsCount || 0,
-                    security: data.securityCount || 0
+                    bugs: data.bugsCount || data.bugs_count || 0,
+                    security: data.securityCount || data.security_count || 0
                 },
-                userId: data.userId
+                userId: data.userId || data.user_id,
+                analysisTime: data.analysisTime || data.analysis_time || 0
             });
 
-            if (data.userId) {
-                userIds.add(data.userId);
+            if (data.userId || data.user_id) {
+                userIds.add(data.userId || data.user_id);
             }
         });
+
+        // Sort by timestamp client-side
+        history.sort((a, b) => b.timestamp - a.timestamp);
 
         console.log(`✅ Loaded ${history.length} analyses from Firestore`);
         console.log(`✅ Found ${userIds.size} unique users`);
@@ -68,9 +77,15 @@ export async function loadFirestoreAnalytics() {
         console.error('  Error code:', error.code);
         console.error('  Error message:', error.message);
 
+        // Fallback to localStorage if Firestore fails
+        console.log('⚠️ Falling back to localStorage...');
+        const localHistory = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+
         return {
             success: false,
-            error: error.message
+            error: error.message,
+            history: localHistory,
+            totalUsers: 0
         };
     }
 }

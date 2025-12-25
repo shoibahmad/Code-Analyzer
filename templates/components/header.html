@@ -1,0 +1,662 @@
+<!-- Modern Responsive Header -->
+<header class="modern-header">
+    <div class="header-wrapper">
+        <!-- Logo -->
+        <div class="header-logo">
+            <a href="/analyzer" class="logo-link">
+                <div class="logo-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span class="logo-text">CodeSentinel AI</span>
+            </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="desktop-navigation">
+            <a href="/analyzer" class="nav-item" data-page="analyzer">
+                <i class="fas fa-code"></i>
+                <span>Analyzer</span>
+            </a>
+            <a href="/history" class="nav-item" data-page="history">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </a>
+            <a href="/admin/analytics" class="nav-item" data-page="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/profile" class="nav-item" data-page="profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+
+        <!-- User Info & Mobile Toggle -->
+        <div class="header-right">
+            <!-- User Info (Desktop) -->
+            <div class="user-info-desktop">
+                <div class="user-avatar" id="desktopUserAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span class="user-name" id="desktopUserName">User</span>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile Sidebar Menu -->
+<div class="mobile-sidebar" id="mobileSidebar">
+    <div class="sidebar-content">
+        <!-- User Section -->
+        <div class="sidebar-user">
+            <div class="sidebar-user-avatar" id="sidebarUserAvatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarUserName">User</div>
+                <div class="sidebar-user-email" id="sidebarUserEmail">user@example.com</div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="sidebar-nav">
+            <a href="/analyzer" class="sidebar-nav-item">
+                <i class="fas fa-code"></i>
+                <span>Analyzer</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            <a href="/history" class="sidebar-nav-item">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            <a href="/admin/analytics" class="sidebar-nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            <a href="/profile" class="sidebar-nav-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </nav>
+
+        <!-- Logout Button -->
+        <div class="sidebar-footer">
+            <button class="sidebar-logout-btn" id="sidebarLogout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+
+<style>
+    /* Modern Header Styles */
+    .modern-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .header-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+
+    /* Logo */
+    .header-logo .logo-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+    }
+
+    .header-logo .logo-link:hover {
+        transform: scale(1.05);
+    }
+
+    .logo-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .logo-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .logo-text {
+        font-size: 1.35rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #e0e7ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    /* Desktop Navigation */
+    .desktop-navigation {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .nav-item:hover::before {
+        left: 100%;
+    }
+
+    .nav-item:hover {
+        background: rgba(99, 102, 241, 0.2);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .nav-item.active {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .nav-item i {
+        font-size: 1.1rem;
+    }
+
+    /* Header Right */
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* User Info Desktop */
+    .user-info-desktop {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .user-info-desktop:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+
+    .user-name {
+        color: white;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    /* Mobile Toggle */
+    .mobile-toggle {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        z-index: 1001;
+    }
+
+    .hamburger-line {
+        width: 28px;
+        height: 3px;
+        background: white;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-toggle.active .hamburger-line:nth-child(1) {
+        transform: rotate(45deg) translate(8px, 8px);
+    }
+
+    .mobile-toggle.active .hamburger-line:nth-child(2) {
+        opacity: 0;
+    }
+
+    .mobile-toggle.active .hamburger-line:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    /* Mobile Sidebar */
+    .mobile-sidebar {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 320px;
+        max-width: 85vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+        z-index: 1002;
+        transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        overflow-y: auto;
+    }
+
+    .mobile-sidebar.active {
+        right: 0;
+    }
+
+    .sidebar-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    /* Sidebar User */
+    .sidebar-user {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .sidebar-user-avatar {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .sidebar-user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sidebar-user-name {
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sidebar-user-email {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.85rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sidebar-close {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .sidebar-close:hover {
+        background: rgba(239, 68, 68, 0.8);
+        transform: rotate(90deg);
+    }
+
+    /* Sidebar Navigation */
+    .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0;
+    }
+
+    .sidebar-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+        position: relative;
+    }
+
+    .sidebar-nav-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0;
+        height: 100%;
+        background: rgba(99, 102, 241, 0.2);
+        transition: width 0.3s ease;
+    }
+
+    .sidebar-nav-item:hover::before {
+        width: 100%;
+    }
+
+    .sidebar-nav-item:hover {
+        color: white;
+        border-left-color: #6366f1;
+    }
+
+    .sidebar-nav-item i:first-child {
+        font-size: 1.3rem;
+        width: 28px;
+        text-align: center;
+        color: #6366f1;
+    }
+
+    .sidebar-nav-item span {
+        flex: 1;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .sidebar-nav-item i:last-child {
+        font-size: 0.9rem;
+        opacity: 0.5;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-nav-item:hover i:last-child {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-logout-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .sidebar-logout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+    }
+
+    .sidebar-logout-btn i {
+        font-size: 1.2rem;
+    }
+
+    /* Mobile Overlay */
+    .mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        z-index: 1001;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .desktop-navigation {
+            gap: 0.25rem;
+        }
+
+        .nav-item {
+            padding: 0.65rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .desktop-navigation {
+            display: none;
+        }
+
+        .user-info-desktop {
+            display: none;
+        }
+
+        .mobile-toggle {
+            display: flex;
+        }
+
+        .header-wrapper {
+            padding: 0.875rem 1rem;
+        }
+
+        .logo-text {
+            font-size: 1.15rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo-icon i {
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .logo-text {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    // Mobile Menu Toggle
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    function openMobileMenu() {
+        mobileToggle.classList.add('active');
+        mobileSidebar.classList.add('active');
+        mobileOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        updateUserInfo();
+    }
+
+    function closeMobileMenu() {
+        mobileToggle.classList.remove('active');
+        mobileSidebar.classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    mobileToggle?.addEventListener('click', () => {
+        if (mobileSidebar.classList.contains('active')) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
+        }
+    });
+
+    sidebarClose?.addEventListener('click', closeMobileMenu);
+    mobileOverlay?.addEventListener('click', closeMobileMenu);
+
+    // Close menu when clicking nav links
+    document.querySelectorAll('.sidebar-nav-item').forEach(link => {
+        link.addEventListener('click', () => {
+            setTimeout(closeMobileMenu, 200);
+        });
+    });
+
+    // Update User Info
+    function updateUserInfo() {
+        if (window.currentUser) {
+            const displayName = window.currentUser.displayName || window.currentUser.email?.split('@')[0] || 'User';
+            const email = window.currentUser.email || '';
+            const initial = displayName.charAt(0).toUpperCase();
+
+            // Desktop
+            const desktopName = document.getElementById('desktopUserName');
+            const desktopAvatar = document.getElementById('desktopUserAvatar');
+
+            if (desktopName) desktopName.textContent = displayName;
+            if (desktopAvatar) {
+                desktopAvatar.innerHTML = `<span style="font-size: 1.1rem; font-weight: 700;">${initial}</span>`;
+            }
+
+            // Sidebar
+            const sidebarName = document.getElementById('sidebarUserName');
+            const sidebarEmail = document.getElementById('sidebarUserEmail');
+            const sidebarAvatar = document.getElementById('sidebarUserAvatar');
+
+            if (sidebarName) sidebarName.textContent = displayName;
+            if (sidebarEmail) sidebarEmail.textContent = email;
+            if (sidebarAvatar) {
+                sidebarAvatar.innerHTML = `<span style="font-size: 1.5rem; font-weight: 700;">${initial}</span>`;
+            }
+        }
+    }
+
+    // Logout Handler
+    const sidebarLogout = document.getElementById('sidebarLogout');
+    sidebarLogout?.addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+            closeMobileMenu();
+            if (window.logout && typeof window.logout === 'function') {
+                window.logout();
+            } else if (window.handleLogout && typeof window.handleLogout === 'function') {
+                window.handleLogout();
+            } else {
+                window.location.href = '/';
+            }
+        }
+    });
+
+    // Initialize on load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(updateUserInfo, 500);
+        });
+    } else {
+        setTimeout(updateUserInfo, 500);
+    }
+
+    // Listen for user changes
+    window.addEventListener('userChanged', updateUserInfo);
+
+    // Highlight active page
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (currentPath.includes(href) && href !== '/') {
+            item.classList.add('active');
+        } else if (currentPath === '/' && href === '/analyzer') {
+            item.classList.add('active');
+        }
+    });
+</script>

@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Review Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/language-indicator.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/features.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <!-- Include Modern Header -->
+    {% include 'components/header.html' %}
+
+    <div class="container">
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section">
+                <div class="editor-toolbar">
+                    <div class="editor-toolbar-left">
+                        <span class="editor-label" id="languageLabel">
+                            <i class="fas fa-magic"></i>
+                            <span id="detectedLanguage">Auto-detecting language...</span>
+                        </span>
+                        <button id="uploadBtn" class="btn btn-secondary" title="Upload Code File">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                        <input type="file" id="fileInput" accept=".py,.js,.java,.cpp,.cs,.go,.rs,.php,.rb,.ts,.jsx,.tsx"
+                            style="display: none;">
+                        <select id="sampleSelect" class="language-select">
+                            <option value="">Load Sample...</option>
+                            <option value="python-good">Python - Good Code</option>
+                            <option value="python-bad">Python - Needs Improvement</option>
+                            <option value="javascript-good">JavaScript - Good Code</option>
+                            <option value="javascript-bad">JavaScript - Needs Improvement</option>
+                        </select>
+                    </div>
+                    <div class="editor-toolbar-right">
+                        <button id="clearBtn" class="btn btn-secondary">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <textarea id="codeInput" class="code-editor" placeholder="# Paste your code here for dual AI-powered analysis...
+# The system will analyze using both ML Model (CodeBERT) and AI (Gemini)
+
+def example():
+    pass"></textarea>
+                <div style="padding: 16px; display: flex; justify-content: center;">
+                    <button id="analyzeBtn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Run Analysis
+                    </button>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> Analysis Results</h2>
+                    <div class="result-actions">
+                        <button id="exportPdfBtn" class="btn btn-primary">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                        <button id="historyBtn" class="btn btn-secondary">
+                            <i class="fas fa-history"></i> History
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visualization Charts -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-bar"></i> Quality Metrics Comparison</h3>
+                        <canvas id="metricsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-pie"></i> Issues Distribution</h3>
+                        <canvas id="issuesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Comparison Grid -->
+                <div class="comparison-container">
+                    <!-- ML Model Analysis -->
+                    <div class="analysis-column">
+                        <div class="column-header ml-header">
+                            <h3>
+                                <span class="column-title">
+                                    <i class="fas fa-brain"></i>
+                                    ML Model Analysis
+                                </span>
+                                <span class="tech-badge">CodeBERT</span>
+                            </h3>
+                        </div>
+
+                        <!-- ML Overall Quality -->
+                        <div class="card quality-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-star"></i> Overall Quality</h3>
+                                <span id="mlQualityScore" class="score-badge">-</span>
+                            </div>
+                            <p id="mlQualitySummary" class="summary-text"></p>
+                        </div>
+
+                        <!-- ML Metrics -->
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <i class="fas fa-project-diagram"></i>
+                                <div class="metric-label">Complexity</div>
+                                <div id="mlComplexityScore" class="metric-value">-</div>
+                            </div>
+                            <div class="metric-card">
+                                <i class="fas fa-eye"></i>
+                                <div class="metric-label">Readability</div>
+                                <div id="mlReadabilityScore" class="metric-value">-</div>
+                            </div>
+                            <div class="metric-card">
+                                <i class="fas fa-tools"></i>
+                                <div class="metric-label">Maintainability</div>
+                                <div id="mlMaintainabilityScore" class="metric-value">-</div>
+                            </div>
+                        </div>
+
+                        <!-- ML Bugs -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bug"></i> Bugs & Issues</h3>
+                                <span id="mlBugsCount" class="count-badge">0</span>
+                            </div>
+                            <div id="mlBugsList" class="issues-list"></div>
+                        </div>
+
+                        <!-- ML Security -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-shield-alt"></i> Security</h3>
+                                <span id="mlSecurityCount" class="count-badge">0</span>
+                            </div>
+                            <div id="mlSecurityList" class="issues-list"></div>
+                        </div>
+
+                        <!-- ML Improvements -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-lightbulb"></i> Improvements</h3>
+                                <span id="mlImprovementsCount" class="count-badge">0</span>
+                            </div>
+                            <div id="mlImprovementsList" class="issues-list"></div>
+                        </div>
+
+                        <!-- ML Best Practices -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-check-circle"></i> Best Practices</h3>
+                                <span id="mlPracticesCount" class="count-badge">0</span>
+                            </div>
+                            <div id="mlPracticesList" class="issues-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- AI Analysis -->
+                    <div class="analysis-column">
+                        <div class="column-header ai-header">
+                            <h3>
+                                <span class="column-title">
+                                    <i class="fas fa-robot"></i>
+                                    AI Analysis
+                                </span>
+                                <span class="tech-badge">Gemini 2.5 Flash</span>
+                            </h3>
+                        </div>
+
+                        <!-- AI Overall Quality -->
+                        <div class="card quality-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-star"></i> Overall Quality</h3>
+                                <span id="aiQualityScore" class="score-badge">-</span>
+                            </div>
+                            <p id="aiQualitySummary" class="summary-text"></p>
+                        </div>
+
+                        <!-- AI Metrics -->
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <i class="fas fa-project-diagram"></i>
+                                <div class="metric-label">Complexity</div>
+                                <div id="aiComplexityScore" class="metric-value">-</div>
+                            </div>
+                            <div class="metric-card">
+                                <i class="fas fa-eye"></i>
+                                <div class="metric-label">Readability</div>
+                                <div id="aiReadabilityScore" class="metric-value">-</div>
+                            </div>
+                            <div class="metric-card">
+                                <i class="fas fa-tools"></i>
+                                <div class="metric-label">Maintainability</div>
+                                <div id="aiMaintainabilityScore" class="metric-value">-</div>
+                            </div>
+                        </div>
+
+                        <!-- AI Bugs -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bug"></i> Bugs & Issues</h3>
+                                <span id="aiBugsCount" class="count-badge">0</span>
+                            </div>
+                            <div id="aiBugsList" class="issues-list"></div>
+                        </div>
+
+                        <!-- AI Security -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-shield-alt"></i> Security</h3>
+                                <span id="aiSecurityCount" class="count-badge">0</span>
+                            </div>
+                            <div id="aiSecurityList" class="issues-list"></div>
+                        </div>
+
+                        <!-- AI Improvements -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-lightbulb"></i> Improvements</h3>
+                                <span id="aiImprovementsCount" class="count-badge">0</span>
+                            </div>
+                            <div id="aiImprovementsList" class="issues-list"></div>
+                        </div>
+
+                        <!-- AI Best Practices -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-check-circle"></i> Best Practices</h3>
+                                <span id="aiPracticesCount" class="count-badge">0</span>
+                            </div>
+                            <div id="aiPracticesList" class="issues-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing your code with AI...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+    </div>
+
+    <!-- Include Modern Footer -->
+    {% include 'components/footer.html' %}
+
+
+    <div class="footer-section">
+        <h3><i class="fas fa-info-circle"></i> About</h3>
+        <p>AI Code Review Assistant is an intelligent code analysis platform that combines Machine Learning
+            (CodeBERT) and Advanced AI (Gemini 2.5 Flash) to provide comprehensive code quality insights.
+        </p>
+        <div class="tech-stack">
+            <span class="tech-item"><i class="fab fa-python"></i> Python</span>
+            <span class="tech-item"><i class="fab fa-js"></i> JavaScript</span>
+            <span class="tech-item"><i class="fas fa-brain"></i> ML/AI</span>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="footer-section">
+        <h3><i class="fas fa-star"></i> Features</h3>
+        <ul class="footer-list">
+            <li><i class="fas fa-check"></i> Dual Analysis (ML + AI)</li>
+            <li><i class="fas fa-check"></i> Auto Language Detection</li>
+            <li><i class="fas fa-check"></i> Bug & Security Detection</li>
+            <li><i class="fas fa-check"></i> Code Quality Metrics</li>
+            <li><i class="fas fa-check"></i> PDF Export & History</li>
+            <li><i class="fas fa-check"></i> Interactive Charts</li>
+        </ul>
+    </div>
+
+    <!-- Quick Links Section -->
+    <div class="footer-section">
+        <h3><i class="fas fa-link"></i> Quick Links</h3>
+        <ul class="footer-list">
+            <li><a href="#" id="termsLink"><i class="fas fa-file-contract"></i> Terms & Conditions</a></li>
+            <li><a href="#" id="privacyLink"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+            <li><a href="#" id="aboutLink"><i class="fas fa-graduation-cap"></i> About Project</a></li>
+            <li><a href="https://github.com" target="_blank"><i class="fab fa-github"></i> GitHub</a></li>
+            <li><a href="https://ai.google.dev" target="_blank"><i class="fas fa-robot"></i> Gemini AI</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="footer-section">
+        <h3><i class="fas fa-envelope"></i> Contact</h3>
+        <p>MCA Final Year Project<br>Academic Year 2024-25</p>
+        <div class="social-links">
+            <a href="#" title="Email"><i class="fas fa-envelope"></i></a>
+            <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+            <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+    </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+        <div class="footer-bottom-content">
+            <p>
+                <i class="fas fa-code"></i> Built with <i class="fas fa-heart pulse"></i> using
+                <strong>CodeBERT</strong> + <strong>Gemini 2.5 Flash</strong>
+            </p>
+            <p class="copyright">
+                © 2024-25 AI Code Review Assistant. All rights reserved. |
+                <span class="highlight">Academic Project</span>
+            </p>
+        </div>
+    </div>
+    </footer>
+
+    <!-- Terms & Conditions Modal -->
+    <div id="termsModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Terms & Conditions</h2>
+                <button class="modal-close" onclick="closeModal('termsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="terms-content">
+                    <div class="info-box">
+                        <p><strong>Last Updated:</strong> March 2026 | <strong>Effective Date:</strong> Academic
+                            Year 2024-25</p>
+                    </div>
+
+                    <h3>1. Acceptance of Terms</h3>
+                    <p>By accessing and using the AI Code Review Assistant, you acknowledge that you have read,
+                        understood, and agree to be bound by these Terms & Conditions. If you do not agree with any
+                        part of these terms, please discontinue use immediately.</p>
+
+                    <h3>2. Academic Purpose & Scope</h3>
+                    <p>This application is developed as part of a Master of Computer Applications (MCA) final year
+                        academic project for the academic year 2024-25. The primary objectives are:</p>
+                    <ul>
+                        <li>Demonstrate practical application of Machine Learning and Artificial Intelligence</li>
+                        <li>Showcase full-stack web development capabilities</li>
+                        <li>Provide educational value to the software development community</li>
+                        <li>Serve as a research and learning platform</li>
+                    </ul>
+
+                    <h3>3. Service Description</h3>
+                    <p>The AI Code Review Assistant provides automated code analysis through two complementary
+                        approaches:</p>
+                    <ul>
+                        <li><strong>ML Model Analysis (CodeBERT):</strong> Utilizes Microsoft's pre-trained
+                            transformer model for pattern-based code analysis, bug detection, and quality assessment
+                        </li>
+                        <li><strong>AI Analysis (Gemini 2.5 Flash):</strong> Leverages Google's advanced language
+                            model for contextual understanding, intelligent suggestions, and comprehensive code
+                            review</li>
+                    </ul>
+
+                    <h3>4. User Responsibilities</h3>
+                    <p>As a user of this service, you agree to:</p>
+                    <ul>
+                        <li>Use the service for lawful purposes only</li>
+                        <li>Not submit malicious, harmful, or illegal code</li>
+                        <li>Respect API rate limits and fair usage policies</li>
+                        <li>Not attempt to reverse engineer or exploit the system</li>
+                        <li>Provide feedback responsibly and constructively</li>
+                    </ul>
+
+                    <h3>5. Data Privacy & Security</h3>
+                    <p>We take your privacy seriously:</p>
+                    <ul>
+                        <li><strong>No Server Storage:</strong> Your code is processed in real-time and is NOT
+                            permanently stored on our servers</li>
+                        <li><strong>Local Storage Only:</strong> Analysis history is saved locally in your browser
+                            using localStorage technology</li>
+                        <li><strong>Third-Party Processing:</strong> Code may be temporarily processed by Google's
+                            Gemini AI API for analysis purposes</li>
+                        <li><strong>No Data Sharing:</strong> We do not sell, trade, or share your code with third
+                            parties</li>
+                    </ul>
+
+                    <div class="warning-box">
+                        <p><strong>⚠️ Important:</strong> Do not submit proprietary, confidential, or sensitive code
+                            that you do not have permission to share.</p>
+                    </div>
+
+                    <h3>6. Third-Party Services</h3>
+                    <p>This application integrates with the following third-party services:</p>
+                    <ul>
+                        <li><strong>Google Gemini AI:</strong> For advanced code analysis (subject to Google's Terms
+                            of Service)</li>
+                        <li><strong>Microsoft CodeBERT:</strong> For ML-based code understanding</li>
+                        <li><strong>Chart.js:</strong> For data visualization</li>
+                        <li><strong>Font Awesome:</strong> For icons and UI elements</li>
+                    </ul>
+
+                    <h3>7. Accuracy & Reliability</h3>
+                    <p>While we strive for high accuracy, please note:</p>
+                    <ul>
+                        <li>Analysis results are automated and may contain errors or omissions</li>
+                        <li>Suggestions should be reviewed by qualified developers before implementation</li>
+                        <li>The service is not a substitute for professional code review</li>
+                        <li>Results may vary based on code complexity and language</li>
+                        <li>We do not guarantee detection of all bugs or security vulnerabilities</li>
+                    </ul>
+
+                    <h3>8. Intellectual Property</h3>
+                    <p>All intellectual property rights in the AI Code Review Assistant, including but not limited
+                        to source code, design, algorithms, and documentation, belong to the project creators. Users
+                        retain all rights to their submitted code.</p>
+
+                    <h3>9. Limitation of Liability</h3>
+                    <p>This software is provided "AS IS" without warranty of any kind, either express or implied. We
+                        shall not be liable for:</p>
+                    <ul>
+                        <li>Any direct, indirect, incidental, or consequential damages</li>
+                        <li>Loss of data, profits, or business opportunities</li>
+                        <li>Damages resulting from use or inability to use the service</li>
+                        <li>Errors or inaccuracies in analysis results</li>
+                        <li>Service interruptions or downtime</li>
+                    </ul>
+
+                    <h3>10. Supported Programming Languages</h3>
+                    <p>Currently supported languages include:</p>
+                    <ul>
+                        <li>Python, JavaScript, TypeScript</li>
+                        <li>Java, C++, C#</li>
+                        <li>Go, Rust, Swift, Kotlin</li>
+                        <li>PHP, Ruby, SQL</li>
+                        <li>HTML, CSS</li>
+                    </ul>
+
+                    <h3>11. Fair Use Policy</h3>
+                    <p>To ensure fair access for all users:</p>
+                    <ul>
+                        <li>Excessive API calls may be rate-limited</li>
+                        <li>Automated or bot-driven usage is prohibited</li>
+                        <li>Commercial use requires explicit permission</li>
+                        <li>Abuse of the service may result in access restrictions</li>
+                    </ul>
+
+                    <h3>12. Modifications to Terms</h3>
+                    <p>We reserve the right to modify these terms at any time. Continued use of the service after
+                        changes constitutes acceptance of the modified terms. Users will be notified of significant
+                        changes.</p>
+
+                    <h3>13. Academic Integrity</h3>
+                    <p>This project adheres to academic integrity standards. All external libraries, APIs, and
+                        resources are properly credited. The project is submitted for academic evaluation and may be
+                        used for educational purposes.</p>
+
+                    <h3>14. Feedback & Contributions</h3>
+                    <p>We welcome and encourage:</p>
+                    <ul>
+                        <li>Bug reports and issue submissions</li>
+                        <li>Feature suggestions and improvements</li>
+                        <li>Constructive feedback on analysis quality</li>
+                        <li>Academic collaboration and research opportunities</li>
+                    </ul>
+
+                    <h3>15. Contact Information</h3>
+                    <p>For questions, concerns, or feedback regarding these terms:</p>
+                    <ul>
+                        <li>Project Type: MCA Final Year Academic Project</li>
+                        <li>Academic Year: 2024-25</li>
+                        <li>Contact: Through provided channels in the application</li>
+                    </ul>
+
+                    <div class="info-box">
+                        <p><strong>Note:</strong> This is an academic project developed for educational purposes.
+                            While we strive for professional quality, it is primarily intended for learning and
+                            demonstration.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Privacy Policy</h2>
+                <button class="modal-close" onclick="closeModal('privacyModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="terms-content">
+                    <div class="info-box">
+                        <p><strong>Last Updated:</strong> December 2024 | <strong>Your Privacy Matters</strong></p>
+                    </div>
+
+                    <h3>1. Introduction</h3>
+                    <p>This Privacy Policy explains how the AI Code Review Assistant collects, uses, and protects
+                        your information. We are committed to ensuring your privacy and maintaining transparency
+                        about our data practices.</p>
+
+                    <h3>2. Information We Collect</h3>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">2.1 Code
+                        Submissions</h4>
+                    <p>When you submit code for analysis:</p>
+                    <ul>
+                        <li><strong>Processing:</strong> Your code is processed in real-time by our analysis engines
+                        </li>
+                        <li><strong>Transmission:</strong> Code is sent to CodeBERT (local) and Gemini AI (Google's
+                            servers)</li>
+                        <li><strong>Storage:</strong> We do NOT permanently store your code on our servers</li>
+                        <li><strong>Retention:</strong> Code exists only during the analysis session</li>
+                    </ul>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">2.2 Analysis
+                        History</h4>
+                    <p>Your analysis history is stored using browser localStorage:</p>
+                    <ul>
+                        <li>Stored locally on your device only</li>
+                        <li>Never transmitted to our servers</li>
+                        <li>Limited to last 10 analyses</li>
+                        <li>Can be cleared anytime by you</li>
+                    </ul>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">2.3 Technical
+                        Information</h4>
+                    <p>We may collect minimal technical data:</p>
+                    <ul>
+                        <li>Browser type and version</li>
+                        <li>Operating system</li>
+                        <li>Language preferences</li>
+                        <li>Error logs (for debugging)</li>
+                    </ul>
+
+                    <h3>3. How We Use Your Information</h3>
+                    <p>We use collected information solely for:</p>
+                    <ul>
+                        <li><strong>Service Delivery:</strong> Providing code analysis and generating reports</li>
+                        <li><strong>Quality Improvement:</strong> Enhancing ML models and algorithms</li>
+                        <li><strong>Visualization:</strong> Creating charts and metrics displays</li>
+                        <li><strong>Error Resolution:</strong> Debugging and fixing technical issues</li>
+                        <li><strong>Academic Research:</strong> Improving the project for educational purposes</li>
+                    </ul>
+
+                    <div class="warning-box">
+                        <p><strong>⚠️ Important:</strong> We NEVER sell, rent, or share your code with third parties
+                            for commercial purposes.</p>
+                    </div>
+
+                    <h3>4. Third-Party Services</h3>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">4.1 Google
+                        Gemini AI</h4>
+                    <p>We use Google's Gemini AI API for advanced code analysis:</p>
+                    <ul>
+                        <li>Your code is temporarily processed by Google's servers</li>
+                        <li>Subject to Google's Privacy Policy and Terms of Service</li>
+                        <li>Google may use data to improve their services</li>
+                        <li>Transmission is encrypted (HTTPS)</li>
+                    </ul>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">4.2 Microsoft
+                        CodeBERT</h4>
+                    <p>CodeBERT model runs locally:</p>
+                    <ul>
+                        <li>No data sent to Microsoft servers</li>
+                        <li>Completely offline processing</li>
+                        <li>Uses pre-trained model weights</li>
+                    </ul>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">4.3 Other
+                        Services</h4>
+                    <ul>
+                        <li><strong>Chart.js:</strong> Client-side visualization (no data sent)</li>
+                        <li><strong>Font Awesome:</strong> Icon library (CDN)</li>
+                        <li><strong>jsPDF:</strong> Client-side PDF generation</li>
+                    </ul>
+
+                    <h3>5. Data Security</h3>
+                    <p>We implement multiple security measures:</p>
+                    <ul>
+                        <li><strong>Encryption:</strong> All data transmission uses HTTPS/TLS</li>
+                        <li><strong>No Persistence:</strong> Code is not stored in databases</li>
+                        <li><strong>Local Processing:</strong> ML model runs on server, not cloud</li>
+                        <li><strong>Secure APIs:</strong> API keys are environment-protected</li>
+                        <li><strong>Regular Updates:</strong> Dependencies kept up-to-date</li>
+                    </ul>
+
+                    <div class="info-box">
+                        <p><strong>Note:</strong> While we implement security best practices, no internet
+                            transmission is 100% secure. Use discretion when submitting sensitive code.</p>
+                    </div>
+
+                    <h3>6. Your Rights & Control</h3>
+                    <p>You have complete control over your data:</p>
+                    <ul>
+                        <li><strong>Access:</strong> View your analysis history anytime</li>
+                        <li><strong>Delete:</strong> Clear history from browser settings</li>
+                        <li><strong>Export:</strong> Download analysis as PDF</li>
+                        <li><strong>Opt-Out:</strong> Stop using the service anytime</li>
+                        <li><strong>Request Info:</strong> Ask about data processing</li>
+                    </ul>
+
+                    <h3>7. Cookies & Tracking</h3>
+                    <p>We respect your privacy:</p>
+                    <ul>
+                        <li><strong>No Cookies:</strong> We don't use traditional cookies</li>
+                        <li><strong>localStorage Only:</strong> For saving your analysis history locally</li>
+                        <li><strong>No Tracking:</strong> No analytics or tracking scripts</li>
+                        <li><strong>No Ads:</strong> Completely ad-free experience</li>
+                        <li><strong>No Profiling:</strong> We don't build user profiles</li>
+                    </ul>
+
+                    <h3>8. Data Retention</h3>
+                    <p>Our data retention policy:</p>
+                    <ul>
+                        <li><strong>Code Submissions:</strong> Deleted immediately after analysis</li>
+                        <li><strong>Analysis History:</strong> Stored locally until you clear it</li>
+                        <li><strong>Error Logs:</strong> Kept for 30 days for debugging</li>
+                        <li><strong>No Long-term Storage:</strong> We don't maintain user databases</li>
+                    </ul>
+
+                    <h3>9. Children's Privacy</h3>
+                    <p>This service is intended for educational and professional use. We do not knowingly collect
+                        information from children under 13. If you believe a child has provided information, please
+                        contact us.</p>
+
+                    <h3>10. International Users</h3>
+                    <p>This service is hosted and operated from [Your Location]. By using the service, you consent
+                        to the transfer of information to our servers and Google's servers (for Gemini AI
+                        processing).</p>
+
+                    <h3>11. Changes to Privacy Policy</h3>
+                    <p>We may update this Privacy Policy to reflect:</p>
+                    <ul>
+                        <li>Changes in our practices</li>
+                        <li>New features or services</li>
+                        <li>Legal or regulatory requirements</li>
+                        <li>User feedback and improvements</li>
+                    </ul>
+                    <p>Continued use after changes constitutes acceptance. Significant changes will be highlighted.
+                    </p>
+
+                    <h3>12. Academic Context</h3>
+                    <p>As an academic project:</p>
+                    <ul>
+                        <li>Data may be used for research purposes</li>
+                        <li>Anonymized insights may be included in project documentation</li>
+                        <li>No personally identifiable information is collected</li>
+                        <li>Project adheres to academic ethics guidelines</li>
+                    </ul>
+
+                    <h3>13. Contact & Questions</h3>
+                    <p>For privacy-related questions or concerns:</p>
+                    <ul>
+                        <li>Review this policy carefully</li>
+                        <li>Contact through provided channels</li>
+                        <li>Request data deletion or information</li>
+                        <li>Report privacy concerns</li>
+                    </ul>
+
+                    <div class="info-box">
+                        <p><strong>Your Trust Matters:</strong> We are committed to protecting your privacy and
+                            being transparent about our practices. This is an academic project, and we take data
+                            protection seriously.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Project Modal -->
+    <div id="aboutModal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-graduation-cap"></i> About This Project</h2>
+                <button class="modal-close" onclick="closeModal('aboutModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="terms-content">
+                    <div class="info-box">
+                        <p><strong>🎓 MCA Final Year Project</strong> | Academic Year 2024-25 | Combining AI, ML &
+                            Full-Stack Development</p>
+                    </div>
+
+                    <h3>1. Project Overview</h3>
+                    <p>The <strong>AI Code Review Assistant</strong> is an innovative academic project that bridges
+                        the gap between traditional code review practices and modern artificial intelligence. This
+                        platform demonstrates how Machine Learning and AI can revolutionize software quality
+                        assurance.</p>
+
+                    <h3>2. Vision & Mission</h3>
+                    <p><strong>Vision:</strong> To create an intelligent, accessible, and comprehensive code
+                        analysis platform that empowers developers of all skill levels.</p>
+                    <p><strong>Mission:</strong> Democratize code quality analysis by combining cutting-edge AI
+                        technology with user-friendly design, making professional-grade code review accessible to
+                        everyone.</p>
+
+                    <h3>3. Core Objectives</h3>
+                    <ul>
+                        <li><strong>Automation:</strong> Automate time-consuming code review processes</li>
+                        <li><strong>Education:</strong> Help developers learn best practices through AI feedback
+                        </li>
+                        <li><strong>Innovation:</strong> Showcase practical AI/ML applications in software
+                            engineering</li>
+                        <li><strong>Accessibility:</strong> Provide free, instant code analysis to all developers
+                        </li>
+                        <li><strong>Research:</strong> Contribute to academic understanding of AI in development
+                        </li>
+                    </ul>
+
+                    <h3>4. Technology Stack</h3>
+                    <div class="tech-details">
+                        <div class="tech-category">
+                            <h4>Frontend Technologies</h4>
+                            <p><strong>Core:</strong> HTML5, CSS3, JavaScript (ES6+)</p>
+                            <p><strong>Libraries:</strong> Chart.js (visualization), jsPDF (reports), Font Awesome
+                                (icons)</p>
+                            <p><strong>Design:</strong> Custom CSS with animations, responsive grid layout, dark
+                                theme</p>
+                        </div>
+                        <div class="tech-category">
+                            <h4>Backend Technologies</h4>
+                            <p><strong>Framework:</strong> Flask (Python web framework)</p>
+                            <p><strong>APIs:</strong> Flask-CORS, RESTful architecture</p>
+                            <p><strong>Environment:</strong> Python 3.8+, virtual environment</p>
+                        </div>
+                        <div class="tech-category">
+                            <h4>AI/ML Technologies</h4>
+                            <p><strong>Models:</strong> CodeBERT (Microsoft), Gemini 2.5 Flash (Google)</p>
+                            <p><strong>Frameworks:</strong> PyTorch, Transformers (Hugging Face)</p>
+                            <p><strong>Processing:</strong> Natural Language Processing, Pattern Recognition</p>
+                        </div>
+                        <div class="tech-category">
+                            <h4>Development Tools</h4>
+                            <p><strong>Version Control:</strong> Git, GitHub</p>
+                            <p><strong>Package Management:</strong> pip, npm</p>
+                            <p><strong>Testing:</strong> Debug mode, error logging</p>
+                        </div>
+                    </div>
+
+                    <h3>5. Key Features & Capabilities</h3>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">5.1 Dual
+                        Analysis System</h4>
+                    <ul>
+                        <li><strong>ML Model (CodeBERT):</strong> Fast, pattern-based analysis using Microsoft's
+                            pre-trained transformer</li>
+                        <li><strong>AI Analysis (Gemini):</strong> Context-aware, intelligent suggestions using
+                            Google's latest AI</li>
+                        <li><strong>Comparison View:</strong> Side-by-side results for comprehensive insights</li>
+                    </ul>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">5.2 Intelligent
+                        Features</h4>
+                    <ul>
+                        <li><strong>Auto Language Detection:</strong> Supports 15+ programming languages</li>
+                        <li><strong>Bug Detection:</strong> Identifies syntax errors, logic issues, and
+                            anti-patterns</li>
+                        <li><strong>Security Analysis:</strong> Detects vulnerabilities and security risks</li>
+                        <li><strong>Quality Metrics:</strong> Complexity, readability, maintainability scores</li>
+                        <li><strong>Best Practices:</strong> Suggests industry-standard improvements</li>
+                    </ul>
+
+                    <h4 style="color: var(--accent-primary); font-size: 16px; margin: 16px 0 8px 0;">5.3 User
+                        Experience</h4>
+                    <ul>
+                        <li><strong>File Upload:</strong> Drag-and-drop or click to upload</li>
+                        <li><strong>Sample Code:</strong> Pre-loaded examples for testing</li>
+                        <li><strong>Interactive Charts:</strong> Radar and doughnut charts for visualization</li>
+                        <li><strong>PDF Export:</strong> Professional analysis reports</li>
+                        <li><strong>History Tracking:</strong> Save and review past analyses</li>
+                        <li><strong>Copy to Clipboard:</strong> Easy code suggestion copying</li>
+                    </ul>
+
+                    <h3>6. Academic Significance</h3>
+                    <p>This project demonstrates mastery of:</p>
+                    <ul>
+                        <li><strong>AI/ML Integration:</strong> Practical application of pre-trained models</li>
+                        <li><strong>API Development:</strong> RESTful services and third-party integration</li>
+                        <li><strong>Full-Stack Development:</strong> Frontend, backend, and database concepts</li>
+                        <li><strong>Software Architecture:</strong> Modular, scalable design patterns</li>
+                        <li><strong>User Interface Design:</strong> Modern, responsive, accessible UI/UX</li>
+                        <li><strong>Data Processing:</strong> Real-time analysis and visualization</li>
+                        <li><strong>Security Practices:</strong> API key management, data privacy</li>
+                    </ul>
+
+                    <h3>7. Innovation & Uniqueness</h3>
+                    <p>What makes this project stand out:</p>
+                    <ul>
+                        <li><strong>Dual Analysis:</strong> First to combine CodeBERT + Gemini for code review</li>
+                        <li><strong>Real-time Processing:</strong> Instant analysis without server storage</li>
+                        <li><strong>Visual Comparison:</strong> Side-by-side ML vs AI results</li>
+                        <li><strong>Privacy-First:</strong> No code storage, local history only</li>
+                        <li><strong>Educational Focus:</strong> Designed for learning and improvement</li>
+                    </ul>
+
+                    <h3>8. Challenges Overcome</h3>
+                    <ul>
+                        <li><strong>Model Integration:</strong> Successfully integrated large ML models</li>
+                        <li><strong>API Rate Limits:</strong> Implemented efficient request handling</li>
+                        <li><strong>Performance:</strong> Optimized for fast analysis times</li>
+                        <li><strong>Language Detection:</strong> Built custom detection algorithm</li>
+                        <li><strong>UI/UX Design:</strong> Created professional, intuitive interface</li>
+                    </ul>
+
+                    <h3>9. Future Enhancements</h3>
+                    <p>Planned improvements and extensions:</p>
+                    <ul>
+                        <li><strong>Custom Rules:</strong> User-defined coding standards</li>
+                        <li><strong>Team Features:</strong> Collaboration and shared analyses</li>
+                        <li><strong>IDE Integration:</strong> VS Code, IntelliJ plugins</li>
+                        <li><strong>CI/CD Integration:</strong> GitHub Actions, GitLab CI</li>
+                        <li><strong>Advanced ML:</strong> Fine-tuned models on specific codebases</li>
+                        <li><strong>More Languages:</strong> Expand to 30+ programming languages</li>
+                        <li><strong>Mobile App:</strong> Native iOS/Android applications</li>
+                        <li><strong>API Access:</strong> Public API for developers</li>
+                    </ul>
+
+                    <h3>10. Learning Outcomes</h3>
+                    <p>Skills and knowledge gained:</p>
+                    <ul>
+                        <li>Deep understanding of transformer models and NLP</li>
+                        <li>Practical experience with modern AI APIs</li>
+                        <li>Full-stack web development proficiency</li>
+                        <li>Software architecture and design patterns</li>
+                        <li>User experience and interface design</li>
+                        <li>Project management and documentation</li>
+                        <li>Problem-solving and debugging skills</li>
+                    </ul>
+
+                    <h3>11. Impact & Applications</h3>
+                    <p>Real-world applications:</p>
+                    <ul>
+                        <li><strong>Education:</strong> Teaching tool for coding best practices</li>
+                        <li><strong>Development:</strong> Quick code quality checks</li>
+                        <li><strong>Code Review:</strong> Pre-review analysis before human review</li>
+                        <li><strong>Learning:</strong> Understand AI/ML in software engineering</li>
+                        <li><strong>Research:</strong> Study AI effectiveness in code analysis</li>
+                    </ul>
+
+                    <h3>12. Acknowledgments</h3>
+                    <p>This project wouldn't be possible without:</p>
+                    <ul>
+                        <li><strong>Microsoft:</strong> For CodeBERT and open-source contributions</li>
+                        <li><strong>Google:</strong> For Gemini AI API and documentation</li>
+                        <li><strong>Hugging Face:</strong> For Transformers library</li>
+                        <li><strong>Open Source Community:</strong> For countless libraries and tools</li>
+                        <li><strong>Academic Advisors:</strong> For guidance and mentorship</li>
+                        <li><strong>Fellow Students:</strong> For feedback and testing</li>
+                    </ul>
+
+                    <h3>13. Project Statistics</h3>
+                    <ul>
+                        <li><strong>Development Time:</strong> 6 months</li>
+                        <li><strong>Lines of Code:</strong> ~3000+</li>
+                        <li><strong>Technologies Used:</strong> 15+</li>
+                        <li><strong>Features Implemented:</strong> 20+</li>
+                        <li><strong>Supported Languages:</strong> 15+</li>
+                    </ul>
+
+                    <div class="info-box">
+                        <p><strong>💡 Conclusion:</strong> This project represents the culmination of MCA studies,
+                            combining theoretical knowledge with practical implementation. It demonstrates how AI
+                            and ML can solve real-world problems in software development while maintaining a focus
+                            on user experience and accessibility.</p>
+                    </div>
+
+                    <div class="warning-box">
+                        <p><strong>🎓 Academic Note:</strong> This project is submitted for academic evaluation and
+                            represents original work. All external resources are properly cited and credited.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/features.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

@@ -274,11 +274,10 @@
 </head>
 
 <body>
+    <!-- Include Modern Header -->
+    {% include 'components/header.html' %}
+
     <div class="container">
-        <a href="/" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Back to Home
-        </a>
 
         <!-- Hero Section -->
         <div class="hero">
@@ -460,7 +459,7 @@
                         </a>
                     </p>
                 </div>
-                
+
             </div>
         </div>
 
@@ -483,6 +482,9 @@
             </p>
         </div>
     </div>
+
+    <!-- Include Modern Footer -->
+    {% include 'components/footer.html' %}
 </body>
 
 </html>

@@ -154,8 +154,8 @@ def validate_code_input(code, language):
     if len(code) > config.MAX_CODE_LENGTH:
         errors.append(f"Code exceeds maximum length of {config.MAX_CODE_LENGTH} characters")
     
-    # Check if language is valid
-    valid_languages = ['python', 'javascript', 'java', 'cpp', 'c', 'csharp', 'go', 'rust', 'php', 'ruby', 'swift', 'kotlin', 'typescript']
+    # Check if language is valid (allow 'auto' for auto-detection)
+    valid_languages = ['auto', 'python', 'javascript', 'java', 'cpp', 'c', 'csharp', 'go', 'rust', 'php', 'ruby', 'swift', 'kotlin', 'typescript']
     if language and language.lower() not in valid_languages:
         errors.append(f"Invalid language: {language}")
     
@@ -205,36 +205,7 @@ def after_request(response):
     # Enable XSS protection
     response.headers['X-XSS-Protection'] = '1; mode=block'
     
-    # Content Security Policy - Allow Firebase and required resources
-    csp = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
-        "https://www.gstatic.com "
-        "https://cdn.jsdelivr.net "
-        "https://cdnjs.cloudflare.com "
-        "https://apis.google.com "
-        "https://identitytoolkit.googleapis.com; "
-        "style-src 'self' 'unsafe-inline' "
-        "https://fonts.googleapis.com "
-        "https://cdnjs.cloudflare.com; "
-        "font-src 'self' "
-        "https://fonts.gstatic.com "
-        "data:; "
-        "img-src 'self' data: https:; "
-        "connect-src 'self' "
-        "https://identitytoolkit.googleapis.com "
-        "https://securetoken.googleapis.com "
-        "https://firestore.googleapis.com "
-        "https://www.googleapis.com "
-        "https://cdn.jsdelivr.net "
-        "https://generativelanguage.googleapis.com "
-        "https://*.firebaseio.com "
-        "https://*.cloudfunctions.net; "
-        "frame-src 'self' "
-        "https://code-analyzer-9d4e7.firebaseapp.com "
-        "https://accounts.google.com;"
-    )
-    response.headers['Content-Security-Policy'] = csp
+   
     
     return response
 
@@ -381,16 +352,32 @@ def get_gemini_analysis(code, language):
             app.logger.warning(f"Initial JSON parse failed: {json_err}")
             
             # Try to fix common JSON issues
-            # Replace unescaped newlines in strings
             import re
             
-            # Try parsing again
+            # Strategy 1: Fix unescaped quotes and newlines in strings
             fixed_text = response_text
+            
+            # Replace unescaped newlines within strings
+            fixed_text = re.sub(r'(?<!\\)\\n', '\\\\n', fixed_text)
+            fixed_text = re.sub(r'(?<!\\)\\r', '\\\\r', fixed_text)
+            fixed_text = re.sub(r'(?<!\\)\\t', '\\\\t', fixed_text)
+            
+            # Try parsing with fixed text
             try:
                 analysis = json.loads(fixed_text)
-            except:
-                # If still fails, create a basic structure
-                app.logger.warning(f"Using fallback analysis structure due to JSON parse error")
+                app.logger.info("✅ JSON fixed and parsed successfully")
+            except json.JSONDecodeError as err2:
+                app.logger.warning(f"Second parse attempt failed: {err2}")
+                
+                # Strategy 2: Use ast.literal_eval as fallback
+                try:
+                    import ast
+                    # Try to convert to Python dict first
+                    analysis = ast.literal_eval(fixed_text)
+                    app.logger.info("✅ Parsed using ast.literal_eval")
+                except:
+                    # Strategy 3: Create fallback structure
+                    app.logger.warning(f"Using fallback analysis structure due to JSON parse error")
                 
                 # Extract what we can using regex
                 quality_match = re.search(r'"overall_quality"\s*:\s*"([^"]+)"', response_text)
@@ -559,7 +546,7 @@ def analyzer():
 @login_required
 def history():
     """History page"""
-    return render_template('history.html')
+    return render_template('history_new.html')
 
 @app.route('/profile')
 @login_required
@@ -760,16 +747,34 @@ def analyze_github_repo():
         if github_token:
             headers['Authorization'] = f'token {github_token}'
         
-        # Fetch repository tree
-        tree_url = f'https://api.github.com/repos/{owner}/{repo}/git/trees/main?recursive=1'
+        # First, get repository info to find the default branch
+        repo_info_url = f'https://api.github.com/repos/{owner}/{repo}'
+        app.logger.info(f"Fetching repository info: {repo_info_url}")
+        
+        repo_info_response = requests.get(repo_info_url, headers=headers, timeout=30)
+        
+        if repo_info_response.status_code != 200:
+            error_message = 'Repository not found or access denied'
+            if repo_info_response.status_code == 404:
+                error_message = 'Repository not found. Please check the URL and ensure the repository is public or you have access.'
+            elif repo_info_response.status_code == 401:
+                error_message = 'Authentication failed. Please check your GitHub token.'
+            elif repo_info_response.status_code == 403:
+                error_message = 'Access forbidden. You may have exceeded the GitHub API rate limit or lack permissions.'
+            
+            app.logger.error(f"GitHub API error: {repo_info_response.status_code} - {error_message}")
+            return jsonify({'error': error_message}), 400
+        
+        repo_data = repo_info_response.json()
+        default_branch = repo_data.get('default_branch', 'main')
+        
+        app.logger.info(f"Repository default branch: {default_branch}")
+        
+        # Fetch repository tree using the correct default branch
+        tree_url = f'https://api.github.com/repos/{owner}/{repo}/git/trees/{default_branch}?recursive=1'
         
         app.logger.info(f"Fetching repository tree: {tree_url}")
         tree_response = requests.get(tree_url, headers=headers, timeout=30)
-        
-        # Try 'master' if 'main' doesn't exist
-        if tree_response.status_code == 404:
-            tree_url = f'https://api.github.com/repos/{owner}/{repo}/git/trees/master?recursive=1'
-            tree_response = requests.get(tree_url, headers=headers, timeout=30)
         
         if tree_response.status_code != 200:
             error_message = f'GitHub API returned status {tree_response.status_code}'
@@ -930,6 +935,8 @@ def analyze_github_repo():
             'total_security_issues': total_security_issues,
             'files': analyzed_files,
             'analysis_time': analysis_time,
+            'total_time': analysis_time,  # For Firestore compatibility
+            'repo_data': repo_data,  # Include repo metadata for Firestore
             'note': f'Analyzed first {max_files} files. Full repository has {len(code_files)} code files.'
         }
         

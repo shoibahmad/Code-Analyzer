@@ -451,6 +451,7 @@ window.saveAnalysisToFirestore = async (code, language, analysisData) => {
     try {
         const analysisDoc = {
             userId: window.currentUser.uid,
+            type: 'code', // Mark as code analysis
             language: language,
             codeSnippet: code.substring(0, 500), // Store first 500 chars
             mlQuality: analysisData.ml_analysis?.overall_quality || 'N/A',
@@ -462,7 +463,7 @@ window.saveAnalysisToFirestore = async (code, language, analysisData) => {
         };
 
         await addDoc(collection(db, 'analyses'), analysisDoc);
-        console.log('Analysis saved to Firestore');
+        console.log('✅ Code analysis saved to Firestore');
 
         // Reload history
         if (typeof window.loadUserHistory === 'function') {
@@ -479,6 +480,111 @@ window.saveAnalysisToFirestore = async (code, language, analysisData) => {
             window.toast.error('Firestore is not available. Check your setup.', 'Service Unavailable');
         } else {
             window.toast.error('Failed to save analysis to cloud', 'Save Error');
+        }
+    }
+};
+
+// Save GitHub repository analysis to Firestore
+window.saveGitHubAnalysisToFirestore = async (repoUrl, repoData, analysisResults) => {
+    console.log('🔵 saveGitHubAnalysisToFirestore called');
+    console.log('  repoUrl:', repoUrl);
+    console.log('  repoData:', repoData);
+    console.log('  analysisResults:', analysisResults);
+
+    if (!window.currentUser) {
+        console.error('❌ No user logged in');
+        return;
+    }
+
+    console.log('✓ User logged in:', window.currentUser.email);
+
+    try {
+        // Calculate aggregate statistics from all files
+        let totalBugs = 0;
+        let totalSecurity = 0;
+        let qualityScores = [];
+        let filesAnalyzed = 0;
+
+        if (analysisResults && analysisResults.files) {
+            filesAnalyzed = analysisResults.files.length;
+            console.log('  Files to analyze:', filesAnalyzed);
+
+            analysisResults.files.forEach(file => {
+                if (file.analysis) {
+                    // Count bugs
+                    totalBugs += (file.analysis.ml_analysis?.bugs?.length || 0) +
+                        (file.analysis.ai_analysis?.bugs?.length || 0);
+
+                    // Count security issues
+                    totalSecurity += (file.analysis.ml_analysis?.security?.length || 0) +
+                        (file.analysis.ai_analysis?.security?.length || 0);
+
+                    // Collect quality scores
+                    const mlQuality = file.analysis.ml_analysis?.overall_quality;
+                    const aiQuality = file.analysis.ai_analysis?.overall_quality;
+
+                    if (mlQuality) {
+                        const match = String(mlQuality).match(/(\d+)/);
+                        if (match) qualityScores.push(parseInt(match[1]));
+                    }
+                    if (aiQuality) {
+                        const match = String(aiQuality).match(/(\d+)/);
+                        if (match) qualityScores.push(parseInt(match[1]));
+                    }
+                }
+            });
+        }
+
+        console.log('  Stats calculated:', { totalBugs, totalSecurity, qualityScores: qualityScores.length });
+
+        // Calculate average quality
+        const avgQuality = qualityScores.length > 0
+            ? Math.round(qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length)
+            : 0;
+
+        const analysisDoc = {
+            userId: window.currentUser.uid,
+            type: 'github', // Mark as GitHub analysis
+            repoUrl: repoUrl,
+            repoName: repoData?.name || repoUrl.split('/').pop(),
+            repoOwner: repoData?.owner?.login || repoUrl.split('/')[3],
+            language: repoData?.language || 'Multiple',
+            filesAnalyzed: filesAnalyzed,
+            mlQuality: avgQuality > 0 ? `${avgQuality}/10` : 'N/A',
+            aiQuality: avgQuality > 0 ? `${avgQuality}/10` : 'N/A',
+            bugsCount: totalBugs,
+            securityCount: totalSecurity,
+            stars: repoData?.stargazers_count || 0,
+            forks: repoData?.forks_count || 0,
+            timestamp: serverTimestamp(),
+            analysisTime: analysisResults?.total_time || 0
+        };
+
+        console.log('📝 Analysis document to save:', analysisDoc);
+
+        await addDoc(collection(db, 'analyses'), analysisDoc);
+        console.log('✅ GitHub analysis saved to Firestore successfully!');
+
+        // Reload history
+        if (typeof window.loadUserHistory === 'function') {
+            console.log('🔄 Reloading history...');
+            window.loadUserHistory();
+        } else {
+            console.warn('⚠️ loadUserHistory function not available');
+        }
+    } catch (error) {
+        console.error('❌ Error saving GitHub analysis to Firestore:', error);
+        console.error('  Error code:', error.code);
+        console.error('  Error message:', error.message);
+        console.error('  Error stack:', error.stack);
+
+        // Show user-friendly error
+        if (error.code === 'permission-denied') {
+            window.toast?.error('Permission denied. Check Firestore rules.', 'Save Error');
+        } else if (error.code === 'unavailable') {
+            window.toast?.error('Firestore is not available.', 'Service Unavailable');
+        } else {
+            window.toast?.error('Failed to save analysis to cloud', 'Save Error');
         }
     }
 };

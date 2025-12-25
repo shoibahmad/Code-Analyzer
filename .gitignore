@@ -12,6 +12,7 @@ venv/
 ENV/
 build/
 develop-eggs/
+functions/
 dist/
 downloads/
 eggs/

@@ -284,6 +284,8 @@
 </head>
 
 <body>
+    {% include 'components/header.html' %}
+
     <div class="admin-container">
         <!-- Header -->
         <div class="admin-header">
@@ -307,7 +309,7 @@
                 <div class="stat-value" id="totalUsers">0</div>
                 <div class="stat-label">Total Users</div>
                 <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> +12% this month
+                    <i class="fas fa-arrow-up"></i> <span id="usersChange">+12%</span> this month
                 </div>
             </div>
 
@@ -318,7 +320,7 @@
                 <div class="stat-value" id="totalAnalyses">0</div>
                 <div class="stat-label">Total Analyses</div>
                 <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> +25% this week
+                    <i class="fas fa-arrow-up"></i> <span id="analysesChange">+25%</span> this week
                 </div>
             </div>
 
@@ -341,6 +343,54 @@
                 <div class="stat-label">Security Issues</div>
                 <div class="stat-change negative">
                     <i class="fas fa-arrow-down"></i> -8% improvement
+                </div>
+            </div>
+
+            <!-- NEW: Average Quality Score -->
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="fas fa-star" style="color: white;"></i>
+                </div>
+                <div class="stat-value" id="avgQuality">0</div>
+                <div class="stat-label">Avg Quality Score</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-trophy"></i> <span id="qualityTrend">Excellent</span>
+                </div>
+            </div>
+
+            <!-- NEW: Most Used Language -->
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                    <i class="fab fa-python" style="color: white;" id="topLangIcon"></i>
+                </div>
+                <div class="stat-value" id="topLanguage" style="font-size: 1.5rem;">Python</div>
+                <div class="stat-label">Most Used Language</div>
+                <div class="stat-change">
+                    <i class="fas fa-fire"></i> <span id="topLangCount">0</span> analyses
+                </div>
+            </div>
+
+            <!-- NEW: Average Analysis Time -->
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                    <i class="fas fa-clock" style="color: white;"></i>
+                </div>
+                <div class="stat-value" id="avgTime">0s</div>
+                <div class="stat-label">Avg Analysis Time</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-bolt"></i> Fast performance
+                </div>
+            </div>
+
+            <!-- NEW: Code Quality Distribution -->
+            <div class="admin-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
+                    <i class="fas fa-chart-pie" style="color: white;"></i>
+                </div>
+                <div class="stat-value" id="excellentPercent">0%</div>
+                <div class="stat-label">Excellent Code Quality</div>
+                <div class="stat-change">
+                    <i class="fas fa-check-circle"></i> <span id="excellentCount">0</span> analyses
                 </div>
             </div>
         </div>
@@ -422,11 +472,68 @@
                         const totalSecurity = history.reduce((sum, h) => sum + (h.stats?.security || 0), 0);
                         const totalUsers = result.totalUsers;
 
+                        // Calculate average quality score
+                        const qualityScores = history.map(h => {
+                            const score = h.mlScore || h.aiScore || '0';
+                            const match = String(score).match(/(\d+)/);
+                            return match ? parseInt(match[1]) : 0;
+                        }).filter(s => s > 0);
+                        const avgQuality = qualityScores.length > 0
+                            ? (qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length).toFixed(1)
+                            : 0;
+
+                        // Find most used language
+                        const langCounts = {};
+                        history.forEach(h => {
+                            const lang = h.language || 'Unknown';
+                            langCounts[lang] = (langCounts[lang] || 0) + 1;
+                        });
+                        const topLang = Object.keys(langCounts).reduce((a, b) =>
+                            langCounts[a] > langCounts[b] ? a : b, 'Python');
+                        const topLangCount = langCounts[topLang] || 0;
+
+                        // Calculate average analysis time
+                        const times = history.map(h => h.analysisTime || 0).filter(t => t > 0);
+                        const avgTime = times.length > 0
+                            ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(2)
+                            : 0;
+
+                        // Calculate excellent code percentage
+                        const excellentCount = qualityScores.filter(s => s >= 8).length;
+                        const excellentPercent = totalAnalyses > 0
+                            ? ((excellentCount / totalAnalyses) * 100).toFixed(0)
+                            : 0;
+
                         // Update stat cards
                         document.getElementById('totalUsers').textContent = totalUsers;
                         document.getElementById('totalAnalyses').textContent = totalAnalyses;
                         document.getElementById('totalBugs').textContent = totalBugs;
                         document.getElementById('totalSecurity').textContent = totalSecurity;
+
+                        // Update new metrics
+                        document.getElementById('avgQuality').textContent = avgQuality + '/10';
+                        document.getElementById('qualityTrend').textContent =
+                            avgQuality >= 8 ? 'Excellent' : avgQuality >= 6 ? 'Good' : 'Needs Work';
+
+                        document.getElementById('topLanguage').textContent = topLang;
+                        document.getElementById('topLangCount').textContent = topLangCount;
+
+                        // Update language icon
+                        const langIcons = {
+                            'python': 'fab fa-python',
+                            'javascript': 'fab fa-js',
+                            'java': 'fab fa-java',
+                            'php': 'fab fa-php',
+                            'ruby': 'fab fa-gem',
+                            'go': 'fab fa-golang',
+                            'rust': 'fab fa-rust'
+                        };
+                        const iconClass = langIcons[topLang.toLowerCase()] || 'fas fa-code';
+                        document.getElementById('topLangIcon').className = iconClass + ' fa-fw';
+
+                        document.getElementById('avgTime').textContent = avgTime + 's';
+                        document.getElementById('excellentPercent').textContent = excellentPercent + '%';
+                        document.getElementById('excellentCount').textContent = excellentCount;
 
                         // Create charts
                         createAnalysisTrendChart(history);
@@ -614,6 +721,9 @@
             }
 
             tbody.innerHTML = recent.map(h => {
+                // Check if this is a GitHub analysis
+                const isGitHub = h.type === 'github';
+
                 // Parse quality score properly
                 let score = 0;
                 const aiScore = h.aiScore || h.mlScore || 'N/A';
@@ -640,14 +750,33 @@
                     console.error('Error parsing date:', e);
                 }
 
+                // Format language/name column based on type
+                let languageDisplay = '';
+                if (isGitHub) {
+                    languageDisplay = `
+                        <div>
+                            <i class="fab fa-github" style="color: #6366f1;"></i>
+                            <strong>${h.repoName || 'Repository'}</strong>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            ${h.filesAnalyzed || 0} files • ${h.stars || 0} ⭐
+                        </div>
+                    `;
+                } else {
+                    languageDisplay = `<strong>${h.language || 'Unknown'}</strong>`;
+                }
+
                 return `
                     <tr>
                         <td>${dateStr}</td>
-                        <td><strong>${h.language || 'Unknown'}</strong></td>
+                        <td>${languageDisplay}</td>
                         <td>${score > 0 ? score + '/10' : 'N/A'}</td>
-                        <td>${h.stats?.bugs || 0}</td>
-                        <td>${h.stats?.security || 0}</td>
-                        <td><span class="badge badge-${statusClass}">${statusText}</span></td>
+                        <td>${h.stats?.bugs || h.bugsCount || 0}</td>
+                        <td>${h.stats?.security || h.securityCount || 0}</td>
+                        <td>
+                            ${isGitHub ? '<span class="badge" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; margin-right: 0.5rem;"><i class="fab fa-github"></i> Repo</span>' : ''}
+                            <span class="badge badge-${statusClass}">${statusText}</span>
+                        </td>
                     </tr>
                 `;
             }).join('');
@@ -656,6 +785,8 @@
         // Load analytics on page load
         document.addEventListener('DOMContentLoaded', loadAnalytics);
     </script>
+
+    {% include 'components/footer.html' %}
 </body>
 
 </html>

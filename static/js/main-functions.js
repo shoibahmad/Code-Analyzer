@@ -729,6 +729,16 @@ async function analyzeGithubRepo() {
 
         window.toast.success(`Analyzed ${data.analyzed_files} files!`, 'Analysis Complete');
 
+        // Save to Firestore
+        if (window.saveGitHubAnalysisToFirestore) {
+            try {
+                await window.saveGitHubAnalysisToFirestore(urlInput, data.repo_data, data);
+                console.log('✅ GitHub analysis saved to Firestore');
+            } catch (error) {
+                console.error('Failed to save GitHub analysis:', error);
+            }
+        }
+
         // Display results
         resultsDiv.innerHTML = `
             <!-- Repository Overview -->
